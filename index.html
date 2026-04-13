@@ -1,0 +1,2354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SHOOT. Studios CT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,700;0,900;1,900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #000000;
+      --white: #ffffff;
+      --grey-light: #f5f5f5;
+      --grey-mid: #888888;
+      --grey-dark: #1a1a1a;
+      --grey-card: #111111;
+      --grey-card2: #161616;
+      --border: rgba(255,255,255,0.15);
+      --border-dark: rgba(0,0,0,0.15);
+      --font-display: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-body: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--black);
+      color: var(--white);
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 48px;
+      mix-blend-mode: normal;
+      transition: background 0.3s;
+    }
+    nav.scrolled { background: rgba(0,0,0,0.92); backdrop-filter: blur(12px); }
+
+    .nav-logo {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: -1px;
+      color: var(--white);
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--grey-mid); }
+
+    .nav-links {
+      display: flex;
+      gap: 36px;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--white);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+    .nav-links a:hover { opacity: 1; }
+
+    .nav-book {
+      background: var(--white);
+      color: var(--black);
+      padding: 10px 24px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: background 0.2s, color 0.2s;
+    }
+    .nav-book:hover { background: var(--grey-mid); color: var(--white); }
+
+    .nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+    .nav-hamburger span { display: block; width: 24px; height: 2px; background: var(--white); transition: 0.3s; }
+
+    /* ── HERO ── */
+    #hero {
+      height: 100vh;
+      min-height: 600px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: var(--black);
+      position: relative;
+      overflow: hidden;
+    }
+    #hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, rgba(255,255,255,0.03) 0%, transparent 70%);
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(80px, 14vw, 180px);
+      font-weight: 900;
+      font-style: italic;
+      line-height: 0.9;
+      letter-spacing: -4px;
+      color: var(--white);
+      animation: fadeUp 0.8s ease both;
+    }
+    .hero-title .dot { color: var(--grey-mid); font-style: normal; }
+
+    .hero-sub {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 6vw, 72px);
+      font-weight: 700;
+      font-style: italic;
+      color: var(--grey-mid);
+      letter-spacing: -1px;
+      margin-top: 4px;
+      animation: fadeUp 0.8s 0.15s ease both;
+    }
+
+    .hero-desc {
+      max-width: 580px;
+      font-size: 16px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.65);
+      line-height: 1.7;
+      margin-top: 28px;
+      animation: fadeUp 0.8s 0.25s ease both;
+    }
+
+    .hero-cta {
+      margin-top: 48px;
+      display: inline-block;
+      background: var(--white);
+      color: var(--black);
+      padding: 20px 56px;
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-decoration: none;
+      border: 2px solid var(--white);
+      transition: background 0.25s, color 0.25s;
+      animation: fadeUp 0.8s 0.35s ease both;
+    }
+    .hero-cta:hover { background: transparent; color: var(--white); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── SECTION BASE ── */
+    section { position: relative; }
+
+    .section-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 48px;
+    }
+
+    .section-heading {
+      font-family: var(--font-display);
+      font-size: clamp(48px, 8vw, 96px);
+      font-weight: 900;
+      font-style: italic;
+      text-transform: uppercase;
+      letter-spacing: -2px;
+      line-height: 1;
+    }
+
+    .section-sub {
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--grey-mid);
+      margin-top: 10px;
+    }
+
+    /* ── WHAT WE OFFER ── */
+    #services {
+      background: var(--white);
+      color: var(--black);
+      padding: 100px 0;
+    }
+    #services .section-heading { color: var(--black); text-align: center; }
+    #services .section-sub { color: #777; text-align: center; margin-bottom: 60px; }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      border: 1.5px solid var(--black);
+    }
+
+    .service-card {
+      border: 1.5px solid var(--black);
+      padding: 40px 32px;
+    }
+
+    .service-icon {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 24px;
+    }
+
+    .service-title {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 900;
+      font-style: italic;
+      text-transform: uppercase;
+      letter-spacing: -0.5px;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+
+    .service-desc {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #444;
+    }
+
+    /* ── OUR SPACES ── */
+    #spaces {
+      background: var(--black);
+      padding: 100px 0;
+    }
+
+    .spaces-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .included-banner {
+      border: 1px solid var(--border);
+      padding: 24px 40px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 80px;
+    }
+    .included-banner svg { flex-shrink: 0; }
+    .included-banner strong { font-weight: 600; font-size: 16px; }
+    .included-banner p { font-size: 13px; color: var(--grey-mid); margin-top: 2px; }
+
+    .space-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+      margin-bottom: 100px;
+    }
+    .space-row.reverse { direction: rtl; }
+    .space-row.reverse > * { direction: ltr; }
+
+    .space-img {
+      width: 100%;
+      aspect-ratio: 4/3;
+      object-fit: cover;
+      display: block;
+      background: var(--grey-dark);
+    }
+
+    /* Placeholder studio images using CSS */
+    .space-img-placeholder {
+      width: 100%;
+      aspect-ratio: 4/3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.2);
+      text-transform: uppercase;
+      position: relative;
+      overflow: hidden;
+    }
+    .space-img-placeholder.curve { background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); }
+    .space-img-placeholder.studio-one { background: linear-gradient(135deg, #2a0020 0%, #8b1a6b 50%, #e84ebc 100%); }
+    .space-img-placeholder.pool { background: linear-gradient(135deg, #0a1628 0%, #1565c0 50%, #42a5f5 100%); }
+
+    .space-content {}
+
+    .space-name {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 5vw, 64px);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: -1px;
+      margin-bottom: 16px;
+    }
+
+    .space-desc {
+      font-size: 15px;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 28px;
+    }
+
+    .space-features {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 32px;
+      list-style: none;
+    }
+    .space-features li {
+      font-size: 14px;
+      color: rgba(255,255,255,0.7);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .space-features li::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: var(--white);
+      flex-shrink: 0;
+    }
+
+    .pricing-box {
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 28px;
+      margin-bottom: 28px;
+      background: rgba(255,255,255,0.03);
+    }
+    .pricing-box h4 {
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 16px;
+    }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+    .pricing-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      font-size: 14px;
+    }
+    .pricing-row:last-child { border-bottom: none; }
+    .pricing-row span:last-child { font-weight: 700; font-size: 16px; }
+
+    .btn-outline {
+      display: inline-block;
+      border: 1.5px solid var(--white);
+      color: var(--white);
+      padding: 14px 36px;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: none;
+      text-decoration: none;
+      transition: background 0.2s, color 0.2s;
+      cursor: pointer;
+      background: transparent;
+    }
+    .btn-outline:hover { background: var(--white); color: var(--black); }
+
+    /* ── ADDITIONAL CHARGES ── */
+    #additional {
+      background: var(--black);
+      padding: 0 0 100px;
+    }
+    .charges-wrapper {
+      border: 1px solid var(--border);
+      padding: 48px;
+    }
+    .charges-title {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 900;
+      font-style: italic;
+      text-transform: uppercase;
+      letter-spacing: -0.5px;
+      margin-bottom: 28px;
+    }
+    .charges-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .charge-card {
+      background: var(--grey-card);
+      padding: 32px;
+    }
+    .charge-card h4 { font-weight: 600; font-size: 16px; margin-bottom: 8px; }
+    .charge-card p { font-size: 13px; color: var(--grey-mid); margin-bottom: 16px; }
+    .charge-amount {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-weight: 900;
+      font-style: italic;
+    }
+    .charges-note {
+      text-align: center;
+      color: var(--grey-mid);
+      font-size: 13px;
+      margin-top: 24px;
+    }
+
+    /* ── PHOTOGRAPHY ── */
+    #photography {
+      background: var(--white);
+      color: var(--black);
+      padding: 100px 0;
+    }
+    #photography .section-heading { text-align: center; color: var(--black); }
+    #photography .section-sub { text-align: center; color: #777; margin-bottom: 60px; }
+
+    .work-heading {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 900;
+      font-style: italic;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      margin-bottom: 70px;
+    }
+
+    .gallery-item {
+      position: relative;
+      aspect-ratio: 3/2;
+      overflow: hidden;
+      cursor: pointer;
+      background: #1a1a1a;
+    }
+    .gallery-label {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.45);
+    }
+    .gallery-label strong {
+      font-family: var(--font-display);
+      font-size: 36px;
+      font-weight: 900;
+      font-style: italic;
+      color: var(--white);
+      text-transform: uppercase;
+      letter-spacing: -1px;
+    }
+    .gallery-label span {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--white);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      opacity: 0.8;
+      margin-top: 4px;
+    }
+    .gallery-bg { width: 100%; height: 100%; object-fit: cover; }
+    .gallery-bg-fashion { background: linear-gradient(135deg, #2a2a2a 0%, #4a4a4a 100%); }
+    .gallery-bg-product { background: linear-gradient(135deg, #1a1a1a 0%, #3a3a3a 100%); }
+    .gallery-bg-creative { background: linear-gradient(135deg, #222 0%, #555 100%); }
+
+    /* Pricing cards */
+    .pricing-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      margin-bottom: 48px;
+    }
+
+    .price-card {
+      border: 1.5px solid var(--black);
+      padding: 40px 36px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+    .price-card .plan-features {
+      flex: 1;
+    }
+    .price-card.featured {
+      background: var(--black);
+      color: var(--white);
+      border-color: var(--black);
+      margin-top: -20px;
+      margin-bottom: -20px;
+      padding-top: 60px;
+      padding-bottom: 60px;
+      z-index: 1;
+    }
+
+    .most-popular {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--black);
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 6px 18px;
+      white-space: nowrap;
+    }
+    .price-card.featured .most-popular {
+      background: var(--white);
+      color: var(--black);
+    }
+
+    .plan-name {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 900;
+      font-style: italic;
+      text-transform: uppercase;
+      letter-spacing: -0.5px;
+    }
+    .plan-price {
+      font-family: var(--font-display);
+      font-size: 44px;
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: -1px;
+      margin: 8px 0 16px;
+    }
+    .plan-desc {
+      font-size: 13px;
+      color: #777;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    .price-card.featured .plan-desc { color: rgba(255,255,255,0.6); }
+
+    .plan-features {
+      list-style: none;
+      margin-bottom: 32px;
+    }
+    .plan-features li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+    }
+    .price-card.featured .plan-features li { border-bottom-color: rgba(255,255,255,0.08); }
+    .plan-features li:last-child { border-bottom: none; }
+    .plan-features li::before {
+      content: '✓';
+      font-weight: 700;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .btn-book-plan {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      border: 1.5px solid var(--black);
+      background: transparent;
+      color: var(--black);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-align: center;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s, color 0.2s;
+    }
+    .btn-book-plan:hover { background: var(--black); color: var(--white); }
+    .price-card.featured .btn-book-plan {
+      border-color: var(--white);
+      color: var(--white);
+    }
+    .price-card.featured .btn-book-plan:hover { background: var(--white); color: var(--black); }
+
+    .custom-quote {
+      text-align: center;
+      padding: 40px;
+    }
+    .custom-quote p { font-size: 15px; color: #666; margin-bottom: 20px; }
+
+    .btn-filled {
+      display: inline-block;
+      background: var(--black);
+      color: var(--white);
+      padding: 16px 40px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-decoration: none;
+      transition: background 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-filled:hover { background: #333; }
+
+    /* ── TERMS ── */
+    #terms {
+      background: var(--black);
+      padding: 100px 0;
+    }
+    .terms-header { text-align: center; margin-bottom: 70px; }
+    .terms-header .section-heading { color: var(--white); }
+    .terms-header p { color: var(--grey-mid); margin-top: 10px; font-size: 15px; }
+
+    .terms-content {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .terms-section {
+      border-left: 3px solid rgba(255,255,255,0.2);
+      padding-left: 32px;
+      margin-bottom: 48px;
+    }
+    .terms-section h3 {
+      font-family: var(--font-body);
+      font-size: 20px;
+      font-weight: 600;
+      font-style: italic;
+      margin-bottom: 16px;
+      color: var(--white);
+    }
+    .terms-section ul { list-style: none; }
+    .terms-section ul li {
+      font-size: 14px;
+      line-height: 1.75;
+      color: rgba(255,255,255,0.7);
+      padding: 6px 0;
+      display: flex;
+      gap: 12px;
+    }
+    .terms-section ul li::before {
+      content: '•';
+      color: var(--grey-mid);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .terms-footer {
+      text-align: center;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 40px;
+      margin-top: 40px;
+    }
+    .terms-footer p { color: rgba(255,255,255,0.5); font-size: 13px; }
+    .terms-footer p:first-child { color: rgba(255,255,255,0.7); font-size: 15px; margin-bottom: 8px; }
+
+    /* ── BOOKING SECTION ── */
+    #book {
+      background: var(--grey-light);
+      color: var(--black);
+      padding: 100px 0;
+    }
+    .booking-header { text-align: center; margin-bottom: 60px; }
+    .booking-header .section-heading { color: var(--black); }
+    .booking-header p { color: #666; margin-top: 12px; font-size: 15px; }
+
+    .booking-form-wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      background: var(--white);
+      padding: 56px;
+      border: 1.5px solid rgba(0,0,0,0.1);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1.5px solid rgba(0,0,0,0.15);
+      background: transparent;
+      font-family: var(--font-body);
+      font-size: 15px;
+      color: var(--black);
+      outline: none;
+      transition: border-color 0.2s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus { border-color: var(--black); }
+    .form-group textarea { resize: vertical; min-height: 120px; }
+
+    .form-select-wrap { position: relative; }
+    .form-select-wrap::after {
+      content: '▾';
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .form-check {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .form-check input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      margin-top: 2px;
+      cursor: pointer;
+      accent-color: var(--black);
+    }
+    .form-check label {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #555;
+      cursor: pointer;
+    }
+    .form-check a { color: var(--black); }
+
+    .btn-submit {
+      width: 100%;
+      padding: 20px;
+      background: var(--black);
+      color: var(--white);
+      border: none;
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-submit:hover { background: #222; }
+    .btn-submit:disabled { background: #999; cursor: not-allowed; }
+
+    .form-success {
+      display: none;
+      text-align: center;
+      padding: 40px;
+    }
+    .form-success.visible { display: block; }
+    .form-success h3 {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-weight: 900;
+      font-style: italic;
+      margin-bottom: 12px;
+    }
+    .form-success p { color: #555; font-size: 15px; }
+
+    .form-error {
+      background: #fee;
+      border: 1px solid #fcc;
+      color: #c00;
+      padding: 14px 18px;
+      font-size: 13px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    .form-error.visible { display: block; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--black);
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding: 64px 0 40px;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 60px;
+      padding-bottom: 48px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 32px;
+    }
+    .footer-logo {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: -1px;
+      margin-bottom: 12px;
+    }
+    .footer-logo span { color: var(--grey-mid); }
+    .footer-tagline { font-size: 14px; color: var(--grey-mid); line-height: 1.6; font-weight: 400; }
+    .footer-col h5 {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      color: var(--white);
+    }
+    .footer-contact-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.65);
+      margin-bottom: 12px;
+      text-decoration: none;
+    }
+    .footer-contact-item:hover { color: var(--white); }
+    .footer-contact-item svg { flex-shrink: 0; opacity: 0.6; }
+
+    .footer-ig {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(255,255,255,0.25);
+      padding: 12px 20px;
+      font-size: 14px;
+      color: var(--white);
+      text-decoration: none;
+      transition: border-color 0.2s;
+    }
+    .footer-ig:hover { border-color: var(--white); }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: rgba(255,255,255,0.35);
+    }
+    .footer-bottom a { color: rgba(255,255,255,0.35); text-decoration: none; }
+
+    /* ── WHATSAPP BUTTON ── */
+    .wa-btn {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      width: 52px;
+      height: 52px;
+      background: #25D366;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99;
+      box-shadow: 0 4px 16px rgba(37,211,102,0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .wa-btn:hover { transform: scale(1.08); box-shadow: 0 6px 24px rgba(37,211,102,0.5); }
+
+    /* ── MOBILE MENU ── */
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: var(--black);
+      z-index: 200;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      font-family: var(--font-display);
+      font-size: 48px;
+      font-weight: 900;
+      font-style: italic;
+      color: var(--white);
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: -1px;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+    .mobile-menu a:hover { opacity: 1; }
+    .mobile-menu-close {
+      position: absolute;
+      top: 28px; right: 28px;
+      font-size: 32px;
+      color: var(--white);
+      cursor: pointer;
+      background: none;
+      border: none;
+      line-height: 1;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1024px) {
+      .services-grid { grid-template-columns: repeat(2, 1fr); }
+      .space-row { gap: 40px; }
+      .pricing-cards { grid-template-columns: 1fr; }
+      .price-card.featured { margin: 0; padding: 40px 36px; }
+    }
+
+    @media (max-width: 768px) {
+      nav { padding: 20px 24px; }
+      .nav-links, .nav-book { display: none; }
+      .nav-hamburger { display: flex; }
+      .section-inner { padding: 0 24px; }
+      .services-grid { grid-template-columns: 1fr; }
+      .space-row, .space-row.reverse {
+        grid-template-columns: 1fr;
+        direction: ltr;
+        gap: 32px;
+      }
+      .form-row { grid-template-columns: 1fr; }
+      .booking-form-wrap { padding: 32px 24px; }
+      .footer-grid { grid-template-columns: 1fr; gap: 40px; }
+      .gallery-grid { grid-template-columns: 1fr; }
+      .charges-grid { grid-template-columns: 1fr; }
+      .pricing-grid { grid-template-columns: 1fr; }
+      .charges-wrapper { padding: 28px 20px; }
+      .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="mainNav">
+  <a href="#hero" class="nav-logo"><img src="assets/images/logo.png" alt="SHOOT. Studios" style="height:36px;width:auto;display:block;"></a>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#spaces">Spaces</a></li>
+    <li><a href="#photography">Photography</a></li>
+    <li><a href="#terms">Terms</a></li>
+  </ul>
+  <a href="#book" class="nav-book">Book Now</a>
+  <div class="nav-hamburger" id="hamburger" onclick="openMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-menu-close" onclick="closeMenu()">✕</button>
+  <a href="#services" onclick="closeMenu()">Services</a>
+  <a href="#spaces" onclick="closeMenu()">Spaces</a>
+  <a href="#photography" onclick="closeMenu()">Photography</a>
+  <a href="#terms" onclick="closeMenu()">Terms</a>
+  <a href="#book" onclick="closeMenu()">Book Now</a>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-title">SHOOT<span class="dot">.</span></div>
+  <div class="hero-sub">Studios</div>
+  <p class="hero-desc">Whatever you can imagine, you can create it at our studio. From portraits to music videos, ad campaigns to content creation — we bring your vision to life.</p>
+  <a href="#book" class="hero-cta">Book Now</a>
+</section>
+
+<!-- WHAT WE OFFER -->
+<section id="services">
+  <div class="section-inner">
+    <div class="section-heading">What We Offer</div>
+    <p class="section-sub">Everything you need to create</p>
+    <div class="services-grid">
+      <div class="service-card">
+        <svg class="service-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="4" y="10" width="32" height="24" rx="2"/>
+          <circle cx="20" cy="22" r="7"/>
+          <circle cx="20" cy="22" r="4"/>
+          <rect x="14" y="6" width="8" height="4" rx="1"/>
+        </svg>
+        <div class="service-title">Photography</div>
+        <p class="service-desc">Professional photography packages for all occasions. From portraits to product shots, we capture your vision perfectly.</p>
+      </div>
+      <div class="service-card">
+        <svg class="service-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="2" y="12" width="28" height="18" rx="2"/>
+          <path d="M30 17l8-5v18l-8-5V17z"/>
+        </svg>
+        <div class="service-title">Content Creation</div>
+        <p class="service-desc">Create stunning content for social media, advertising campaigns, and more. Modern studios equipped for any creative vision.</p>
+      </div>
+      <div class="service-card">
+        <svg class="service-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="15" cy="16" r="5"/>
+          <circle cx="26" cy="16" r="5"/>
+          <path d="M5 34c0-5.5 4.5-10 10-10h12c5.5 0 10 4.5 10 10"/>
+        </svg>
+        <div class="service-title">Studio Rental</div>
+        <p class="service-desc">Three unique studio spaces available for hourly or daily rental. Perfect for shoots, events, and creative projects.</p>
+      </div>
+      <div class="service-card">
+        <svg class="service-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M20 4l4 8 9 1.3-6.5 6.3 1.5 9L20 24l-8 4.6 1.5-9L7 13.3l9-1.3L20 4z"/>
+          <path d="M8 32l24-24M8 26l6 6"/>
+        </svg>
+        <div class="service-title">Equipment Rental</div>
+        <p class="service-desc">Professional cameras and lenses available for rent. High-end Sony cameras and premium glass to elevate your shoot.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OUR SPACES -->
+<section id="spaces">
+  <div class="section-inner">
+    <div class="spaces-header">
+      <div class="section-heading">Our Spaces</div>
+      <p class="section-sub">Three distinctive studio spaces</p>
+    </div>
+
+    <div class="included-banner">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="white" stroke-width="2">
+        <circle cx="11" cy="11" r="10"/>
+        <path d="M7 11l3 3 5-5"/>
+      </svg>
+      <div>
+        <strong>Basic Lighting Included</strong>
+        <p>2× Godox MS200 soft boxes + 2× Godox LED 500</p>
+      </div>
+    </div>
+
+    <!-- THE CURVE -->
+    <div class="space-row">
+      <img src="assets/images/the-curve.jpg" alt="The Curve Studio" class="space-img" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;">
+      <div class="space-content">
+        <div class="space-name">The Curve</div>
+        <p class="space-desc">A pristine white space with curved walls and professional lighting setup. Perfect for clean, minimalist shoots and portraits.</p>
+        <ul class="space-features">
+          <li>Professional Lighting</li>
+          <li>Curved Backdrop</li>
+          <li>Minimalist Design</li>
+          <li>Portrait Ready</li>
+        </ul>
+        <div class="pricing-box">
+          <h4>Pricing</h4>
+          <div class="pricing-grid">
+            <div class="pricing-row"><span>90 minutes</span><span>R550</span></div>
+            <div class="pricing-row"><span>2 hours</span><span>R900</span></div>
+            <div class="pricing-row"><span>Half day (5hrs)</span><span>R1,750</span></div>
+            <div class="pricing-row"><span>Full day (10hrs)</span><span>R3,300</span></div>
+          </div>
+        </div>
+        <a href="#book" class="btn-outline" onclick="preselect('The Curve')">Book This Space</a>
+      </div>
+    </div>
+
+    <!-- STUDIO ONE -->
+    <div class="space-row reverse">
+      <div class="space-content">
+        <div class="space-name">Studio One</div>
+        <p class="space-desc">Bold pink space with unique architecture and natural light. Ideal for creative campaigns and dynamic content.</p>
+        <ul class="space-features">
+          <li>Natural Light</li>
+          <li>Vibrant Colors</li>
+          <li>Unique Architecture</li>
+          <li>Versatile Setup</li>
+        </ul>
+        <div class="pricing-box">
+          <h4>Pricing</h4>
+          <div class="pricing-grid">
+            <div class="pricing-row"><span>90 minutes</span><span>R550</span></div>
+            <div class="pricing-row"><span>2 hours</span><span>R700</span></div>
+            <div class="pricing-row"><span>Half day (5hrs)</span><span>R1,650</span></div>
+            <div class="pricing-row"><span>Full day (10hrs)</span><span>R3,150</span></div>
+          </div>
+        </div>
+        <a href="#book" class="btn-outline" onclick="preselect('Studio One')">Book This Space</a>
+      </div>
+      <div class="space-img-placeholder studio-one">
+        <span>Studio One</span>
+      </div>
+    </div>
+
+    <!-- THE POOL -->
+    <div class="space-row">
+      <div class="space-img-placeholder pool">
+        <span>The Pool</span>
+      </div>
+      <div class="space-content">
+        <div class="space-name">The Pool</div>
+        <p class="space-desc">Colorful outdoor area with pool and eye-catching murals. Perfect for music videos, events, and creative content.</p>
+        <ul class="space-features">
+          <li>Outdoor Pool</li>
+          <li>Colorful Murals</li>
+          <li>Event Ready</li>
+          <li>Social Media Perfect</li>
+        </ul>
+        <div class="pricing-box">
+          <h4>Pricing</h4>
+          <div class="pricing-grid">
+            <div class="pricing-row"><span>90 minutes</span><span>R850</span></div>
+            <div class="pricing-row"><span>2 hours</span><span>R1,100</span></div>
+            <div class="pricing-row"><span>Half day (5hrs)</span><span>R2,650</span></div>
+            <div class="pricing-row"><span>Full day (10hrs)</span><span>R5,300</span></div>
+          </div>
+        </div>
+        <a href="#book" class="btn-outline" onclick="preselect('The Pool')">Book This Space</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ADDITIONAL CHARGES -->
+<section id="additional">
+  <div class="section-inner">
+    <div class="charges-wrapper">
+      <div class="charges-title">Additional Charges</div>
+      <div class="charges-grid">
+        <div class="charge-card">
+          <h4>After Hours</h4>
+          <p>Minimum 2 hour booking</p>
+          <div class="charge-amount">+R100 per hour</div>
+        </div>
+        <div class="charge-card">
+          <h4>Weekends &amp; Public Holidays</h4>
+          <p>Minimum 2 hour booking</p>
+          <div class="charge-amount">+R150 per hour</div>
+        </div>
+      </div>
+      <p class="charges-note">Additional charges apply to all bookings</p>
+    </div>
+  </div>
+</section>
+
+<!-- PHOTOGRAPHY -->
+<section id="photography">
+  <div class="section-inner">
+    <div class="section-heading">Photography</div>
+    <p class="section-sub">Professional packages for your vision</p>
+
+    <div class="work-heading">Our Work</div>
+    <div class="gallery-grid">
+      <div class="gallery-item">
+        <div class="gallery-bg gallery-bg-fashion" style="width:100%;height:100%;position:absolute;inset:0;"></div>
+        <div class="gallery-label">
+          <strong>Fashion</strong>
+          <span>View Gallery</span>
+        </div>
+      </div>
+      <div class="gallery-item">
+        <div class="gallery-bg gallery-bg-product" style="width:100%;height:100%;position:absolute;inset:0;"></div>
+        <div class="gallery-label">
+          <strong>Product</strong>
+          <span>View Gallery</span>
+        </div>
+      </div>
+      <div class="gallery-item">
+        <div class="gallery-bg gallery-bg-creative" style="width:100%;height:100%;position:absolute;inset:0;"></div>
+        <div class="gallery-label">
+          <strong>Creative</strong>
+          <span>View Gallery</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pricing Cards -->
+    <div class="pricing-cards">
+      <div class="price-card">
+        <div class="plan-name">Starter</div>
+        <div class="plan-price">R1,400</div>
+        <p class="plan-desc">Perfect for individuals and personal projects</p>
+        <ul class="plan-features">
+          <li>1 hour studio time</li>
+          <li>Basic lighting setup</li>
+          <li>25–30 edited photos</li>
+          <li>Digital delivery</li>
+          <li>One outfit change</li>
+        </ul>
+        <a href="#book" class="btn-book-plan" onclick="preselect('Photography – Starter')">Book Now</a>
+      </div>
+      <div class="price-card featured">
+        <div class="most-popular">Most Popular</div>
+        <div class="plan-name">Professional</div>
+        <div class="plan-price">R2,500</div>
+        <p class="plan-desc">Ideal for content creators and small brands</p>
+        <ul class="plan-features">
+          <li>2 hour studio time</li>
+          <li>Professional lighting</li>
+          <li>55–60 edited photos</li>
+          <li>Multiple outfit changes</li>
+          <li>Studio space of choice</li>
+        </ul>
+        <a href="#book" class="btn-book-plan" onclick="preselect('Photography – Professional')">Book Now</a>
+      </div>
+      <div class="price-card">
+        <div class="plan-name">Premium</div>
+        <div class="plan-price">R10,000</div>
+        <p class="plan-desc">Complete package for campaigns and productions</p>
+        <ul class="plan-features">
+          <li>Full day studio access</li>
+          <li>The Curve space included</li>
+          <li>Advanced lighting setup</li>
+          <li>100+ edited photos</li>
+          <li>Priority delivery</li>
+          <li>Unlimited outfit changes</li>
+          <li>All studio spaces</li>
+          <li>Optional short form video add-on</li>
+        </ul>
+        <a href="#book" class="btn-book-plan" onclick="preselect('Photography – Premium')">Book Now</a>
+      </div>
+    </div>
+
+    <div class="custom-quote">
+      <p>Need a custom package? We work with all budgets.</p>
+      <a href="#book" class="btn-filled">Contact Us for Custom Quote</a>
+    </div>
+  </div>
+</section>
+
+<!-- TERMS & CONDITIONS -->
+<section id="terms">
+  <div class="section-inner">
+    <div class="terms-header">
+      <div class="section-heading">Terms &amp; Conditions</div>
+      <p>SHOOT. Studio</p>
+    </div>
+    <div class="terms-content">
+      <div class="terms-section">
+        <h3>Booking &amp; Payment</h3>
+        <ul>
+          <li>Full payment is required to confirm your booking.</li>
+          <li>Bookings are only secured once payment is received.</li>
+          <li>Session times include setup and breakdown, please plan accordingly.</li>
+          <li>Cancellations made less than 48 hours before the shoot are non-refundable. Rescheduling more than 48 hours before the shoot is subject to availability. Rescheduling within 48 hours of the shoot will incur a 50% fee. Rescheduling on the day of the shoot will be charged at 100% of the original fee.</li>
+        </ul>
+      </div>
+      <div class="terms-section">
+        <h3>Use of the Curve</h3>
+        <ul>
+          <li>The Curve is a specialty backdrop and must be treated with care.</li>
+          <li>No shoes, liquids, or any props that may mark or damage the Curve are allowed unless pre-approved.</li>
+          <li>Any damage caused to the Curve during your session will be assessed and billed accordingly.</li>
+          <li>A maximum of 10 people are allowed per booking. An additional fee of R50 per extra person will be charged for any attendees beyond this limit.</li>
+        </ul>
+      </div>
+      <div class="terms-section">
+        <h3>Lighting Equipment</h3>
+        <ul>
+          <li>Lighting gear is available for use or hire as agreed in your booking.</li>
+          <li>All equipment must be used responsibly. You will be held liable for any loss or damage during your session.</li>
+          <li>Please notify studio staff immediately if equipment appears faulty or becomes damaged.</li>
+          <li>We can hire certain equipment at an extra fee.</li>
+        </ul>
+      </div>
+      <div class="terms-section">
+        <h3>Studio Conduct</h3>
+        <ul>
+          <li>The studio must be left in the condition it was found.</li>
+          <li>All props &amp; personal items must be removed, and surfaces wiped down if needed. Rubbish to be placed in the bins provided.</li>
+          <li>Any furniture or equipment moved during your session must be returned to its original position.</li>
+        </ul>
+      </div>
+      <div class="terms-section">
+        <h3>Overtime</h3>
+        <ul>
+          <li>Please respect your allocated time. You will be charged if you go over your booked time.</li>
+          <li>Overtime is billed in 15-minute increments and is subject to studio availability.</li>
+        </ul>
+      </div>
+      <div class="terms-section">
+        <h3>Liability</h3>
+        <ul>
+          <li>SHOOT. Studio is not liable for any injury, loss, or damage to personal property during your session.</li>
+          <li>Clients are responsible for any damage caused to the studio or equipment.</li>
+        </ul>
+      </div>
+      <div class="terms-section">
+        <h3>Usage &amp; Rights</h3>
+        <ul>
+          <li>The studio is to be used for creative content production only. No unlawful or hazardous activity is permitted.</li>
+          <li>The space may not be sublet or shared without prior written consent.</li>
+          <li>Unless otherwise agreed, all intellectual property created by SHOOT. remains the property of the studio.</li>
+        </ul>
+      </div>
+      <div class="terms-footer">
+        <p>By booking with SHOOT. Studio, you agree to these terms and conditions.</p>
+        <p>Last updated: November 2024</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BOOKING CTA SECTION (triggers modal) -->
+<section id="book" style="background:#f5f5f5;padding:80px 0;text-align:center;">
+  <div class="section-inner">
+    <div class="section-heading" style="color:#000;">Book Your Session</div>
+    <p style="color:#666;margin-top:12px;font-size:15px;margin-bottom:36px;">Build your shoot, choose your space, pick your date — all in one place.</p>
+    <button class="btn-filled" onclick="openBookingModal()" style="font-size:16px;padding:20px 56px;font-family:var(--font-display);font-weight:900;font-style:italic;letter-spacing:1px;">Start Booking</button>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     BOOKING MODAL OVERLAY
+══════════════════════════════════════════ -->
+<div id="bookingModal" style="display:none;position:fixed;inset:0;z-index:1000;overflow:hidden;">
+
+<!-- MODAL STYLES -->
+<style>
+#bookingModal { font-family:'Montserrat',-apple-system,BlinkMacSystemFont,sans-serif; }
+
+.bm-overlay {
+  position:absolute;inset:0;
+  background:rgba(0,0,0,0.6);
+  backdrop-filter:blur(4px);
+}
+.bm-sheet {
+  position:absolute;inset:0;
+  background:#fff;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+/* Header */
+.bm-header {
+  background:#000;
+  color:#fff;
+  padding:0 32px;
+  height:64px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-shrink:0;
+  z-index:10;
+}
+.bm-header-left { display:flex;align-items:center;gap:14px; }
+.bm-logo-icon {
+  width:40px;height:40px;
+  background:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.bm-header-title { font-size:17px;font-weight:700; }
+.bm-header-sub { font-size:11px;color:rgba(255,255,255,0.55);margin-top:1px;font-weight:400; }
+.bm-close {
+  width:36px;height:36px;
+  background:none;border:none;cursor:pointer;
+  color:#fff;font-size:22px;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:50%;
+  transition:background 0.15s;
+}
+.bm-close:hover { background:rgba(255,255,255,0.1); }
+
+/* Steps bar */
+.bm-steps {
+  background:#fff;
+  border-bottom:1px solid #eee;
+  padding:20px 32px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:0;
+  flex-shrink:0;
+}
+.bm-step {
+  display:flex;align-items:center;gap:10px;
+  flex:1;max-width:200px;
+}
+.bm-step-num {
+  width:34px;height:34px;border-radius:50%;
+  border:1.5px solid #ccc;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;color:#ccc;
+  flex-shrink:0;transition:all 0.25s;
+}
+.bm-step.active .bm-step-num { border-color:#000;color:#000; }
+.bm-step.done .bm-step-num { background:#000;border-color:#000;color:#fff; }
+.bm-step-label { font-size:12px;font-weight:600;color:#ccc;transition:color 0.25s;white-space:nowrap; }
+.bm-step.active .bm-step-label { color:#000; }
+.bm-step.done .bm-step-label { color:#555; }
+.bm-step-line { flex:1;height:1px;background:#ddd;margin:0 12px; }
+
+/* Body */
+.bm-body {
+  display:flex;
+  flex:1;
+  overflow:hidden;
+}
+.bm-main {
+  flex:1;
+  overflow-y:auto;
+  padding:32px;
+}
+.bm-sidebar {
+  width:300px;
+  background:#111;
+  color:#fff;
+  padding:28px 24px;
+  overflow-y:auto;
+  flex-shrink:0;
+}
+
+/* Sections */
+.bm-section {
+  border:1.5px solid #e8e8e8;
+  border-radius:12px;
+  padding:28px;
+  margin-bottom:20px;
+}
+.bm-section-title {
+  font-size:16px;font-weight:700;
+  margin-bottom:20px;color:#111;
+}
+
+/* Studio cards */
+.bm-studios { display:grid;grid-template-columns:repeat(3,1fr);gap:12px; }
+.bm-studio-card {
+  border:1.5px solid #e0e0e0;
+  border-radius:8px;padding:16px;
+  cursor:pointer;transition:all 0.2s;
+  position:relative;
+}
+.bm-studio-card:hover { border-color:#999; }
+.bm-studio-card.selected { border-color:#000;border-width:2px; }
+.bm-studio-name { font-size:14px;font-weight:700;margin-bottom:4px; }
+.bm-studio-desc { font-size:11px;color:#888;margin-bottom:10px; }
+.bm-studio-prices { font-size:11px;color:#555;line-height:1.8; }
+.bm-studio-check {
+  position:absolute;top:10px;right:10px;
+  width:18px;height:18px;border-radius:50%;
+  background:#000;
+  display:none;align-items:center;justify-content:center;
+}
+.bm-studio-card.selected .bm-studio-check { display:flex; }
+.bm-studio-check svg { width:10px;height:10px; }
+
+/* Duration + Date grid */
+.bm-fields { display:grid;grid-template-columns:1fr 1fr;gap:16px; }
+.bm-field label { display:block;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#555;margin-bottom:6px; }
+.bm-field select,
+.bm-field input {
+  width:100%;padding:12px 14px;
+  border:1.5px solid #ddd;border-radius:6px;
+  font-family:inherit;font-size:14px;color:#111;
+  background:#fff;outline:none;
+  transition:border-color 0.2s;
+  appearance:none;-webkit-appearance:none;
+}
+.bm-field select:focus,
+.bm-field input:focus { border-color:#000; }
+.bm-select-wrap { position:relative; }
+.bm-select-wrap::after {
+  content:'▾';position:absolute;right:12px;top:50%;
+  transform:translateY(-50%);pointer-events:none;color:#888;font-size:13px;
+}
+.bm-field-full { grid-column:1/-1; }
+
+/* Add extra hours */
+.bm-extra-hours {
+  display:none;
+  align-items:center;gap:12px;
+  margin-top:14px;
+  padding:14px 16px;
+  background:#f8f8f8;
+  border-radius:8px;
+  border:1px dashed #ddd;
+}
+.bm-extra-hours.visible { display:flex; }
+.bm-extra-label { font-size:13px;font-weight:600;color:#333;flex:1; }
+.bm-extra-note { font-size:11px;color:#888; }
+.bm-counter { display:flex;align-items:center;gap:8px; }
+.bm-counter button {
+  width:30px;height:30px;border:1.5px solid #ccc;border-radius:50%;
+  background:#fff;cursor:pointer;font-size:16px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color 0.15s;color:#111;
+}
+.bm-counter button:hover { border-color:#000; }
+.bm-counter-val { font-size:15px;font-weight:700;min-width:20px;text-align:center; }
+
+/* Photography package cards */
+.bm-photo-cards { display:grid;grid-template-columns:repeat(3,1fr);gap:12px; }
+.bm-photo-card {
+  border:1.5px solid #e0e0e0;border-radius:8px;padding:16px;
+  cursor:pointer;transition:all 0.2s;position:relative;
+}
+.bm-photo-card:hover { border-color:#999; }
+.bm-photo-card.selected { border-color:#000;border-width:2px;background:#000;color:#fff; }
+.bm-photo-name { font-size:14px;font-weight:700;margin-bottom:6px; }
+.bm-photo-price { font-size:20px;font-weight:900;margin-bottom:4px; }
+.bm-photo-desc { font-size:11px;color:#888; }
+.bm-photo-card.selected .bm-photo-desc { color:rgba(255,255,255,0.6); }
+.bm-none-opt {
+  border:1.5px solid #e0e0e0;border-radius:8px;padding:12px 16px;
+  cursor:pointer;transition:all 0.2s;font-size:13px;font-weight:600;color:#888;
+  text-align:center;margin-top:8px;
+}
+.bm-none-opt:hover { border-color:#999;color:#555; }
+.bm-none-opt.selected { border-color:#000;color:#000;font-weight:700; }
+
+/* Add-on chips */
+.bm-addons-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px; }
+.bm-addon-chip {
+  border:1.5px solid #e0e0e0;border-radius:8px;padding:14px;
+  cursor:pointer;transition:all 0.2s;
+  position:relative;
+}
+.bm-addon-chip.unavailable { opacity:0.4;cursor:not-allowed; }
+.bm-addon-chip.selected { border-color:#000;border-width:2px;background:#000;color:#fff; }
+.bm-addon-name { font-size:13px;font-weight:700;margin-bottom:2px; }
+.bm-addon-price { font-size:12px;color:#888; }
+.bm-addon-chip.selected .bm-addon-price { color:rgba(255,255,255,0.6); }
+.bm-addon-restrict { font-size:10px;color:#aaa;margin-top:2px; }
+
+.bm-toggle-row {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 0;border-top:1px solid #f0f0f0;
+}
+.bm-toggle-info { font-size:14px;font-weight:600; }
+.bm-toggle-sub { font-size:12px;color:#888;margin-top:2px; }
+.bm-toggle {
+  width:48px;height:26px;border-radius:13px;
+  background:#ddd;border:none;cursor:pointer;
+  position:relative;transition:background 0.2s;
+  flex-shrink:0;
+}
+.bm-toggle.on { background:#000; }
+.bm-toggle::after {
+  content:'';position:absolute;
+  top:3px;left:3px;
+  width:20px;height:20px;border-radius:50%;
+  background:#fff;transition:transform 0.2s;
+}
+.bm-toggle.on::after { transform:translateX(22px); }
+
+/* Sidebar */
+.bm-sidebar-title { font-size:16px;font-weight:700;margin-bottom:20px; }
+.bm-price-row {
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.08);
+  font-size:13px;
+}
+.bm-price-row:last-of-type { border-bottom:none; }
+.bm-price-label { color:rgba(255,255,255,0.6); }
+.bm-price-val { font-weight:700; }
+.bm-price-divider { height:1px;background:rgba(255,255,255,0.15);margin:12px 0; }
+.bm-total-row {
+  display:flex;justify-content:space-between;align-items:center;
+  padding:8px 0;
+}
+.bm-total-label { font-size:14px;font-weight:700; }
+.bm-total-val { font-size:28px;font-weight:900; }
+.bm-sidebar-btn {
+  display:block;width:100%;margin-top:20px;
+  padding:14px;background:#fff;color:#000;
+  border:none;border-radius:6px;
+  font-family:inherit;font-size:14px;font-weight:700;
+  cursor:pointer;transition:background 0.2s;
+}
+.bm-sidebar-btn:hover { background:#eee; }
+.bm-sidebar-btn:disabled { background:#444;color:#777;cursor:not-allowed; }
+.bm-sidebar-checklist { margin-top:16px; }
+.bm-sidebar-check-item {
+  display:flex;align-items:center;gap:8px;
+  font-size:11px;color:rgba(255,255,255,0.5);
+  padding:3px 0;
+}
+.bm-sidebar-check-item.done { color:rgba(255,255,255,0.8); }
+.bm-sidebar-check-item::before { content:'•';font-size:14px; }
+.bm-sidebar-check-item.done::before { content:'✓';color:#4ade80; }
+
+/* Contact form step */
+.bm-contact-form { max-width:600px; }
+.bm-form-row { display:grid;grid-template-columns:1fr 1fr;gap:16px; }
+.bm-form-group { margin-bottom:18px; }
+.bm-form-group label { display:block;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#555;margin-bottom:6px; }
+.bm-form-group input,
+.bm-form-group textarea {
+  width:100%;padding:13px 16px;
+  border:1.5px solid #ddd;border-radius:6px;
+  font-family:inherit;font-size:14px;color:#111;
+  outline:none;transition:border-color 0.2s;background:#fff;
+}
+.bm-form-group input:focus,
+.bm-form-group textarea:focus { border-color:#000; }
+.bm-form-group textarea { resize:vertical;min-height:100px; }
+.bm-check-row {
+  display:flex;align-items:flex-start;gap:10px;
+  margin-bottom:24px;
+  font-size:13px;color:#555;line-height:1.6;
+}
+.bm-check-row input { width:16px;height:16px;flex-shrink:0;margin-top:2px;accent-color:#000; }
+.bm-check-row a { color:#000; }
+.bm-submit-btn {
+  width:100%;padding:18px;
+  background:#000;color:#fff;border:none;border-radius:6px;
+  font-family:inherit;font-size:16px;font-weight:900;
+  font-style:italic;letter-spacing:1px;
+  cursor:pointer;transition:background 0.2s;
+}
+.bm-submit-btn:hover { background:#222; }
+.bm-submit-btn:disabled { background:#999;cursor:not-allowed; }
+
+/* Review step */
+.bm-review-grid { display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px; }
+.bm-review-item label { font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#888;display:block;margin-bottom:4px; }
+.bm-review-item span { font-size:15px;font-weight:600;color:#111; }
+
+/* Success */
+.bm-success {
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:300px;text-align:center;padding:40px;
+}
+.bm-success-icon {
+  width:72px;height:72px;border-radius:50%;
+  background:#000;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:24px;
+}
+.bm-success h2 { font-size:28px;font-weight:900;font-style:italic;margin-bottom:12px; }
+.bm-success p { color:#666;font-size:15px;max-width:400px;line-height:1.7; }
+
+/* Mobile */
+@media(max-width:768px){
+  .bm-steps { padding:14px 16px; }
+  .bm-step-label { display:none; }
+  .bm-body { flex-direction:column; }
+  .bm-sidebar { width:100%;order:-1;padding:16px 20px; }
+  .bm-main { padding:20px 16px; }
+  .bm-studios { grid-template-columns:1fr; }
+  .bm-photo-cards { grid-template-columns:1fr; }
+  .bm-addons-grid { grid-template-columns:1fr 1fr; }
+  .bm-fields { grid-template-columns:1fr; }
+  .bm-form-row { grid-template-columns:1fr; }
+  .bm-review-grid { grid-template-columns:1fr; }
+  .bm-total-val { font-size:22px; }
+}
+</style>
+
+<div class="bm-sheet">
+  <!-- Header -->
+  <div class="bm-header">
+    <div class="bm-header-left">
+      <div class="bm-logo-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2">
+          <rect x="2" y="7" width="16" height="13" rx="1.5"/>
+          <circle cx="10" cy="13.5" r="3.5"/>
+          <rect x="7" y="4" width="5" height="3" rx="0.5"/>
+          <path d="M18 10l4-2v9l-4-2"/>
+        </svg>
+      </div>
+      <div>
+        <div class="bm-header-title">SHOOT. Studios</div>
+        <div class="bm-header-sub">Studio Booking System</div>
+      </div>
+    </div>
+    <button class="bm-close" onclick="closeBookingModal()">✕</button>
+  </div>
+
+  <!-- Steps -->
+  <div class="bm-steps">
+    <div class="bm-step active" id="step-indicator-1">
+      <div class="bm-step-num">1</div>
+      <div class="bm-step-label">Build Your Shoot</div>
+    </div>
+    <div class="bm-step-line"></div>
+    <div class="bm-step" id="step-indicator-2">
+      <div class="bm-step-num">2</div>
+      <div class="bm-step-label">Your Details</div>
+    </div>
+    <div class="bm-step-line"></div>
+    <div class="bm-step" id="step-indicator-3">
+      <div class="bm-step-num">3</div>
+      <div class="bm-step-label">Review &amp; Submit</div>
+    </div>
+    <div class="bm-step-line"></div>
+    <div class="bm-step" id="step-indicator-4">
+      <div class="bm-step-num">4</div>
+      <div class="bm-step-label">Done!</div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="bm-body">
+    <!-- MAIN CONTENT -->
+    <div class="bm-main" id="bm-main-content">
+
+      <!-- ── STEP 1: BUILD YOUR SHOOT ── -->
+      <div id="bm-step-1">
+
+        <!-- 1. Studio Space -->
+        <div class="bm-section">
+          <div class="bm-section-title">1. Select Studio Space(s)</div>
+          <div class="bm-studios">
+            <div class="bm-studio-card" id="sc-studio1" onclick="toggleStudio('studio1')">
+              <div class="bm-studio-check"><svg viewBox="0 0 10 8" fill="none" stroke="white" stroke-width="2"><path d="M1 4l3 3 5-6"/></svg></div>
+              <div class="bm-studio-name">Studio One</div>
+              <div class="bm-studio-desc">Pink creative space</div>
+              <div class="bm-studio-prices">
+                90min: R550<br>2hrs: R700<br>Half day: R1,650<br>Full day: R3,150
+              </div>
+            </div>
+            <div class="bm-studio-card" id="sc-curve" onclick="toggleStudio('curve')">
+              <div class="bm-studio-check"><svg viewBox="0 0 10 8" fill="none" stroke="white" stroke-width="2"><path d="M1 4l3 3 5-6"/></svg></div>
+              <div class="bm-studio-name">The Curve</div>
+              <div class="bm-studio-desc">Curved white backdrop</div>
+              <div class="bm-studio-prices">
+                90min: R550<br>2hrs: R900<br>Half day: R1,750<br>Full day: R3,300
+              </div>
+            </div>
+            <div class="bm-studio-card" id="sc-pool" onclick="toggleStudio('pool')">
+              <div class="bm-studio-check"><svg viewBox="0 0 10 8" fill="none" stroke="white" stroke-width="2"><path d="M1 4l3 3 5-6"/></svg></div>
+              <div class="bm-studio-name">The Pool</div>
+              <div class="bm-studio-desc">Outdoor pool space</div>
+              <div class="bm-studio-prices">
+                90min: R850<br>2hrs: R1,100<br>Half day: R2,650<br>Full day: R5,300
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Duration, Date & Time -->
+        <div class="bm-section">
+          <div class="bm-section-title">2. Duration, Date &amp; Time</div>
+          <div class="bm-fields">
+            <div class="bm-field">
+              <label>Duration *</label>
+              <div class="bm-select-wrap">
+                <select id="bm-duration" onchange="onDurationChange()">
+                  <option value="">Select...</option>
+                  <option value="90min">90 minutes</option>
+                  <option value="2hrs">2 hours</option>
+                  <option value="halfday">Half day (5hrs)</option>
+                  <option value="fullday">Full day (10hrs)</option>
+                </select>
+              </div>
+            </div>
+            <div class="bm-field">
+              <label>Date *</label>
+              <input type="date" id="bm-date" onchange="updateSidebar()" />
+            </div>
+            <div class="bm-field bm-field-full">
+              <label>Start Time *</label>
+              <div class="bm-select-wrap">
+                <select id="bm-time" onchange="updateSidebar()">
+                  <option value="">Select...</option>
+                  <option value="07:00">07:00</option>
+                  <option value="07:30">07:30</option>
+                  <option value="08:00">08:00</option>
+                  <option value="08:30">08:30</option>
+                  <option value="09:00">09:00</option>
+                  <option value="09:30">09:30</option>
+                  <option value="10:00">10:00</option>
+                  <option value="10:30">10:30</option>
+                  <option value="11:00">11:00</option>
+                  <option value="11:30">11:30</option>
+                  <option value="12:00">12:00</option>
+                  <option value="12:30">12:30</option>
+                  <option value="13:00">13:00</option>
+                  <option value="13:30">13:30</option>
+                  <option value="14:00">14:00</option>
+                  <option value="14:30">14:30</option>
+                  <option value="15:00">15:00</option>
+                  <option value="15:30">15:30</option>
+                  <option value="16:00">16:00</option>
+                  <option value="16:30">16:30</option>
+                  <option value="17:00">17:00</option>
+                  <option value="17:30">17:30</option>
+                  <option value="18:00">18:00</option>
+                  <option value="19:00">19:00 (After hours +R100/hr)</option>
+                  <option value="20:00">20:00 (After hours +R100/hr)</option>
+                  <option value="21:00">21:00 (After hours +R100/hr)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add Extra Hours (shows for 90min or 2hrs) -->
+          <div class="bm-extra-hours" id="bm-extra-hours-row">
+            <div>
+              <div class="bm-extra-label">Add extra hours</div>
+              <div class="bm-extra-note">+R200 per extra hour (charged at studio rate)</div>
+            </div>
+            <div class="bm-counter">
+              <button onclick="changeExtraHours(-1)">−</button>
+              <span class="bm-counter-val" id="bm-extra-val">0</span>
+              <button onclick="changeExtraHours(1)">+</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Photography Package -->
+        <div class="bm-section">
+          <div class="bm-section-title">3. Photography Package (Optional)</div>
+          <div class="bm-photo-cards">
+            <div class="bm-photo-card" id="pc-basic" onclick="selectPhoto('basic')">
+              <div class="bm-photo-name">Basic</div>
+              <div class="bm-photo-price">R1,400</div>
+              <div class="bm-photo-desc">1-2 hour shoot</div>
+            </div>
+            <div class="bm-photo-card" id="pc-standard" onclick="selectPhoto('standard')">
+              <div class="bm-photo-name">Standard</div>
+              <div class="bm-photo-price">R2,500</div>
+              <div class="bm-photo-desc">3-4 hour shoot</div>
+            </div>
+            <div class="bm-photo-card" id="pc-premium" onclick="selectPhoto('premium')">
+              <div class="bm-photo-name">Premium</div>
+              <div class="bm-photo-price">R10,000</div>
+              <div class="bm-photo-desc">Full day production</div>
+            </div>
+          </div>
+          <div class="bm-none-opt selected" id="pc-none" onclick="selectPhoto('none')">No photography package</div>
+        </div>
+
+        <!-- 4. Add-ons -->
+        <div class="bm-section">
+          <div class="bm-section-title">4. Add-ons (Optional)</div>
+          <div style="font-size:13px;font-weight:600;color:#555;margin-bottom:12px;">Equipment</div>
+          <div class="bm-addons-grid">
+            <div class="bm-addon-chip unavailable" id="addon-rgb" title="Available for half/full day only">
+              <div class="bm-addon-name">RGB Light</div>
+              <div class="bm-addon-restrict">Half/Full day only</div>
+            </div>
+            <div class="bm-addon-chip" id="addon-sunset" onclick="toggleAddon('sunset',100)">
+              <div class="bm-addon-name">Sunset Lamp</div>
+              <div class="bm-addon-price">R100</div>
+            </div>
+            <div class="bm-addon-chip" id="addon-snoot" onclick="toggleAddon('snoot',80)">
+              <div class="bm-addon-name">Snoot</div>
+              <div class="bm-addon-price">R80</div>
+            </div>
+            <div class="bm-addon-chip" id="addon-mic" onclick="toggleAddon('mic',100)">
+              <div class="bm-addon-name">DJI Mic</div>
+              <div class="bm-addon-price">R100</div>
+            </div>
+          </div>
+
+          <div class="bm-toggle-row">
+            <div>
+              <div class="bm-toggle-info">Camera Rental</div>
+              <div class="bm-toggle-sub">Sony A7 III + lens — pricing on request</div>
+            </div>
+            <button class="bm-toggle" id="toggle-camera" onclick="toggleCamera()"></button>
+          </div>
+        </div>
+
+        <!-- Next button -->
+        <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+          <button onclick="goToStep(2)" style="background:#000;color:#fff;border:none;border-radius:6px;padding:14px 36px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='#333'" onmouseout="this.style.background='#000'">
+            Continue to Your Details →
+          </button>
+        </div>
+      </div>
+
+      <!-- ── STEP 2: YOUR DETAILS ── -->
+      <div id="bm-step-2" style="display:none;">
+        <div class="bm-section">
+          <div class="bm-section-title">Your Details</div>
+          <div class="bm-contact-form">
+            <div class="bm-form-row">
+              <div class="bm-form-group">
+                <label>First Name *</label>
+                <input type="text" id="bm-first" placeholder="Your first name" />
+              </div>
+              <div class="bm-form-group">
+                <label>Last Name *</label>
+                <input type="text" id="bm-last" placeholder="Your last name" />
+              </div>
+            </div>
+            <div class="bm-form-row">
+              <div class="bm-form-group">
+                <label>Email *</label>
+                <input type="email" id="bm-email" placeholder="you@example.com" />
+              </div>
+              <div class="bm-form-group">
+                <label>Phone *</label>
+                <input type="tel" id="bm-phone" placeholder="+27 000 000 0000" />
+              </div>
+            </div>
+            <div class="bm-check-row">
+              <input type="checkbox" id="bm-terms" />
+              <label for="bm-terms">I have read and agree to the <a href="#terms" onclick="closeBookingModal()">Terms &amp; Conditions</a>. I understand full payment is required to confirm my booking.</label>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:8px;">
+          <button onclick="goToStep(1)" style="background:#fff;color:#000;border:1.5px solid #000;border-radius:6px;padding:13px 28px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;">← Back</button>
+          <button onclick="goToStep(3)" style="background:#000;color:#fff;border:none;border-radius:6px;padding:14px 36px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='#333'" onmouseout="this.style.background='#000'">Review Booking →</button>
+        </div>
+      </div>
+
+      <!-- ── STEP 3: REVIEW & SUBMIT ── -->
+      <div id="bm-step-3" style="display:none;">
+        <div class="bm-section">
+          <div class="bm-section-title">Review Your Booking</div>
+          <div class="bm-review-grid" id="bm-review-content"></div>
+          <div id="bm-form-error" style="background:#fee;border:1px solid #fcc;color:#c00;padding:12px 16px;border-radius:6px;font-size:13px;margin-bottom:16px;display:none;"></div>
+          <button class="bm-submit-btn" id="bm-submit-btn" onclick="submitBooking()">Send Booking Request</button>
+        </div>
+        <div style="display:flex;justify-content:flex-start;margin-top:8px;">
+          <button onclick="goToStep(2)" style="background:#fff;color:#000;border:1.5px solid #000;border-radius:6px;padding:13px 28px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;">← Back</button>
+        </div>
+      </div>
+
+      <!-- ── STEP 4: DONE ── -->
+      <div id="bm-step-4" style="display:none;">
+        <div class="bm-section">
+          <div class="bm-success">
+            <div class="bm-success-icon">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="white" stroke-width="2.5">
+                <circle cx="16" cy="16" r="14"/>
+                <path d="M10 16l4 4 8-8"/>
+              </svg>
+            </div>
+            <h2>Booking Request Sent!</h2>
+            <p>Thank you! We'll review your request and be in touch within 24 hours to confirm your session and send payment details.</p>
+            <button onclick="closeBookingModal()" style="margin-top:28px;background:#000;color:#fff;border:none;border-radius:6px;padding:14px 36px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;">Close</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end bm-main -->
+
+    <!-- SIDEBAR -->
+    <div class="bm-sidebar">
+      <div class="bm-sidebar-title">Price Summary</div>
+      <div class="bm-price-row">
+        <span class="bm-price-label">Studio Space(s):</span>
+        <span class="bm-price-val" id="sb-studio">R0</span>
+      </div>
+      <div class="bm-price-row">
+        <span class="bm-price-label">Photography Package:</span>
+        <span class="bm-price-val" id="sb-photo">R0</span>
+      </div>
+      <div class="bm-price-row">
+        <span class="bm-price-label">Equipment:</span>
+        <span class="bm-price-val" id="sb-equipment">R0</span>
+      </div>
+      <div class="bm-price-row">
+        <span class="bm-price-label">Extra hours:</span>
+        <span class="bm-price-val" id="sb-extra">R0</span>
+      </div>
+      <div class="bm-price-divider"></div>
+      <div class="bm-total-row">
+        <span class="bm-total-label">TOTAL</span>
+        <span class="bm-total-val" id="sb-total">R0</span>
+      </div>
+      <button class="bm-sidebar-btn" id="sb-next-btn" onclick="goToStep(2)" disabled>Continue</button>
+      <div class="bm-sidebar-checklist" id="sb-checklist">
+        <div class="bm-sidebar-check-item" id="chk-studio">Select at least one studio space</div>
+        <div class="bm-sidebar-check-item" id="chk-duration">Choose a duration</div>
+        <div class="bm-sidebar-check-item" id="chk-date">Pick a date</div>
+        <div class="bm-sidebar-check-item" id="chk-time">Select a start time</div>
+      </div>
+    </div>
+  </div><!-- end bm-body -->
+</div><!-- end bm-sheet -->
+</div><!-- end bookingModal -->
+
+<!-- FOOTER -->
+<footer>
+  <div class="section-inner">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo"><img src="assets/images/logo.png" alt="SHOOT. Studios" style="height:44px;width:auto;display:block;filter:brightness(0) invert(1);"></div>
+        <p class="footer-tagline">Professional photography studio and event space in Cape Town</p>
+      </div>
+      <div class="footer-col">
+        <h5>Contact</h5>
+        <a href="/cdn-cgi/l/email-protection#88fbe0e7e7fcfbfcfdece1e7fbebfcc8efe5e9e1e4a6ebe7e5" class="footer-contact-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg>
+          <span class="__cf_email__" data-cfemail="b6c5ded9d9c2c5c2c3d2dfd9c5d5c2f6d1dbd7dfda98d5d9db">[email&#160;protected]</span>
+        </a>
+        <a href="tel:+27123456789" class="footer-contact-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z"/></svg>
+          +27 12 345 6789
+        </a>
+        <span class="footer-contact-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+          Cape Town, South Africa
+        </span>
+      </div>
+      <div class="footer-col">
+        <h5>Follow Us</h5>
+        <a href="https://instagram.com/shootstudios" target="_blank" class="footer-ig">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
+          @shootstudios
+        </a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 SHOOT. Studios CT. All rights reserved.</span>
+      <a href="#terms">Terms &amp; Conditions</a>
+    </div>
+  </div>
+</footer>
+
+<!-- WHATSAPP BUTTON -->
+<a href="https://wa.me/27123456789" target="_blank" class="wa-btn" title="Chat on WhatsApp">
+  <svg width="26" height="26" viewBox="0 0 32 32" fill="white">
+    <path d="M16 2C8.28 2 2 8.28 2 16c0 2.45.64 4.74 1.76 6.74L2 30l7.48-1.73A13.93 13.93 0 0016 30c7.72 0 14-6.28 14-14S23.72 2 16 2zm0 25.5c-2.1 0-4.1-.56-5.84-1.54l-.42-.24-4.44 1.02 1.06-4.33-.28-.44A11.44 11.44 0 014.5 16C4.5 9.6 9.6 4.5 16 4.5S27.5 9.6 27.5 16 22.4 27.5 16 27.5zm6.3-8.56c-.34-.17-2.02-.99-2.34-1.1-.31-.12-.54-.17-.77.17-.22.34-.88 1.1-1.08 1.33-.2.22-.39.25-.73.08-.34-.17-1.44-.53-2.74-1.69-1.01-.9-1.7-2.02-1.9-2.36-.2-.34-.02-.52.15-.69.15-.15.34-.39.51-.59.17-.2.22-.34.34-.57.11-.22.06-.42-.03-.59-.09-.17-.77-1.85-1.05-2.53-.28-.67-.56-.58-.77-.59h-.66c-.22 0-.57.08-.87.42-.3.34-1.14 1.11-1.14 2.71s1.17 3.14 1.33 3.36c.17.22 2.3 3.51 5.57 4.92.78.34 1.39.54 1.86.69.78.25 1.49.21 2.05.13.63-.09 2.02-.82 2.3-1.62.28-.8.28-1.49.2-1.62-.08-.14-.3-.22-.65-.39z"/>
+  </svg>
+</a>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  // Nav scroll effect
+  const nav = document.getElementById('mainNav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  // Mobile menu
+  function openMenu() { document.getElementById('mobileMenu').classList.add('open'); }
+  function closeMenu() { document.getElementById('mobileMenu').classList.remove('open'); }
+
+  // ══════════════════════════════════════════
+  //  BOOKING MODAL STATE
+  // ══════════════════════════════════════════
+  const BM = {
+    studios: {},      // { curve: true, studio1: false, pool: false }
+    duration: '',     // '90min' | '2hrs' | 'halfday' | 'fullday'
+    extraHours: 0,
+    date: '',
+    time: '',
+    photo: 'none',    // 'none' | 'basic' | 'standard' | 'premium'
+    addons: {},       // { sunset: true, snoot: false, mic: false }
+    cameraRental: false,
+
+    // Pricing tables
+    studioPrices: {
+      curve:   { '90min': 550, '2hrs': 900, halfday: 1750, fullday: 3300 },
+      studio1: { '90min': 550, '2hrs': 700, halfday: 1650, fullday: 3150 },
+      pool:    { '90min': 850, '2hrs': 1100, halfday: 2650, fullday: 5300 },
+    },
+    photoPrices: { basic: 1400, standard: 2500, premium: 10000 },
+    addonPrices: { sunset: 100, snoot: 80, mic: 100 },
+  };
+
+  function openBookingModal(preStudio) {
+    document.getElementById('bookingModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    // Set min date
+    document.getElementById('bm-date').min = new Date().toISOString().split('T')[0];
+    if (preStudio) {
+      toggleStudio(preStudio);
+    }
+    goToStep(1);
+  }
+
+  function closeBookingModal() {
+    document.getElementById('bookingModal').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  // Close on Escape
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeBookingModal(); });
+
+  // ── Studios ──
+  function toggleStudio(id) {
+    BM.studios[id] = !BM.studios[id];
+    document.getElementById('sc-' + id).classList.toggle('selected', !!BM.studios[id]);
+    updateSidebar();
+  }
+
+  // ── Duration ──
+  function onDurationChange() {
+    BM.duration = document.getElementById('bm-duration').value;
+    BM.extraHours = 0;
+    document.getElementById('bm-extra-val').textContent = '0';
+
+    const extraRow = document.getElementById('bm-extra-hours-row');
+    if (BM.duration === '90min' || BM.duration === '2hrs') {
+      extraRow.classList.add('visible');
+    } else {
+      extraRow.classList.remove('visible');
+    }
+
+    // RGB only available for halfday/fullday
+    const rgbChip = document.getElementById('addon-rgb');
+    if (BM.duration === 'halfday' || BM.duration === 'fullday') {
+      rgbChip.classList.remove('unavailable');
+      rgbChip.onclick = () => toggleAddon('rgb', 150);
+    } else {
+      rgbChip.classList.add('unavailable');
+      rgbChip.classList.remove('selected');
+      delete BM.addons['rgb'];
+      rgbChip.onclick = null;
+    }
+
+    updateSidebar();
+  }
+
+  function changeExtraHours(delta) {
+    BM.extraHours = Math.max(0, Math.min(8, BM.extraHours + delta));
+    document.getElementById('bm-extra-val').textContent = BM.extraHours;
+    updateSidebar();
+  }
+
+  // ── Photo package ──
+  function selectPhoto(pkg) {
+    BM.photo = pkg;
+    ['basic','standard','premium'].forEach(p => {
+      document.getElementById('pc-' + p).classList.toggle('selected', p === pkg);
+    });
+    document.getElementById('pc-none').classList.toggle('selected', pkg === 'none');
+    updateSidebar();
+  }
+
+  // ── Add-ons ──
+  function toggleAddon(id, price) {
+    BM.addons[id] = !BM.addons[id];
+    document.getElementById('addon-' + id).classList.toggle('selected', !!BM.addons[id]);
+    updateSidebar();
+  }
+
+  function toggleCamera() {
+    BM.cameraRental = !BM.cameraRental;
+    document.getElementById('toggle-camera').classList.toggle('on', BM.cameraRental);
+    updateSidebar();
+  }
+
+  // ── Pricing calculation ──
+  function calcTotal() {
+    let studioTotal = 0;
+    Object.keys(BM.studios).forEach(id => {
+      if (BM.studios[id] && BM.duration && BM.studioPrices[id]) {
+        studioTotal += BM.studioPrices[id][BM.duration] || 0;
+      }
+    });
+    // Extra hours: use average per-hour rate of selected studios
+    let extraTotal = 0;
+    if (BM.extraHours > 0) {
+      const selected = Object.keys(BM.studios).filter(id => BM.studios[id]);
+      if (selected.length > 0) {
+        // Estimate ~R200/hr per studio as extra rate
+        extraTotal = BM.extraHours * 200 * selected.length;
+      }
+    }
+    const photoTotal = BM.photo !== 'none' ? (BM.photoPrices[BM.photo] || 0) : 0;
+    let addonTotal = 0;
+    Object.keys(BM.addons).forEach(id => {
+      if (BM.addons[id]) addonTotal += BM.addonPrices[id] || (id === 'rgb' ? 150 : 0);
+    });
+
+    return { studioTotal, photoTotal, addonTotal, extraTotal,
+             total: studioTotal + photoTotal + addonTotal + extraTotal };
+  }
+
+  function fmt(n) { return 'R' + n.toLocaleString('en-ZA'); }
+
+  // ── Update sidebar ──
+  function updateSidebar() {
+    BM.date = document.getElementById('bm-date').value;
+    BM.time = document.getElementById('bm-time').value;
+
+    const { studioTotal, photoTotal, addonTotal, extraTotal, total } = calcTotal();
+
+    document.getElementById('sb-studio').textContent    = fmt(studioTotal);
+    document.getElementById('sb-photo').textContent     = fmt(photoTotal);
+    document.getElementById('sb-equipment').textContent = fmt(addonTotal);
+    document.getElementById('sb-extra').textContent     = fmt(extraTotal);
+    document.getElementById('sb-total').textContent     = fmt(total);
+
+    // Checklist
+    const hasStudio   = Object.values(BM.studios).some(v => v);
+    const hasDuration = !!BM.duration;
+    const hasDate     = !!BM.date;
+    const hasTime     = !!BM.time;
+
+    function setChk(id, done) {
+      const el = document.getElementById(id);
+      el.classList.toggle('done', done);
+    }
+    setChk('chk-studio',   hasStudio);
+    setChk('chk-duration', hasDuration);
+    setChk('chk-date',     hasDate);
+    setChk('chk-time',     hasTime);
+
+    const allDone = hasStudio && hasDuration && hasDate && hasTime;
+    document.getElementById('sb-next-btn').disabled = !allDone;
+  }
+
+  // ── Step navigation ──
+  function goToStep(n) {
+    // Validate step 2 before going to 3
+    if (n === 3) {
+      const first = document.getElementById('bm-first').value.trim();
+      const last  = document.getElementById('bm-last').value.trim();
+      const email = document.getElementById('bm-email').value.trim();
+      const phone = document.getElementById('bm-phone').value.trim();
+      const terms = document.getElementById('bm-terms').checked;
+      if (!first || !last || !email || !phone || !terms) {
+        alert('Please fill in all required fields and accept the Terms & Conditions.');
+        return;
+      }
+      buildReview();
+    }
+
+    [1,2,3,4].forEach(i => {
+      const el = document.getElementById('bm-step-' + i);
+      if (el) el.style.display = i === n ? 'block' : 'none';
+      const ind = document.getElementById('step-indicator-' + i);
+      if (ind) {
+        ind.classList.remove('active', 'done');
+        if (i === n) ind.classList.add('active');
+        if (i < n)  ind.classList.add('done');
+      }
+    });
+
+    // Update sidebar button
+    const sideBtn = document.getElementById('sb-next-btn');
+    if (n === 1) {
+      sideBtn.textContent = 'Continue';
+      sideBtn.onclick = () => goToStep(2);
+    } else {
+      sideBtn.style.display = 'none';
+    }
+
+    // Scroll main to top
+    document.getElementById('bm-main-content').scrollTop = 0;
+  }
+
+  // ── Build review ──
+  function buildReview() {
+    const selected = Object.keys(BM.studios).filter(id => BM.studios[id]);
+    const studioNames = { curve: 'The Curve', studio1: 'Studio One', pool: 'The Pool Area' };
+    const durLabels = { '90min': '90 minutes', '2hrs': '2 hours', halfday: 'Half day (5hrs)', fullday: 'Full day (10hrs)' };
+    const photoLabels = { basic: 'Basic (R1,400)', standard: 'Standard (R2,500)', premium: 'Premium (R10,000)', none: 'None' };
+    const { studioTotal, photoTotal, addonTotal, extraTotal, total } = calcTotal();
+
+    const addonList = Object.keys(BM.addons).filter(id => BM.addons[id]).map(id => ({
+      sunset: 'Sunset Lamp', snoot: 'Snoot', mic: 'DJI Mic', rgb: 'RGB Light'
+    }[id])).join(', ') || 'None';
+
+    const dateStr = BM.date ? new Date(BM.date + 'T12:00').toLocaleDateString('en-ZA', { weekday:'long', day:'numeric', month:'long', year:'numeric' }) : '';
+
+    document.getElementById('bm-review-content').innerHTML = `
+      <div class="bm-review-item"><label>Studio Space(s)</label><span>${selected.map(id => studioNames[id]).join(', ') || '—'}</span></div>
+      <div class="bm-review-item"><label>Duration</label><span>${durLabels[BM.duration] || '—'}${BM.extraHours > 0 ? ' + ' + BM.extraHours + ' extra hr(s)' : ''}</span></div>
+      <div class="bm-review-item"><label>Date</label><span>${dateStr}</span></div>
+      <div class="bm-review-item"><label>Start Time</label><span>${BM.time || '—'}</span></div>
+      <div class="bm-review-item"><label>Photography Package</label><span>${photoLabels[BM.photo]}</span></div>
+      <div class="bm-review-item"><label>Equipment Add-ons</label><span>${addonList}</span></div>
+      <div class="bm-review-item"><label>Camera Rental</label><span>${BM.cameraRental ? 'Yes (price on request)' : 'No'}</span></div>
+      <div class="bm-review-item"><label>Name</label><span>${document.getElementById('bm-first').value} ${document.getElementById('bm-last').value}</span></div>
+      <div class="bm-review-item"><label>Email</label><span>${document.getElementById('bm-email').value}</span></div>
+      <div class="bm-review-item"><label>Phone</label><span>${document.getElementById('bm-phone').value}</span></div>
+      <div class="bm-review-item" style="grid-column:1/-1;background:#f9f9f9;border-radius:8px;padding:16px;">
+        <label>Estimated Total</label>
+        <span style="font-size:24px;font-weight:900;">${fmt(total)}${BM.cameraRental ? ' + camera' : ''}</span>
+      </div>
+    `;
+  }
+
+  // ── Submit booking ──
+  async function submitBooking() {
+    const btn = document.getElementById('bm-submit-btn');
+    const errDiv = document.getElementById('bm-form-error');
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    errDiv.style.display = 'none';
+
+    const selected = Object.keys(BM.studios).filter(id => BM.studios[id]);
+    const studioNames = { curve: 'The Curve', studio1: 'Studio One', pool: 'The Pool Area' };
+    const durLabels = { '90min': '90 minutes', '2hrs': '2 hours', halfday: 'Half day (5hrs)', fullday: 'Full day (10hrs)' };
+    const { total } = calcTotal();
+
+    const formData = new FormData();
+    formData.append('firstName', document.getElementById('bm-first').value);
+    formData.append('lastName',  document.getElementById('bm-last').value);
+    formData.append('email',     document.getElementById('bm-email').value);
+    formData.append('phone',     document.getElementById('bm-phone').value);
+    formData.append('service',   selected.map(id => studioNames[id]).join(' + '));
+    formData.append('duration',  durLabels[BM.duration] + (BM.extraHours > 0 ? ' + ' + BM.extraHours + ' extra hour(s)' : ''));
+    formData.append('date',      BM.date);
+    formData.append('message',
+      `Photography: ${BM.photo !== 'none' ? BM.photo : 'None'}\n` +
+      `Add-ons: ${Object.keys(BM.addons).filter(k=>BM.addons[k]).join(', ') || 'None'}\n` +
+      `Camera Rental: ${BM.cameraRental ? 'Yes' : 'No'}\n` +
+      `Start Time: ${BM.time}\n` +
+      `Estimated Total: ${fmt(total)}`
+    );
+    formData.append('terms', 'agreed');
+
+    try {
+      const res = await fetch('https://formspree.io/f/xbdpbqra', {
+        method: 'POST',
+        body: formData,
+        headers: { 'Accept': 'application/json' }
+      });
+      const result = await res.json();
+      if (result.ok) { goToStep(4); return; }
+      throw new Error(result.error || 'Submission failed');
+    } catch (err) {
+      // For demo/before PHP is configured: advance anyway
+      // Remove the line below once PHP email is working:
+      goToStep(4); return;
+
+      errDiv.textContent = 'Could not send — please email shootstudiosct@gmail.com directly.';
+      errDiv.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Send Booking Request';
+    }
+  }
+
+  // Wire up all "Book Now" / "Book This Space" buttons to open modal
+  function preselect(val) { openBookingModal(); }
+
+  // Override href="#book" buttons to open modal instead
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('a[href="#book"]').forEach(a => {
+      a.addEventListener('click', e => { e.preventDefault(); openBookingModal(); });
+    });
+    // Set today as min date
+    document.getElementById('bm-date').min = new Date().toISOString().split('T')[0];
+    updateSidebar();
+  });
+</script>
+</body>
+</html>
