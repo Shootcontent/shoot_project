@@ -1775,6 +1775,9 @@
                   <option value="fullday">Full day (10hrs)</option>
                 </select>
               </div>
+              <div id="bm-min-duration-warning" style="display:none;margin-top:6px;font-size:12px;color:#e07b00;font-weight:600;">
+                ⚠ Minimum 2 hours required for weekends, public holidays &amp; after-hours bookings.
+              </div>
             </div>
             <div class="bm-field">
               <label>Date *</label>
@@ -1981,6 +1984,10 @@
         <span class="bm-price-label">Extra hours:</span>
         <span class="bm-price-val" id="sb-extra">R0</span>
       </div>
+      <div class="bm-price-row" id="sb-surcharge-row" style="display:none;">
+        <span class="bm-price-label" id="sb-surcharge-label">After-hours surcharge:</span>
+        <span class="bm-price-val" id="sb-surcharge">R0</span>
+      </div>
       <div class="bm-price-divider"></div>
       <div class="bm-total-row">
         <span class="bm-total-label">TOTAL</span>
@@ -2076,6 +2083,75 @@
 
   // ══════════════════════════════════════════
   //  BOOKING MODAL STATE
+  // ══════════════════════════════════════════
+  // South African public holidays (extend each year as needed)
+  const SA_PUBLIC_HOLIDAYS = new Set([
+    '2025-01-01','2025-03-21','2025-04-18','2025-04-21','2025-04-28',
+    '2025-05-01','2025-06-16','2025-08-09','2025-09-24',
+    '2025-12-16','2025-12-25','2025-12-26',
+    '2026-01-01','2026-03-21','2026-03-23','2026-04-03','2026-04-06',
+    '2026-04-27','2026-05-01','2026-06-16','2026-08-10','2026-09-24',
+    '2026-12-16','2026-12-25','2026-12-26',
+  ]);
+
+  // Hours for each duration key (used for surcharge calculations)
+  const DURATION_HOURS = { '90min': 1.5, '2hrs': 2, halfday: 5, fullday: 10 };
+  const SURCHARGE_RATE  = 150; // R150 per hour — never stacks
+  const AFTER_HOURS     = 17;  // 17:00 (5pm) is when after-hours begins
+
+  /**
+   * Determines surcharge exposure for a booking.
+   * Surcharge applies (non-stacking at R150/hr) when:
+   *   - The booking date is a weekend (Sat/Sun)
+   *   - The booking date is a SA public holiday
+   *   - The booking START time is on or after 17:00 on a weekday
+   *   - The booking crosses 17:00 on a weekday (partial surcharge for hours after 17:00)
+   *
+   * Minimum 2-hour duration is required whenever the booking START conditions
+   * would trigger a surcharge (weekend, holiday, or after-hours start).
+   */
+  function getBookingConditions(dateStr, timeStr, durationKey, extraHours) {
+    const none = { surchargeHours: 0, isAfterHours: false, isWeekend: false, isHoliday: false, minDurationRequired: false, surchargeLabel: '' };
+    if (!dateStr || !timeStr || !durationKey) return none;
+
+    const date      = new Date(dateStr + 'T00:00:00');
+    const dow       = date.getDay(); // 0=Sun, 6=Sat
+    const isWeekend = dow === 0 || dow === 6;
+    const isHoliday = SA_PUBLIC_HOLIDAYS.has(dateStr);
+
+    const [hStr, mStr] = timeStr.split(':');
+    const startHour       = parseInt(hStr, 10) + parseInt(mStr, 10) / 60;
+    const totalHours      = (DURATION_HOURS[durationKey] || 0) + (extraHours || 0);
+    const endHour         = startHour + totalHours;
+
+    let surchargeHours = 0;
+    let isAfterHours   = false;
+    let surchargeLabel = '';
+
+    if (isWeekend || isHoliday) {
+      // Entire booking is on a weekend/holiday — full surcharge
+      surchargeHours = totalHours;
+      surchargeLabel = isHoliday ? 'Public holiday surcharge:' : 'Weekend surcharge:';
+    } else {
+      // Weekday: check if booking starts or crosses 17:00
+      if (startHour >= AFTER_HOURS) {
+        isAfterHours   = true;
+        surchargeHours = totalHours;
+        surchargeLabel = 'After-hours surcharge:';
+      } else if (endHour > AFTER_HOURS) {
+        // Booking straddles 17:00 — surcharge only on hours after 17:00
+        isAfterHours   = true;
+        surchargeHours = endHour - AFTER_HOURS;
+        surchargeLabel = 'After-hours surcharge:';
+      }
+    }
+
+    // Minimum 2h applies when the booking START triggers a condition
+    const minDurationRequired = isWeekend || isHoliday || startHour >= AFTER_HOURS;
+
+    return { surchargeHours, isAfterHours, isWeekend, isHoliday, minDurationRequired, surchargeLabel };
+  }
+
   // ══════════════════════════════════════════
   const BM = {
     studios: {},      // { curve: true, studio1: false, pool: false }
@@ -2188,23 +2264,28 @@
         studioTotal += BM.studioPrices[id][BM.duration] || 0;
       }
     });
-    // Extra hours: use average per-hour rate of selected studios
+
+    // Extra hours at ~R200/hr per selected studio
     let extraTotal = 0;
     if (BM.extraHours > 0) {
       const selected = Object.keys(BM.studios).filter(id => BM.studios[id]);
       if (selected.length > 0) {
-        // Estimate ~R200/hr per studio as extra rate
         extraTotal = BM.extraHours * 200 * selected.length;
       }
     }
+
     const photoTotal = BM.photo !== 'none' ? (BM.photoPrices[BM.photo] || 0) : 0;
     let addonTotal = 0;
     Object.keys(BM.addons).forEach(id => {
       if (BM.addons[id]) addonTotal += BM.addonPrices[id] || (id === 'rgb' ? 150 : 0);
     });
 
-    return { studioTotal, photoTotal, addonTotal, extraTotal,
-             total: studioTotal + photoTotal + addonTotal + extraTotal };
+    // Surcharge: R150/hr for applicable hours (non-stacking — one flat rate regardless of how many conditions apply)
+    const { surchargeHours, surchargeLabel } = getBookingConditions(BM.date, BM.time, BM.duration, BM.extraHours);
+    const surchargeTotal = Math.round(surchargeHours * SURCHARGE_RATE);
+
+    return { studioTotal, photoTotal, addonTotal, extraTotal, surchargeTotal, surchargeLabel,
+             total: studioTotal + photoTotal + addonTotal + extraTotal + surchargeTotal };
   }
 
   function fmt(n) { return 'R' + n.toLocaleString('en-ZA'); }
@@ -2214,13 +2295,42 @@
     BM.date = document.getElementById('bm-date').value;
     BM.time = document.getElementById('bm-time').value;
 
-    const { studioTotal, photoTotal, addonTotal, extraTotal, total } = calcTotal();
+    // Determine surcharge conditions based on current date/time/duration
+    const { minDurationRequired, surchargeHours, surchargeTotal: _st, surchargeLabel } =
+      getBookingConditions(BM.date, BM.time, BM.duration, BM.extraHours);
+
+    // Enforce minimum 2-hour duration: disable 90min option when conditions require it
+    const opt90 = document.querySelector('#bm-duration option[value="90min"]');
+    if (opt90) {
+      opt90.disabled = minDurationRequired;
+      // If 90min was already selected and is now forbidden, reset it
+      if (minDurationRequired && BM.duration === '90min') {
+        BM.duration = '';
+        document.getElementById('bm-duration').value = '';
+      }
+    }
+    // Show/hide the minimum duration warning
+    document.getElementById('bm-min-duration-warning').style.display =
+      minDurationRequired ? 'block' : 'none';
+
+    const { studioTotal, photoTotal, addonTotal, extraTotal, surchargeTotal, total } = calcTotal();
 
     document.getElementById('sb-studio').textContent    = fmt(studioTotal);
     document.getElementById('sb-photo').textContent     = fmt(photoTotal);
     document.getElementById('sb-equipment').textContent = fmt(addonTotal);
     document.getElementById('sb-extra').textContent     = fmt(extraTotal);
-    document.getElementById('sb-total').textContent     = fmt(total);
+
+    // Show surcharge row only when a surcharge applies
+    const surchargeRow = document.getElementById('sb-surcharge-row');
+    if (surchargeTotal > 0) {
+      document.getElementById('sb-surcharge-label').textContent = surchargeLabel;
+      document.getElementById('sb-surcharge').textContent       = fmt(surchargeTotal);
+      surchargeRow.style.display = '';
+    } else {
+      surchargeRow.style.display = 'none';
+    }
+
+    document.getElementById('sb-total').textContent = fmt(total);
 
     // Checklist
     const hasStudio   = Object.values(BM.studios).some(v => v);
@@ -2229,8 +2339,7 @@
     const hasTime     = !!BM.time;
 
     function setChk(id, done) {
-      const el = document.getElementById(id);
-      el.classList.toggle('done', done);
+      document.getElementById(id).classList.toggle('done', done);
     }
     setChk('chk-studio',   hasStudio);
     setChk('chk-duration', hasDuration);
