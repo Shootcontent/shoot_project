@@ -1170,9 +1170,9 @@
           <div class="charge-amount">+R100 per hour</div>
         </div>
         <div class="charge-card scroll-reveal" data-delay="200">
-          <h4>Weekends &amp; Public Holidays</h4>
+          <h4>Weekend &amp; After-Hours Surcharge</h4>
           <p>Minimum 2 hour booking</p>
-          <div class="charge-amount">+R150 per hour</div>
+          <div class="charge-amount">+R200 per hour</div>
         </div>
       </div>
       <p class="charges-note">Additional charges apply to all bookings</p>
@@ -2096,12 +2096,12 @@
 
   // Hours for each duration key (used for surcharge calculations)
   const DURATION_HOURS = { '90min': 1.5, '2hrs': 2, halfday: 5, fullday: 10 };
-  const SURCHARGE_RATE  = 150; // R150 per hour — never stacks
+  const SURCHARGE_RATE  = 200; // R200 per hour — never stacks
   const AFTER_HOURS     = 17;  // 17:00 (5pm) is when after-hours begins
 
   /**
    * Determines surcharge exposure for a booking.
-   * Surcharge applies (non-stacking at R150/hr) when:
+   * Surcharge applies (non-stacking at R200/hr) when:
    *   - The booking date is a weekend (Sat/Sun)
    *   - The booking date is a SA public holiday
    *   - The booking START time is on or after 17:00 on a weekday
@@ -2280,7 +2280,7 @@
       if (BM.addons[id]) addonTotal += BM.addonPrices[id] || (id === 'rgb' ? 150 : 0);
     });
 
-    // Surcharge: R150/hr for applicable hours (non-stacking — one flat rate regardless of how many conditions apply)
+    // Surcharge: R200/hr for applicable hours (non-stacking — one flat rate regardless of how many conditions apply)
     const { surchargeHours, surchargeLabel } = getBookingConditions(BM.date, BM.time, BM.duration, BM.extraHours);
     const surchargeTotal = Math.round(surchargeHours * SURCHARGE_RATE);
 
