@@ -1906,20 +1906,113 @@
 .bm-success h2 { font-size:28px;font-weight:900;font-style:italic;margin-bottom:12px; }
 .bm-success p { color:#666;font-size:15px;max-width:400px;line-height:1.7; }
 
-/* Mobile */
+/* ── MOBILE BOOKING MODAL ── */
 @media(max-width:768px){
-  .bm-steps { padding:14px 16px; }
+
+  /* ── Header: tighter padding ── */
+  .bm-header { padding:0 20px; }
+
+  /* ── Step bar: smaller circles, no labels ── */
+  .bm-steps { padding:10px 16px; }
   .bm-step-label { display:none; }
-  .bm-body { flex-direction:column; }
-  .bm-sidebar { width:100%;order:-1;padding:16px 20px; }
-  .bm-main { padding:20px 16px; }
-  .bm-studios { grid-template-columns:1fr; }
-  .bm-photo-cards { grid-template-columns:1fr; }
-  .bm-addons-grid { grid-template-columns:1fr 1fr; }
-  .bm-fields { grid-template-columns:1fr; }
-  .bm-form-row { grid-template-columns:1fr; }
-  .bm-review-grid { grid-template-columns:1fr; }
-  .bm-total-val { font-size:22px; }
+  .bm-step-num { width:28px; height:28px; font-size:11px; }
+  .bm-step-line { margin:0 8px; }
+
+  /* ── Body: column — form first, sticky bar last ── */
+  .bm-body { flex-direction:column; overflow:hidden; }
+
+  /* ── Main: scrollable, padded so last field clears the sticky bar ── */
+  .bm-main { flex:1; overflow-y:auto; padding:20px 16px 88px; }
+
+  /* ── Sidebar → sticky bottom bar ──
+       No order:-1 here so the sidebar renders AFTER bm-main in the DOM column,
+       which naturally places it at the bottom without reordering DOM nodes.    */
+  .bm-sidebar {
+    width:100%;
+    flex-shrink:0;
+    height:68px;
+    padding:0 16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    overflow:hidden;
+    background:#111;
+    border-top:1px solid rgba(255,255,255,0.18);
+    /* remove sidebar scroll */
+    overflow-y:hidden;
+  }
+
+  /* Hide everything in the sidebar except the total row + continue button */
+  .bm-sidebar-title,
+  .bm-price-row,
+  .bm-promo-sidebar-row,
+  .bm-price-divider,
+  .bm-sidebar-checklist { display:none !important; }
+
+  /* Total row: sits inline on the left of the bar */
+  .bm-total-row {
+    flex:1;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    justify-content:center;
+    gap:1px;
+  }
+  .bm-total-label { font-size:11px; font-weight:600; color:rgba(255,255,255,0.45); letter-spacing:0.5px; }
+  .bm-total-val   { font-size:20px; font-weight:900; line-height:1; }
+
+  /* Continue button: compact pill beside the total */
+  .bm-sidebar-btn {
+    width:auto;
+    margin-top:0;
+    padding:12px 22px;
+    flex-shrink:0;
+    border-radius:6px;
+    font-size:14px;
+    font-weight:700;
+  }
+  /* Enabled state: white button on dark bar */
+  .bm-sidebar-btn:not(:disabled) { background:#fff; color:#000; }
+  /* Disabled state */
+  .bm-sidebar-btn:disabled { background:rgba(255,255,255,0.12); color:rgba(255,255,255,0.35); cursor:not-allowed; }
+
+  /* ── Form layout adjustments ── */
+  .bm-section { padding:20px 16px; margin-bottom:16px; }
+  .bm-section-title { font-size:15px; margin-bottom:16px; }
+  .bm-studios        { grid-template-columns:1fr; }
+  .bm-photo-cards    { grid-template-columns:1fr; }
+  .bm-addons-grid    { grid-template-columns:1fr 1fr; }
+  .bm-fields         { grid-template-columns:1fr; }
+  .bm-form-row       { grid-template-columns:1fr; }
+  .bm-review-grid    { grid-template-columns:1fr; }
+
+  /* ── Tap target: min 48px, 16px font prevents iOS Safari zoom ── */
+  .bm-field select,
+  .bm-field input {
+    min-height:48px;
+    font-size:16px;
+    padding:13px 14px;
+  }
+  .bm-form-group input,
+  .bm-form-group textarea { font-size:16px; }
+
+  /* Counter buttons: larger touch area */
+  .bm-counter button { width:40px; height:40px; }
+
+  /* Studio cards: comfortable tap area */
+  .bm-studio-card { padding:14px 12px; }
+
+  /* Photography / add-on cards */
+  .bm-photo-card { padding:14px; }
+
+  /* Step nav buttons (back/next inside steps 2-3) */
+  #bm-step-2 button,
+  #bm-step-3 button { min-height:48px; }
+
+  /* Submit button */
+  .bm-submit-btn { font-size:15px; padding:16px; }
 }
 </style>
 
