@@ -1822,6 +1822,78 @@
 }
 .bm-toggle.on::after { transform:translateX(22px); }
 
+/* Camera Rental Section */
+.bm-rental-yn { display:flex;gap:10px; }
+.bm-yn-btn {
+  flex:1;padding:12px 10px;border:1.5px solid #e0e0e0;border-radius:8px;
+  background:#fff;cursor:pointer;font-family:inherit;font-size:13px;
+  font-weight:700;color:#888;transition:all 0.2s;
+}
+.bm-yn-btn:hover { border-color:#999;color:#555; }
+.bm-yn-btn.selected { border-color:#000;border-width:2px;background:#000;color:#fff; }
+
+.bm-rental-panel {
+  overflow:hidden;max-height:0;opacity:0;
+  transition:max-height 0.45s ease,opacity 0.3s ease;
+}
+.bm-rental-panel.open { max-height:1200px;opacity:1; }
+
+.bm-rental-sub { font-size:13px;font-weight:700;color:#333;margin:20px 0 12px;letter-spacing:0.01em; }
+
+.bm-camera-cards { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
+.bm-camera-card {
+  border:1.5px solid #e0e0e0;border-radius:10px;padding:18px;
+  cursor:pointer;transition:border-color 0.2s,background 0.2s;position:relative;
+}
+.bm-camera-card:hover { border-color:#999; }
+.bm-camera-card.selected { border-color:#000;border-width:2px;background:#000; }
+.bm-camera-name { font-size:14px;font-weight:800;margin-bottom:8px;color:#111;letter-spacing:-0.01em; }
+.bm-camera-card.selected .bm-camera-name { color:#fff; }
+.bm-camera-pricing { display:flex;gap:20px;margin-bottom:12px; }
+.bm-camera-price-item { display:flex;flex-direction:column; }
+.bm-camera-price-label { font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:#aaa;margin-bottom:2px; }
+.bm-camera-card.selected .bm-camera-price-label { color:rgba(255,255,255,0.45); }
+.bm-camera-price-val { font-size:18px;font-weight:900;color:#111; }
+.bm-camera-card.selected .bm-camera-price-val { color:#fff; }
+.bm-camera-specs { font-size:11px;color:#aaa;border-top:1px solid #f0f0f0;padding-top:8px;line-height:1.7; }
+.bm-camera-card.selected .bm-camera-specs { color:rgba(255,255,255,0.35);border-top-color:rgba(255,255,255,0.1); }
+
+.bm-dur-pills { display:flex;gap:10px; }
+.bm-dur-pill {
+  flex:1;padding:12px;border:1.5px solid #e0e0e0;border-radius:8px;
+  background:#fff;cursor:pointer;font-family:inherit;font-size:13px;
+  font-weight:700;color:#888;text-align:center;transition:all 0.2s;
+}
+.bm-dur-pill:hover { border-color:#999;color:#555; }
+.bm-dur-pill.selected { border-color:#000;border-width:2px;background:#000;color:#fff; }
+
+.bm-lens-divider { border:none;border-top:1px solid #f0f0f0;margin:22px 0; }
+.bm-lens-panel { overflow:hidden;max-height:0;opacity:0;transition:max-height 0.4s ease,opacity 0.3s ease; }
+.bm-lens-panel.open { max-height:600px;opacity:1; }
+
+.bm-lens-cards { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
+.bm-lens-card {
+  border:1.5px solid #e0e0e0;border-radius:10px;padding:18px;
+  cursor:pointer;transition:border-color 0.2s,background 0.2s;position:relative;
+}
+.bm-lens-card:hover { border-color:#999; }
+.bm-lens-card.selected { border-color:#000;border-width:2px;background:#000; }
+.bm-lens-name { font-size:14px;font-weight:800;margin-bottom:8px;color:#111;letter-spacing:-0.01em; }
+.bm-lens-card.selected .bm-lens-name { color:#fff; }
+.bm-lens-pricing { display:flex;gap:20px;margin-bottom:12px; }
+.bm-lens-price-item { display:flex;flex-direction:column; }
+.bm-lens-price-label { font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:#aaa;margin-bottom:2px; }
+.bm-lens-card.selected .bm-lens-price-label { color:rgba(255,255,255,0.45); }
+.bm-lens-price-val { font-size:18px;font-weight:900;color:#111; }
+.bm-lens-card.selected .bm-lens-price-val { color:#fff; }
+.bm-lens-specs { font-size:11px;color:#aaa;border-top:1px solid #f0f0f0;padding-top:8px;line-height:1.7; }
+.bm-lens-card.selected .bm-lens-specs { color:rgba(255,255,255,0.35);border-top-color:rgba(255,255,255,0.1); }
+.bm-dur-linked {
+  font-size:11px;color:#888;margin-top:10px;padding:9px 12px;
+  background:#f8f8f8;border-radius:6px;border:1px solid #eee;
+}
+.bm-dur-linked strong { color:#333; }
+
 /* Sidebar */
 .bm-sidebar-title { font-size:16px;font-weight:700;margin-bottom:20px; }
 .bm-price-row {
@@ -1987,6 +2059,9 @@
   .bm-studios        { grid-template-columns:1fr; }
   .bm-photo-cards    { grid-template-columns:1fr; }
   .bm-addons-grid    { grid-template-columns:1fr 1fr; }
+  .bm-camera-cards   { grid-template-columns:1fr; }
+  .bm-lens-cards     { grid-template-columns:1fr; }
+  .bm-rental-yn      { flex-direction:column; }
   .bm-fields         { grid-template-columns:1fr; }
   .bm-form-row       { grid-template-columns:1fr; }
   .bm-review-grid    { grid-template-columns:1fr; }
@@ -2228,12 +2303,101 @@
             </div>
           </div>
 
-          <div class="bm-toggle-row">
-            <div>
-              <div class="bm-toggle-info">Camera Rental</div>
-              <div class="bm-toggle-sub">Canon + lens — pricing on request</div>
+        </div>
+
+        <!-- 5. Camera Rental -->
+        <div class="bm-section">
+          <div class="bm-section-title">5. Camera Rental (Optional)</div>
+          <div style="font-size:13px;color:#888;margin-bottom:16px;line-height:1.6;">Rent a professional Canon mirrorless body and lens for your session.</div>
+
+          <div class="bm-rental-yn">
+            <button class="bm-yn-btn selected" id="yn-camera-no"  onclick="selectCameraRental(false)">No camera rental</button>
+            <button class="bm-yn-btn"           id="yn-camera-yes" onclick="selectCameraRental(true)">Yes, I need a camera</button>
+          </div>
+
+          <div class="bm-rental-panel" id="camera-rental-panel">
+
+            <div class="bm-rental-sub">Choose a Camera Body</div>
+            <div class="bm-camera-cards">
+              <div class="bm-camera-card" id="cam-rp" onclick="selectCamera('rp')">
+                <div class="bm-camera-name">Canon EOS RP</div>
+                <div class="bm-camera-pricing">
+                  <div class="bm-camera-price-item">
+                    <span class="bm-camera-price-label">Half Day</span>
+                    <span class="bm-camera-price-val">R400</span>
+                  </div>
+                  <div class="bm-camera-price-item">
+                    <span class="bm-camera-price-label">Full Day</span>
+                    <span class="bm-camera-price-val">R800</span>
+                  </div>
+                </div>
+                <div class="bm-camera-specs">26.2MP · Full-frame CMOS · 4K video<br>RF mount · Compact &amp; lightweight</div>
+              </div>
+              <div class="bm-camera-card" id="cam-r6" onclick="selectCamera('r6')">
+                <div class="bm-camera-name">Canon EOS R6 MK II</div>
+                <div class="bm-camera-pricing">
+                  <div class="bm-camera-price-item">
+                    <span class="bm-camera-price-label">Half Day</span>
+                    <span class="bm-camera-price-val">R600</span>
+                  </div>
+                  <div class="bm-camera-price-item">
+                    <span class="bm-camera-price-label">Full Day</span>
+                    <span class="bm-camera-price-val">R1,200</span>
+                  </div>
+                </div>
+                <div class="bm-camera-specs">24.2MP · Full-frame CMOS · 6K RAW video<br>RF mount · Advanced IBIS · 40fps burst</div>
+              </div>
             </div>
-            <button class="bm-toggle" id="toggle-camera" onclick="toggleCamera()"></button>
+
+            <div class="bm-rental-sub" style="margin-top:22px;">Rental Duration</div>
+            <div class="bm-dur-pills">
+              <button class="bm-dur-pill" id="dur-halfday" onclick="selectRentalDuration('halfday')">Half Day</button>
+              <button class="bm-dur-pill" id="dur-fullday" onclick="selectRentalDuration('fullday')">Full Day</button>
+            </div>
+
+            <hr class="bm-lens-divider">
+
+            <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:12px;">Lens Rental</div>
+            <div class="bm-rental-yn" style="margin-bottom:0;">
+              <button class="bm-yn-btn selected" id="yn-lens-no"  onclick="selectLensRental(false)">No lens rental</button>
+              <button class="bm-yn-btn"           id="yn-lens-yes" onclick="selectLensRental(true)">Yes, add a lens</button>
+            </div>
+
+            <div class="bm-lens-panel" id="lens-rental-panel">
+              <div class="bm-rental-sub">Choose a Lens</div>
+              <div class="bm-lens-cards">
+                <div class="bm-lens-card" id="lens-2470" onclick="selectLens('2470')">
+                  <div class="bm-lens-name">Canon 24–70mm f/2.8</div>
+                  <div class="bm-lens-pricing">
+                    <div class="bm-lens-price-item">
+                      <span class="bm-lens-price-label">Half Day</span>
+                      <span class="bm-lens-price-val">R350</span>
+                    </div>
+                    <div class="bm-lens-price-item">
+                      <span class="bm-lens-price-label">Full Day</span>
+                      <span class="bm-lens-price-val">R700</span>
+                    </div>
+                  </div>
+                  <div class="bm-lens-specs">Versatile zoom · f/2.8 constant aperture<br>Image stabilisation · RF mount</div>
+                </div>
+                <div class="bm-lens-card" id="lens-50" onclick="selectLens('50')">
+                  <div class="bm-lens-name">Canon 50mm f/1.8</div>
+                  <div class="bm-lens-pricing">
+                    <div class="bm-lens-price-item">
+                      <span class="bm-lens-price-label">Half Day</span>
+                      <span class="bm-lens-price-val">R250</span>
+                    </div>
+                    <div class="bm-lens-price-item">
+                      <span class="bm-lens-price-label">Full Day</span>
+                      <span class="bm-lens-price-val">R500</span>
+                    </div>
+                  </div>
+                  <div class="bm-lens-specs">Portrait prime · Ultra-wide f/1.8 aperture<br>STM autofocus · RF mount</div>
+                </div>
+              </div>
+              <div class="bm-dur-linked" id="lens-dur-badge">Duration linked to camera rental: <strong>—</strong></div>
+            </div>
+
           </div>
         </div>
 
@@ -2332,6 +2496,10 @@
       <div class="bm-price-row">
         <span class="bm-price-label">Equipment:</span>
         <span class="bm-price-val" id="sb-equipment">R0</span>
+      </div>
+      <div class="bm-price-row" id="sb-camera-row" style="display:none;">
+        <span class="bm-price-label">Camera Rental:</span>
+        <span class="bm-price-val" id="sb-camera">R0</span>
       </div>
       <div class="bm-price-row">
         <span class="bm-price-label">Extra hours:</span>
@@ -2530,6 +2698,10 @@
     photo: 'none',    // 'none' | 'basic' | 'standard' | 'premium'
     addons: {},       // { sunset: true, snoot: false, mic: false }
     cameraRental: false,
+    cameraBody: null,      // 'rp' | 'r6'
+    rentalDuration: null,  // 'halfday' | 'fullday'
+    lensRental: false,
+    lensChoice: null,      // '2470' | '50'
 
     // Pricing tables (3hrs = hourly rate × 3; promo pays 2hr price for 3hrs in May)
     studioPrices: {
@@ -2539,6 +2711,8 @@
     },
     photoPrices: { basic: 1400, standard: 2500, premium: 10000 },
     addonPrices: { sunset: 100, snoot: 80, mic: 100 },
+    cameraPrices: { rp: { halfday: 400, fullday: 800 }, r6: { halfday: 600, fullday: 1200 } },
+    lensPrices:   { '2470': { halfday: 350, fullday: 700 }, '50': { halfday: 250, fullday: 500 } },
   };
 
   function openBookingModal(preStudio) {
@@ -2618,9 +2792,52 @@
     updateSidebar();
   }
 
-  function toggleCamera() {
-    BM.cameraRental = !BM.cameraRental;
-    document.getElementById('toggle-camera').classList.toggle('on', BM.cameraRental);
+  function selectCameraRental(val) {
+    BM.cameraRental = val;
+    document.getElementById('yn-camera-no').classList.toggle('selected', !val);
+    document.getElementById('yn-camera-yes').classList.toggle('selected', val);
+    document.getElementById('camera-rental-panel').classList.toggle('open', val);
+    if (!val) {
+      BM.cameraBody = null; BM.rentalDuration = null;
+      BM.lensRental = false; BM.lensChoice = null;
+      ['rp','r6'].forEach(id => document.getElementById('cam-'+id).classList.remove('selected'));
+      ['halfday','fullday'].forEach(d => document.getElementById('dur-'+d).classList.remove('selected'));
+      document.getElementById('yn-lens-no').classList.add('selected');
+      document.getElementById('yn-lens-yes').classList.remove('selected');
+      document.getElementById('lens-rental-panel').classList.remove('open');
+      ['2470','50'].forEach(id => document.getElementById('lens-'+id).classList.remove('selected'));
+    }
+    updateSidebar();
+  }
+
+  function selectCamera(id) {
+    BM.cameraBody = id;
+    ['rp','r6'].forEach(c => document.getElementById('cam-'+c).classList.toggle('selected', c === id));
+    updateSidebar();
+  }
+
+  function selectRentalDuration(dur) {
+    BM.rentalDuration = dur;
+    ['halfday','fullday'].forEach(d => document.getElementById('dur-'+d).classList.toggle('selected', d === dur));
+    document.querySelector('#lens-dur-badge strong').textContent = dur === 'halfday' ? 'Half Day' : 'Full Day';
+    updateSidebar();
+  }
+
+  function selectLensRental(val) {
+    BM.lensRental = val;
+    document.getElementById('yn-lens-no').classList.toggle('selected', !val);
+    document.getElementById('yn-lens-yes').classList.toggle('selected', val);
+    document.getElementById('lens-rental-panel').classList.toggle('open', val);
+    if (!val) {
+      BM.lensChoice = null;
+      ['2470','50'].forEach(id => document.getElementById('lens-'+id).classList.remove('selected'));
+    }
+    updateSidebar();
+  }
+
+  function selectLens(id) {
+    BM.lensChoice = id;
+    ['2470','50'].forEach(l => document.getElementById('lens-'+l).classList.toggle('selected', l === id));
     updateSidebar();
   }
 
@@ -2659,13 +2876,21 @@
       if (BM.addons[id]) addonTotal += BM.addonPrices[id] || (id === 'rgb' ? 150 : 0);
     });
 
+    let cameraTotal = 0;
+    if (BM.cameraRental && BM.cameraBody && BM.rentalDuration) {
+      cameraTotal += (BM.cameraPrices[BM.cameraBody] || {})[BM.rentalDuration] || 0;
+    }
+    if (BM.cameraRental && BM.lensRental && BM.lensChoice && BM.rentalDuration) {
+      cameraTotal += (BM.lensPrices[BM.lensChoice] || {})[BM.rentalDuration] || 0;
+    }
+
     // Surcharge: R200/hr for applicable hours (non-stacking)
     const { surchargeHours, surchargeLabel } = getBookingConditions(BM.date, BM.time, BM.duration, BM.extraHours);
     const surchargeTotal = Math.round(surchargeHours * SURCHARGE_RATE);
 
     return { studioTotal, studioOriginal, promoDiscount, promoApplied: promo.applied,
-             photoTotal, addonTotal, extraTotal, surchargeTotal, surchargeLabel,
-             total: studioTotal + photoTotal + addonTotal + extraTotal + surchargeTotal };
+             photoTotal, addonTotal, extraTotal, cameraTotal, surchargeTotal, surchargeLabel,
+             total: studioTotal + photoTotal + addonTotal + extraTotal + cameraTotal + surchargeTotal };
   }
 
   function fmt(n) { return 'R' + n.toLocaleString('en-ZA'); }
@@ -2694,7 +2919,7 @@
       minDurationRequired ? 'block' : 'none';
 
     const { studioTotal, studioOriginal, promoDiscount, promoApplied,
-            photoTotal, addonTotal, extraTotal, surchargeTotal, total } = calcTotal();
+            photoTotal, addonTotal, extraTotal, cameraTotal, surchargeTotal, total } = calcTotal();
 
     // Studio price row: show strikethrough original when promo active
     const sbStudio = document.getElementById('sb-studio');
@@ -2724,6 +2949,14 @@
     document.getElementById('sb-photo').textContent     = fmt(photoTotal);
     document.getElementById('sb-equipment').textContent = fmt(addonTotal);
     document.getElementById('sb-extra').textContent     = fmt(extraTotal);
+
+    const cameraRow = document.getElementById('sb-camera-row');
+    if (cameraTotal > 0) {
+      document.getElementById('sb-camera').textContent = fmt(cameraTotal);
+      cameraRow.style.display = '';
+    } else {
+      cameraRow.style.display = 'none';
+    }
 
     // Show surcharge row only when a surcharge applies
     const surchargeRow = document.getElementById('sb-surcharge-row');
@@ -2757,6 +2990,12 @@
 
   // ── Step navigation ──
   function goToStep(n) {
+    // Validate camera rental before leaving step 1
+    if (n === 2 && BM.cameraRental) {
+      if (!BM.cameraBody) { alert('Please select a camera body or choose "No camera rental".'); return; }
+      if (!BM.rentalDuration) { alert('Please select a rental duration (Half Day or Full Day).'); return; }
+      if (BM.lensRental && !BM.lensChoice) { alert('Please select a lens or choose "No lens rental".'); return; }
+    }
     // Validate step 2 before going to 3
     if (n === 3) {
       const first = document.getElementById('bm-first').value.trim();
@@ -2801,7 +3040,10 @@
     const studioNames = { curve: 'The Curve', studio1: 'Studio One', pool: 'The Pool Area' };
     const durLabels = { '90min': '90 minutes', '2hrs': '2 hours', '3hrs': '3 hours', halfday: 'Half day (5hrs)', fullday: 'Full day (10hrs)' };
     const photoLabels = { basic: 'Basic (R1,400)', standard: 'Standard (R2,500)', premium: 'Premium (R10,000)', none: 'None' };
-    const { studioTotal, studioOriginal, promoDiscount, promoApplied, photoTotal, addonTotal, extraTotal, total } = calcTotal();
+    const cameraNames = { rp: 'Canon EOS RP', r6: 'Canon EOS R6 MK II' };
+    const lensNames = { '2470': 'Canon 24–70mm f/2.8', '50': 'Canon 50mm f/1.8' };
+    const rentalDurLabels = { halfday: 'Half Day', fullday: 'Full Day' };
+    const { studioTotal, studioOriginal, promoDiscount, promoApplied, photoTotal, addonTotal, extraTotal, cameraTotal, total } = calcTotal();
 
     const addonList = Object.keys(BM.addons).filter(id => BM.addons[id]).map(id => ({
       sunset: 'Sunset Lamp', snoot: 'Snoot', mic: 'DJI Mic', rgb: 'RGB Light'
@@ -2816,7 +3058,12 @@
       <div class="bm-review-item"><label>Start Time</label><span>${BM.time || '—'}</span></div>
       <div class="bm-review-item"><label>Photography Package</label><span>${photoLabels[BM.photo]}</span></div>
       <div class="bm-review-item"><label>Equipment Add-ons</label><span>${addonList}</span></div>
-      <div class="bm-review-item"><label>Camera Rental</label><span>${BM.cameraRental ? 'Yes (price on request)' : 'No'}</span></div>
+      ${BM.cameraRental && BM.cameraBody ? `
+      <div class="bm-review-item"><label>Camera Body</label><span>${cameraNames[BM.cameraBody]} — ${rentalDurLabels[BM.rentalDuration]} — ${fmt((BM.cameraPrices[BM.cameraBody]||{})[BM.rentalDuration]||0)}</span></div>
+      ` : `<div class="bm-review-item"><label>Camera Rental</label><span>None</span></div>`}
+      ${BM.cameraRental && BM.lensRental && BM.lensChoice ? `
+      <div class="bm-review-item"><label>Lens Rental</label><span>${lensNames[BM.lensChoice]} — ${rentalDurLabels[BM.rentalDuration]} — ${fmt((BM.lensPrices[BM.lensChoice]||{})[BM.rentalDuration]||0)}</span></div>
+      ` : ''}
       <div class="bm-review-item"><label>Name</label><span>${document.getElementById('bm-first').value} ${document.getElementById('bm-last').value}</span></div>
       <div class="bm-review-item"><label>Email</label><span>${document.getElementById('bm-email').value}</span></div>
       <div class="bm-review-item"><label>Phone</label><span>${document.getElementById('bm-phone').value}</span></div>
@@ -2827,7 +3074,7 @@
       </div>` : ''}
       <div class="bm-review-item" style="grid-column:1/-1;background:#f9f9f9;border-radius:8px;padding:16px;">
         <label>Estimated Total</label>
-        <span style="font-size:24px;font-weight:900;">${promoApplied ? '<span style="text-decoration:line-through;font-size:16px;color:#999;margin-right:8px;">' + fmt(studioOriginal + photoTotal + addonTotal + extraTotal) + '</span>' : ''}${fmt(total)}${BM.cameraRental ? ' + camera' : ''}</span>
+        <span style="font-size:24px;font-weight:900;">${promoApplied ? '<span style="text-decoration:line-through;font-size:16px;color:#999;margin-right:8px;">' + fmt(studioOriginal + photoTotal + addonTotal + extraTotal + cameraTotal) + '</span>' : ''}${fmt(total)}</span>
       </div>
     `;
   }
@@ -2853,10 +3100,23 @@
     formData.append('service',   selected.map(id => studioNames[id]).join(' + '));
     formData.append('duration',  durLabels[BM.duration] + (BM.extraHours > 0 ? ' + ' + BM.extraHours + ' extra hour(s)' : ''));
     formData.append('date',      BM.date);
+    const cameraNames = { rp: 'Canon EOS RP', r6: 'Canon EOS R6 MK II' };
+    const lensNames = { '2470': 'Canon 24–70mm f/2.8', '50': 'Canon 50mm f/1.8' };
+    const rentalDurLabels = { halfday: 'Half Day', fullday: 'Full Day' };
+    const { cameraTotal } = calcTotal();
+    let cameraLine = 'No';
+    if (BM.cameraRental && BM.cameraBody) {
+      cameraLine = `${cameraNames[BM.cameraBody]} — ${rentalDurLabels[BM.rentalDuration]} — ${fmt((BM.cameraPrices[BM.cameraBody]||{})[BM.rentalDuration]||0)}`;
+    }
+    let lensLine = BM.cameraRental && BM.lensRental && BM.lensChoice
+      ? `${lensNames[BM.lensChoice]} — ${rentalDurLabels[BM.rentalDuration]} — ${fmt((BM.lensPrices[BM.lensChoice]||{})[BM.rentalDuration]||0)}`
+      : 'No';
     formData.append('message',
       `Photography: ${BM.photo !== 'none' ? BM.photo : 'None'}\n` +
       `Add-ons: ${Object.keys(BM.addons).filter(k=>BM.addons[k]).join(', ') || 'None'}\n` +
-      `Camera Rental: ${BM.cameraRental ? 'Yes' : 'No'}\n` +
+      `Camera Rental: ${cameraLine}\n` +
+      `Lens Rental: ${lensLine}\n` +
+      (cameraTotal > 0 ? `Rental Total: ${fmt(cameraTotal)}\n` : '') +
       `Start Time: ${BM.time}\n` +
       (promoApplied ? `PROMO APPLIED: May Special — Book 3 hours, pay for 2 (Save ${fmt(promoDiscount)})\n` : '') +
       `Estimated Total: ${fmt(total)}`
