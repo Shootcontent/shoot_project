@@ -3147,7 +3147,13 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
         headers: { 'Accept': 'application/json' }
       });
       const result = await res.json();
-      if (result.ok) { goToStep(4); return; }
+      if (result.ok) {
+        if (typeof fbq !== 'undefined') {
+          fbq('track', 'Lead', { value: total, currency: 'ZAR' });
+          fbq('track', 'Purchase', { value: total, currency: 'ZAR' });
+        }
+        goToStep(4); return;
+      }
       throw new Error(result.error || 'Submission failed');
     } catch (err) {
       // For demo/before PHP is configured: advance anyway
