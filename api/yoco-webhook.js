@@ -1,15 +1,14 @@
-// api/yoco-webhook.js
-// Receives Yoco payment events. No database — just logs and acknowledges.
-// Webhook URL to set in Yoco dashboard: https://www.shootstudios.co.za/api/yoco-webhook
+// api/yoco-webhook.js — authoritative payment confirmation path
 
 const crypto = require('crypto');
+const { confirmBooking } = require('./verify-payment');
+const { releaseSlots, redis } = require('./_redis');
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
   const raw = await readBody(req);
 
-  // Verify HMAC signature if webhook secret is configured
   const secret = process.env.YOCO_WEBHOOK_SECRET;
   if (secret) {
     const sig      = req.headers['x-yoco-signature'] || '';
@@ -22,12 +21,25 @@ module.exports = async function handler(req, res) {
 
   let event;
   try { event = JSON.parse(raw.toString('utf8')); }
-  catch { return res.status(400).json({ error: 'Invalid JSON' }); }
+  catch { return res.status(400).end(); }
 
-  console.log('[webhook] Event received:', event.type, '| id:', event.id);
-  console.log('[webhook] Payload:', JSON.stringify(event.payload?.metadata || {}));
+  console.log('[webhook]', event.type, '| id:', event.id);
 
-  // Acknowledge immediately — Yoco retries if we don't respond 200
+  const bookingId = event.payload?.metadata?.bookingId;
+
+  if (event.type === 'payment.succeeded' && bookingId) {
+    const alreadyDone = await redis('GET', `confirmed:${bookingId}`);
+    if (!alreadyDone) await confirmBooking(bookingId, event.payload?.id || event.id);
+  }
+
+  if (event.type === 'payment.failed' && bookingId) {
+    const raw2 = await redis('GET', `booking:${bookingId}`);
+    if (raw2) {
+      const booking = JSON.parse(raw2);
+      if (booking.slotKeys?.length) await releaseSlots(booking.slotKeys);
+    }
+  }
+
   return res.status(200).json({ received: true });
 };
 

@@ -1,5 +1,7 @@
-// api/verify-payment.js
-// Queries Yoco directly for checkout status — no database needed.
+// api/verify-payment.js — queries Yoco for payment status, confirms booking + sends email
+
+const { redis, confirmSlots } = require('./_redis');
+const { sendConfirmationEmail } = require('./_email');
 
 const YOCO_API = 'https://payments.yoco.com/api/checkouts';
 
@@ -12,52 +14,62 @@ module.exports = async function handler(req, res) {
 
   const { checkoutId } = req.query;
   if (!checkoutId) return res.status(400).json({ error: 'Missing checkoutId' });
+  if (!process.env.YOCO_SECRET_KEY) return res.status(500).json({ error: 'Payment not configured — YOCO_SECRET_KEY missing' });
 
-  if (!process.env.YOCO_SECRET_KEY) {
-    return res.status(500).json({ error: 'YOCO_SECRET_KEY not configured' });
-  }
-
+  // ── Ask Yoco for checkout status ─────────────────────────────────────────────
+  let checkout;
   try {
-    const yocoRes = await fetch(`${YOCO_API}/${checkoutId}`, {
+    const r = await fetch(`${YOCO_API}/${checkoutId}`, {
       headers: { 'Authorization': `Bearer ${process.env.YOCO_SECRET_KEY}` },
     });
-
-    if (!yocoRes.ok) {
-      const errText = await yocoRes.text();
-      console.error('[verify-payment] Yoco error:', yocoRes.status, errText);
-      return res.status(502).json({ error: 'Could not verify with Yoco' });
-    }
-
-    const checkout = await yocoRes.json();
-    console.log('[verify-payment] Checkout status:', checkout.id, checkout.status);
-
-    // Yoco checkout statuses: pending | complete | cancelled | expired
-    const status = (checkout.status || '').toLowerCase();
-
-    if (status === 'complete' || status === 'completed' || status === 'succeeded' || status === 'paid') {
-      // Pull the payment ID from the payments array if available
-      const paymentId = checkout.payments?.[0]?.id || checkout.id;
-      return res.status(200).json({
-        status:  'confirmed',
-        booking: {
-          checkoutId:  checkout.id,
-          paymentId,
-          amountRands: ((checkout.amount || 0) / 100).toFixed(2),
-          currency:    checkout.currency,
-          metadata:    checkout.metadata || {},
-        },
-      });
-    }
-
-    if (status === 'failed')    return res.status(200).json({ status: 'failed' });
-    if (status === 'cancelled') return res.status(200).json({ status: 'cancelled' });
-    if (status === 'expired')   return res.status(200).json({ status: 'cancelled' });
-
-    // Still pending
-    return res.status(200).json({ status: 'pending' });
-
+    if (!r.ok) return res.status(502).json({ error: 'Could not reach Yoco' });
+    checkout = await r.json();
   } catch (err) {
-    console.error('[verify-payment] fetch error:', err.message);
     return res.status(502).json({ error: 'Network error verifying payment' });
   }
+
+  const status = (checkout.status || '').toLowerCase();
+  console.log('[verify-payment] checkoutId:', checkoutId, '| status:', status);
+
+  // ── Payment succeeded ────────────────────────────────────────────────────────
+  if (status === 'complete' || status === 'completed' || status === 'succeeded' || status === 'paid') {
+    const bookingId = checkout.metadata?.bookingId;
+    if (bookingId) {
+      const alreadyDone = await redis('GET', `confirmed:${bookingId}`);
+      if (!alreadyDone) await confirmBooking(bookingId, checkout.id);
+    }
+    return res.status(200).json({
+      status:  'confirmed',
+      booking: {
+        checkoutId:  checkout.id,
+        paymentId:   checkout.payments?.[0]?.id || checkout.id,
+        amountRands: ((checkout.amount || 0) / 100).toFixed(2),
+      },
+    });
+  }
+
+  if (status === 'failed')                            return res.status(200).json({ status: 'failed' });
+  if (status === 'cancelled' || status === 'expired') return res.status(200).json({ status: 'cancelled' });
+
+  return res.status(200).json({ status: 'pending' });
 };
+
+// ── Confirm: make slots permanent + send email ────────────────────────────────
+async function confirmBooking(bookingId, checkoutId) {
+  try {
+    const raw = await redis('GET', `booking:${bookingId}`);
+    if (!raw) { console.warn('[confirm] booking record not found:', bookingId); return; }
+    const booking = JSON.parse(raw);
+
+    if (booking.slotKeys?.length) await confirmSlots(booking.slotKeys, bookingId);
+
+    await redis('SET', `confirmed:${bookingId}`, checkoutId);
+    await redis('SET', `booking:${bookingId}`, JSON.stringify({ ...booking, status: 'confirmed', confirmedAt: new Date().toISOString() }));
+
+    await sendConfirmationEmail(booking);
+  } catch (err) {
+    console.error('[confirm] error:', err.message);
+  }
+}
+
+module.exports.confirmBooking = confirmBooking;
