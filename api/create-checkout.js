@@ -1,6 +1,4 @@
-// api/create-checkout.js
-// Creates a Yoco hosted checkout — secret key stays server-side only.
-// No database required. Only needs YOCO_SECRET_KEY env var.
+// api/create-checkout.js — creates Yoco checkout, stores booking details in metadata for email
 
 const YOCO_API = 'https://payments.yoco.com/api/checkouts';
 
@@ -23,13 +21,13 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'Payment not configured — YOCO_SECRET_KEY missing' });
   }
 
-  const { bookingId, lockToken, amountRands } = req.body || {};
+  const { bookingId, lockToken, amountRands, bookingData } = req.body || {};
   if (!bookingId || !lockToken || amountRands === undefined) {
-    return res.status(400).json({ error: 'Missing bookingId, lockToken or amountRands' });
+    return res.status(400).json({ error: 'Missing required fields' });
   }
 
   const amountCents = Math.round(Number(amountRands) * 100);
-  if (amountCents < 100) return res.status(400).json({ error: 'Amount too small (min R1.00)' });
+  if (amountCents < 200) return res.status(400).json({ error: 'Amount too small (min R2.00)' });
 
   const siteUrl = getSiteUrl(req);
 
@@ -47,26 +45,35 @@ module.exports = async function handler(req, res) {
         successUrl: `${siteUrl}/booking-success.html`,
         cancelUrl:  `${siteUrl}/booking-cancel.html?reason=cancelled`,
         failureUrl: `${siteUrl}/booking-cancel.html?reason=failed`,
-        metadata:   { bookingId, lockToken },
+        metadata: {
+          bookingId,
+          lockToken,
+          firstName:   bookingData?.firstName   || '',
+          lastName:    bookingData?.lastName    || '',
+          email:       bookingData?.email       || '',
+          phone:       bookingData?.phone       || '',
+          studios:     (bookingData?.studios    || []).join(','),
+          date:        bookingData?.date        || '',
+          startTime:   bookingData?.startTime   || '',
+          durationKey: bookingData?.durationKey || '',
+          extraHours:  String(bookingData?.extraHours || 0),
+          totalRands:  String(amountRands),
+        },
       }),
     });
 
     if (!yocoRes.ok) {
-      const errText = await yocoRes.text();
-      console.error('[create-checkout] Yoco error:', yocoRes.status, errText);
-      return res.status(502).json({ error: `Payment provider error: ${errText}` });
+      const err = await yocoRes.text();
+      console.error('[create-checkout] Yoco error:', yocoRes.status, err);
+      return res.status(502).json({ error: `Payment provider error: ${err}` });
     }
 
     const checkout = await yocoRes.json();
-    console.log('[create-checkout] Created checkout:', checkout.id, 'for booking:', bookingId);
-
-    return res.status(200).json({
-      checkoutId:  checkout.id,
-      redirectUrl: checkout.redirectUrl,
-    });
+    console.log('[create-checkout] Created:', checkout.id, 'bookingId:', bookingId);
+    return res.status(200).json({ checkoutId: checkout.id, redirectUrl: checkout.redirectUrl });
 
   } catch (err) {
-    console.error('[create-checkout] fetch failed:', err.message);
-    return res.status(502).json({ error: 'Could not reach Yoco — check server logs' });
+    console.error('[create-checkout] failed:', err.message);
+    return res.status(502).json({ error: 'Could not reach Yoco — try again' });
   }
 };

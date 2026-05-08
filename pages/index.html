@@ -1926,7 +1926,9 @@
           <div class="bm-section-title">Review Your Booking</div>
           <div class="bm-review-grid" id="bm-review-content"></div>
           <div id="bm-form-error" style="background:#fee;border:1px solid #fcc;color:#c00;padding:12px 16px;border-radius:6px;font-size:13px;margin-bottom:16px;display:none;"></div>
-          <button class="bm-submit-btn" id="bm-submit-btn" onclick="submitBooking()">Send Booking Request</button>
+          <div id="bm-lock-timer" style="display:none;background:#f0fdf4;border:1px solid rgba(34,197,94,0.35);border-radius:6px;padding:10px 14px;font-size:12px;color:#15803d;font-weight:700;margin-bottom:14px;text-align:center;"></div>
+          <button class="bm-submit-btn" id="bm-submit-btn" onclick="proceedToPayment()">Lock Slot &amp; Pay Now</button>
+          <p style="font-size:11px;color:#999;text-align:center;margin-top:12px;line-height:1.6;">Your slot is held for 10 minutes while you pay. Powered by <strong>Yoco</strong> — secure, South African payments.</p>
         </div>
         <div style="display:flex;justify-content:flex-start;margin-top:8px;">
           <button onclick="goToStep(2)" style="background:#fff;color:#000;border:1.5px solid #000;border-radius:6px;padding:13px 28px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;">← Back</button>
@@ -1943,9 +1945,10 @@
                 <path d="M10 16l4 4 8-8"/>
               </svg>
             </div>
-            <h2>Booking Request Sent!</h2>
-            <p>Thank you! We'll review your request and be in touch within 24 hours to confirm your session and send payment details.</p>
-            <button onclick="closeBookingModal()" style="margin-top:28px;background:#000;color:#fff;border:none;border-radius:6px;padding:14px 36px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;">Close</button>
+            <h2>Redirecting to Payment…</h2>
+            <p>Your slot is locked. You're being taken to our secure payment page. Do not close this window.</p>
+            <div style="margin-top:20px;width:36px;height:36px;border:3px solid rgba(0,0,0,0.1);border-top-color:#000;border-radius:50%;animation:spin 0.8s linear infinite;margin-left:auto;margin-right:auto;"></div>
+            <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
           </div>
         </div>
       </div>
@@ -2283,54 +2286,104 @@
     `;
   }
 
-  // ── Submit booking ──
-  async function submitBooking() {
-    const btn = document.getElementById('bm-submit-btn');
+  // ── Proceed to Payment ──
+  async function proceedToPayment() {
+    const btn    = document.getElementById('bm-submit-btn');
     const errDiv = document.getElementById('bm-form-error');
+    if (btn.disabled) return;
     btn.disabled = true;
-    btn.textContent = 'Sending…';
     errDiv.style.display = 'none';
 
     const selected = Object.keys(BM.studios).filter(id => BM.studios[id]);
-    const studioNames = { curve: 'The Curve', studio1: 'Studio One', pool: 'The Pool Area' };
-    const durLabels = { '90min': '90 minutes', '2hrs': '2 hours', halfday: 'Half day (5hrs)', fullday: 'Full day (10hrs)' };
-    const { total } = calcTotal();
+    const { total, promoApplied, promoDiscount } = calcTotal();
 
-    const formData = new FormData();
-    formData.append('firstName', document.getElementById('bm-first').value);
-    formData.append('lastName',  document.getElementById('bm-last').value);
-    formData.append('email',     document.getElementById('bm-email').value);
-    formData.append('phone',     document.getElementById('bm-phone').value);
-    formData.append('service',   selected.map(id => studioNames[id]).join(' + '));
-    formData.append('duration',  durLabels[BM.duration] + (BM.extraHours > 0 ? ' + ' + BM.extraHours + ' extra hour(s)' : ''));
-    formData.append('date',      BM.date);
-    formData.append('message',
-      `Photography: ${BM.photo !== 'none' ? BM.photo : 'None'}\n` +
-      `Add-ons: ${Object.keys(BM.addons).filter(k=>BM.addons[k]).join(', ') || 'None'}\n` +
-      `Camera Rental: ${BM.cameraRental ? 'Yes' : 'No'}\n` +
-      `Start Time: ${BM.time}\n` +
-      `Estimated Total: ${fmt(total)}`
-    );
-    formData.append('terms', 'agreed');
-
+    // Step 1: Lock slot
+    btn.textContent = 'Securing your slot…';
+    let lockResult;
     try {
-      const res = await fetch('send_booking.php', { method: 'POST', body: formData });
-      if (res.ok) {
-        const result = await res.json();
-        if (result.success) { goToStep(4); return; }
-        throw new Error(result.message);
-      }
-      throw new Error('Network error');
+      const res = await fetch('/api/lock-slot', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          studios: selected, date: BM.date, startTime: BM.time,
+          durationKey: BM.duration, extraHours: BM.extraHours, totalAmount: total,
+          bookingData: {
+            firstName: document.getElementById('bm-first').value.trim(),
+            lastName:  document.getElementById('bm-last').value.trim(),
+            email:     document.getElementById('bm-email').value.trim(),
+            phone:     document.getElementById('bm-phone').value.trim(),
+          },
+        }),
+      });
+      lockResult = await res.json();
+      if (!res.ok) throw new Error(lockResult.error || 'Could not secure your slot.');
     } catch (err) {
-      // For demo/before PHP is configured: advance anyway
-      // Remove the line below once PHP email is working:
-      goToStep(4); return;
-
-      errDiv.textContent = 'Could not send — please email shootstudiosct@gmail.com directly.';
+      errDiv.textContent = err.message;
       errDiv.style.display = 'block';
-      btn.disabled = false;
-      btn.textContent = 'Send Booking Request';
+      btn.disabled = false; btn.innerHTML = 'Lock Slot &amp; Pay Now'; return;
     }
+
+    startLockTimer(lockResult.lockExpiresAt);
+
+    // Step 2: Create Yoco checkout
+    btn.textContent = 'Preparing payment…';
+    let checkoutData;
+    try {
+      const res = await fetch('/api/create-checkout', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bookingId: lockResult.bookingId, lockToken: lockResult.lockToken,
+          amountRands: total,
+          bookingData: {
+            firstName:   document.getElementById('bm-first').value.trim(),
+            lastName:    document.getElementById('bm-last').value.trim(),
+            email:       document.getElementById('bm-email').value.trim(),
+            phone:       document.getElementById('bm-phone').value.trim(),
+            studios:     selected, date: BM.date, startTime: BM.time,
+            durationKey: BM.duration, extraHours: BM.extraHours,
+          },
+        }),
+      });
+      checkoutData = await res.json();
+      if (!res.ok) throw new Error(checkoutData.error || 'Payment setup failed.');
+    } catch (err) {
+      stopLockTimer();
+      fetch('/api/release-slot', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ bookingId: lockResult.bookingId, lockToken: lockResult.lockToken }) }).catch(()=>{});
+      errDiv.textContent = err.message;
+      errDiv.style.display = 'block';
+      btn.disabled = false; btn.innerHTML = 'Lock Slot &amp; Pay Now'; return;
+    }
+
+    // Step 3: Redirect to Yoco
+    sessionStorage.setItem('shoot_checkout_id',  checkoutData.checkoutId);
+    sessionStorage.setItem('shoot_booking_total', String(total));
+    btn.textContent = 'Redirecting to secure payment…';
+    goToStep(4);
+    window.location.href = checkoutData.redirectUrl;
+  }
+
+  function showPaymentError(msg) {
+    const e = document.getElementById('bm-form-error');
+    e.textContent = msg; e.style.display = 'block';
+  }
+
+  let _lockTimerInterval = null;
+  function startLockTimer(expiresAt) {
+    const el = document.getElementById('bm-lock-timer');
+    if (!el || !expiresAt) return;
+    el.style.display = 'block';
+    const expiry = new Date(expiresAt).getTime();
+    function tick() {
+      const s = Math.max(0, Math.round((expiry - Date.now()) / 1000));
+      el.textContent = `✦ Slot held for ${Math.floor(s/60)}:${String(s%60).padStart(2,'0')} — complete payment before it expires`;
+      if (s <= 0) { clearInterval(_lockTimerInterval); el.textContent = '⚠ Slot hold expired — please restart your booking'; }
+    }
+    tick(); _lockTimerInterval = setInterval(tick, 1000);
+  }
+  function stopLockTimer() {
+    if (_lockTimerInterval) { clearInterval(_lockTimerInterval); _lockTimerInterval = null; }
+    const el = document.getElementById('bm-lock-timer');
+    if (el) el.style.display = 'none';
   }
 
   // Wire up all "Book Now" / "Book This Space" buttons to open modal

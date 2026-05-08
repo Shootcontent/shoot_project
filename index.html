@@ -3179,6 +3179,17 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
           bookingId:   lockResult.bookingId,
           lockToken:   lockResult.lockToken,
           amountRands: total,
+          bookingData: {
+            firstName:   document.getElementById('bm-first').value.trim(),
+            lastName:    document.getElementById('bm-last').value.trim(),
+            email:       document.getElementById('bm-email').value.trim(),
+            phone:       document.getElementById('bm-phone').value.trim(),
+            studios:     selected,
+            date:        BM.date,
+            startTime:   BM.time,
+            durationKey: BM.duration,
+            extraHours:  BM.extraHours,
+          },
         }),
       });
 
