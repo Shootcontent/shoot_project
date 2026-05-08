@@ -1,0 +1,13 @@
+{
+  "functions": {
+    "api/*.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/booking-success", "dest": "/booking-success.html" },
+    { "src": "/booking-cancel", "dest": "/booking-cancel.html" },
+    { "src": "/(.*)", "dest": "/$1" }
+  ]
+}
