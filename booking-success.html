@@ -195,29 +195,29 @@
 </div>
 
 <script>
-  // ── Read URL params ─────────────────────────────────────────────────────────
-  const params     = new URLSearchParams(window.location.search);
-  const bookingId  = params.get('bookingId');
-  const lockToken  = params.get('lockToken');
+  // ── Get checkoutId — from sessionStorage (set before Yoco redirect) ──────────
+  const checkoutId = sessionStorage.getItem('shoot_checkout_id');
 
-  if (!bookingId) {
-    showError('Missing booking reference', 'Please return to the site and try again.');
+  if (!checkoutId) {
+    showError('Session expired', 'We lost track of your checkout. If you completed payment, please contact us with proof of payment.');
   } else {
     pollPaymentStatus();
   }
 
   // ── Poll /api/verify-payment ────────────────────────────────────────────────
   async function pollPaymentStatus() {
-    const MAX_ATTEMPTS = 12;  // 12 × 5s = 60s max wait
+    const MAX_ATTEMPTS = 18;  // 18 × 5s = 90s max wait
     let   attempt      = 0;
 
     async function check() {
       attempt++;
       try {
-        const res  = await fetch(`/api/verify-payment?bookingId=${encodeURIComponent(bookingId)}`);
+        const res  = await fetch(`/api/verify-payment?checkoutId=${encodeURIComponent(checkoutId)}`);
         const data = await res.json();
 
         if (data.status === 'confirmed') {
+          sessionStorage.removeItem('shoot_checkout_id');
+          sessionStorage.removeItem('shoot_booking_total');
           showSuccess(data.booking);
           return;
         }
@@ -238,7 +238,7 @@
         } else {
           showError(
             'Verification timed out',
-            'We couldn\'t get a response in time. If you were charged, please contact us and quote your booking ID: ' + bookingId
+            'We could not confirm your payment in time. If you were charged, please WhatsApp us immediately with your payment confirmation.'
           );
         }
       } catch (err) {
@@ -261,14 +261,37 @@
   }
 
   function showSuccess(booking) {
-    if (!booking) { setState('state-success'); return; }
+    // booking may be sparse (no DB) — show what we have
+    const totalRands = booking?.amountRands || sessionStorage.getItem('shoot_booking_total') || '—';
+    const refId      = (booking?.checkoutId || booking?.paymentId || '').toUpperCase().slice(-8) || '—';
 
-    document.getElementById('confirm-email').textContent = booking.email || '';
+    document.getElementById('confirm-email').textContent = '';
 
-    // Booking summary table
+    document.getElementById('booking-summary').innerHTML = `
+      <div class="summary-row">
+        <span class="summary-label">Payment Reference</span>
+        <span class="summary-val">${esc(refId)}</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">Amount Paid</span>
+        <span class="summary-val">R${formatRands(totalRands)}</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">Status</span>
+        <span class="summary-val" style="color:#22c55e;">Confirmed ✓</span>
+      </div>
+    `;
+
+    document.getElementById('ref-box').textContent =
+      'Payment ID: ' + (booking?.paymentId || booking?.checkoutId || '—').toUpperCase().slice(-12);
+
+    setState('state-success');
+    return;
+
+    // (dead code below — kept for when DB is wired up)
     const studioLabels = { curve: 'The Curve', studio1: 'Studio One', pool: 'The Pool' };
-    const studioNames  = (booking.studios || []).map(s => studioLabels[s] || s).join(', ');
-    const dateStr      = booking.date
+    const studioNames  = (booking?.studios || []).map(s => studioLabels[s] || s).join(', ');
+    const dateStr      = booking?.date
       ? new Date(booking.date + 'T12:00').toLocaleDateString('en-ZA', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
       : '—';
 
@@ -281,23 +304,7 @@
         <span class="summary-label">Studio</span>
         <span class="summary-val">${esc(studioNames)}</span>
       </div>
-      <div class="summary-row">
-        <span class="summary-label">Date</span>
-        <span class="summary-val">${esc(dateStr)}</span>
-      </div>
-      <div class="summary-row">
-        <span class="summary-label">Start Time</span>
-        <span class="summary-val">${esc(booking.startTime || '—')}</span>
-      </div>
-      <div class="summary-row summary-total">
-        <span class="summary-label">Amount Paid</span>
-        <span class="summary-val">R${formatRands(booking.totalRands)}</span>
-      </div>
     `;
-
-    document.getElementById('ref-box').textContent = 'Booking Reference: ' + booking.id.toUpperCase().slice(0, 8);
-
-    setState('state-success');
   }
 
   function showError(title, sub) {

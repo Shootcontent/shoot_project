@@ -3197,6 +3197,10 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
     }
 
     // ── STEP 3: Redirect to Yoco ──────────────────────────────────────────────
+    // Store checkoutId so booking-success.html can verify without a database
+    sessionStorage.setItem('shoot_checkout_id',  checkoutData.checkoutId);
+    sessionStorage.setItem('shoot_booking_total', String(total));
+
     btn.textContent = 'Redirecting to secure payment…';
     goToStep(4);  // show loading spinner step
     window.location.href = checkoutData.redirectUrl;
