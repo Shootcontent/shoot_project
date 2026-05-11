@@ -419,15 +419,18 @@
       text-transform: uppercase;
       letter-spacing: -0.5px;
       margin-bottom: 28px;
+      text-align: center;
     }
     .charges-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+      display: flex;
+      justify-content: center;
       gap: 20px;
     }
     .charge-card {
       background: var(--grey-card);
       padding: 32px;
+      max-width: 560px;
+      width: 100%;
     }
     .charge-card h4 { font-weight: 600; font-size: 16px; margin-bottom: 8px; }
     .charge-card p { font-size: 13px; color: var(--grey-mid); margin-bottom: 16px; }
@@ -1047,7 +1050,7 @@
       .booking-form-wrap { padding: 32px 24px; }
       .footer-grid { grid-template-columns: 1fr; gap: 40px; }
       .gallery-grid { grid-template-columns: 1fr; }
-      .charges-grid { grid-template-columns: 1fr; }
+      .charge-card { max-width: 100%; }
       .pricing-grid { grid-template-columns: 1fr; }
       .charges-wrapper { padding: 28px 20px; }
       .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
