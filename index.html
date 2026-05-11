@@ -1228,7 +1228,15 @@
       .nav-links, .nav-book { display: none; }
       .nav-hamburger { display: flex; }
       .section-inner { padding: 0 24px; }
-      .services-grid { grid-template-columns: 1fr; }
+      /* What We Do — compact 2-col mobile layout */
+      #services { padding: 52px 0 44px; }
+      #services .section-heading { font-size: clamp(34px, 8vw, 48px); letter-spacing: -1.5px; }
+      #services .section-sub { font-size: 13px; margin-bottom: 28px; }
+      .services-grid { grid-template-columns: repeat(2, 1fr); }
+      .service-card { padding: 20px 16px; }
+      .service-icon { width: 26px; height: 26px; margin-bottom: 10px; }
+      .service-title { font-size: 15px; margin-bottom: 7px; }
+      .service-desc { font-size: 12px; line-height: 1.5; }
       .space-row, .space-row.reverse {
         grid-template-columns: 1fr;
         direction: ltr;
@@ -1747,7 +1755,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
         <button class="space-toggle-btn"
           aria-expanded="false"
           aria-controls="panel-curve">
-          <span class="space-toggle-label">View Space</span>
+          <span class="space-toggle-label">View More</span>
           <span class="space-toggle-icon" aria-hidden="true">↓</span>
         </button>
         <div class="space-panel-outer" id="panel-curve" role="region" aria-label="The Curve — pricing and details">
@@ -1788,7 +1796,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
         <button class="space-toggle-btn"
           aria-expanded="false"
           aria-controls="panel-studio1">
-          <span class="space-toggle-label">View Space</span>
+          <span class="space-toggle-label">View More</span>
           <span class="space-toggle-icon" aria-hidden="true">↓</span>
         </button>
         <div class="space-panel-outer" id="panel-studio1" role="region" aria-label="Studio One — pricing and details">
@@ -1829,7 +1837,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
         <button class="space-toggle-btn"
           aria-expanded="false"
           aria-controls="panel-pool">
-          <span class="space-toggle-label">View Space</span>
+          <span class="space-toggle-label">View More</span>
           <span class="space-toggle-icon" aria-hidden="true">↓</span>
         </button>
         <div class="space-panel-outer" id="panel-pool" role="region" aria-label="The Pool — pricing and details">
@@ -3925,14 +3933,14 @@ window.applyDiscountCode = async function () {
         var ol = other.querySelector('.space-toggle-label');
         if (ob) ob.setAttribute('aria-expanded', 'false');
         if (op) op.classList.remove('is-open');
-        if (ol) ol.textContent = 'View Space';
+        if (ol) ol.textContent = 'View More';
       });
       // Toggle this card
       var opening = !isOpen;
       btn.setAttribute('aria-expanded', String(opening));
       panel.classList.toggle('is-open', opening);
       var label = btn.querySelector('.space-toggle-label');
-      if (label) label.textContent = opening ? 'Close' : 'View Space';
+      if (label) label.textContent = opening ? 'Close' : 'View More';
       // Mobile: scroll panel into view after animation
       if (opening && window.innerWidth <= 768) {
         setTimeout(function () {
