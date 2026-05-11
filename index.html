@@ -688,6 +688,62 @@
     .terms-footer p { color: rgba(255,255,255,0.5); font-size: 13px; }
     .terms-footer p:first-child { color: rgba(255,255,255,0.7); font-size: 15px; margin-bottom: 8px; }
 
+    /* ── CONTACT ── */
+    #contact {
+      background: var(--white);
+      color: var(--black);
+      padding: 100px 0;
+    }
+    .contact-header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+    .contact-sub {
+      color: #888;
+      margin-top: 12px;
+      font-size: 15px;
+    }
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      border: 1.5px solid var(--black);
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    .contact-card {
+      padding: 40px 36px;
+    }
+    .contact-card--bordered {
+      border-right: 1.5px solid var(--black);
+    }
+    .contact-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: #aaa;
+      margin-bottom: 14px;
+    }
+    .contact-value {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--black);
+      line-height: 1.5;
+      white-space: nowrap;
+    }
+    .contact-link {
+      text-decoration: none;
+      display: block;
+      transition: opacity 0.2s;
+    }
+    .contact-link:hover { opacity: 0.55; }
+    .contact-note {
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 8px;
+    }
+
     /* ── BOOKING SECTION ── */
     #book {
       background: var(--grey-light);
@@ -983,9 +1039,11 @@
       .pricing-grid { grid-template-columns: 1fr; }
       .charges-wrapper { padding: 28px 20px; }
       .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
-      .contact-grid { grid-template-columns: 1fr !important; }
-      .contact-grid > div { border-right: none !important; border-bottom: 1.5px solid var(--black); }
-      .contact-grid > div:last-child { border-bottom: none; }
+      .contact-grid { grid-template-columns: 1fr; }
+      .contact-card--bordered { border-right: none; border-bottom: 1.5px solid var(--black); }
+      .contact-card--bordered:last-of-type { border-bottom: none; }
+      .contact-value { font-size: 14px; white-space: normal; }
+      .contact-card { padding: 32px 28px; }
     }
 
     /* ── MAY PROMO BANNER ── */
@@ -1426,25 +1484,25 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
 </section>
 
 <!-- CONTACT -->
-<section id="contact" style="background:var(--white);color:var(--black);padding:100px 0;">
+<section id="contact">
   <div class="section-inner">
-    <div style="text-align:center;margin-bottom:64px;" class="scroll-reveal">
+    <div class="contact-header scroll-reveal">
       <div class="section-heading" style="color:var(--black);">Get in Touch</div>
-      <p style="color:#777;margin-top:12px;font-size:15px;">Questions? Collaborations? Just reach out.</p>
+      <p class="contact-sub">Questions? Collaborations? Just reach out.</p>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border:1.5px solid var(--black);max-width:900px;margin:0 auto;" class="scroll-reveal contact-grid">
-      <div style="padding:48px 40px;border-right:1.5px solid var(--black);">
-        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#999;margin-bottom:16px;">Email</div>
-        <a href="mailto:hello@shootstudios.co.za" style="font-size:17px;font-weight:600;color:var(--black);text-decoration:none;line-height:1.5;display:block;word-break:break-all;">hello@shootstudios.co.za</a>
+    <div class="contact-grid scroll-reveal" data-delay="100">
+      <div class="contact-card contact-card--bordered">
+        <div class="contact-label">Email</div>
+        <a href="mailto:hello@shootstudios.co.za" class="contact-value contact-link">hello@shootstudios.co.za</a>
       </div>
-      <div style="padding:48px 40px;border-right:1.5px solid var(--black);">
-        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#999;margin-bottom:16px;">Phone</div>
-        <a href="tel:+27609948107" style="font-size:17px;font-weight:600;color:var(--black);text-decoration:none;">060 994 8107</a>
-        <p style="font-size:13px;color:#888;margin-top:8px;">WhatsApp available</p>
+      <div class="contact-card contact-card--bordered">
+        <div class="contact-label">Phone</div>
+        <a href="tel:+27609948107" class="contact-value contact-link">060 994 8107</a>
+        <p class="contact-note">WhatsApp available</p>
       </div>
-      <div style="padding:48px 40px;">
-        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#999;margin-bottom:16px;">Location</div>
-        <p style="font-size:15px;font-weight:600;color:var(--black);line-height:1.6;">Cape Town<br>South Africa</p>
+      <div class="contact-card">
+        <div class="contact-label">Location</div>
+        <p class="contact-value">135 Albert Rd,<br>Woodstock</p>
       </div>
     </div>
   </div>
