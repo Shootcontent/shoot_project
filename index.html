@@ -24,7 +24,7 @@
       --font-body: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; scrollbar-gutter: stable; }
 
     body {
       font-family: var(--font-body);
@@ -96,13 +96,18 @@
       height: 100vh;
       min-height: 600px;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      text-align: center;
       background: var(--black);
       position: relative;
       overflow: hidden;
+    }
+    .hero-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      width: 100%;
     }
     #hero::before {
       content: '';
@@ -1218,9 +1223,11 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
 
 <!-- HERO -->
 <section id="hero">
-  <img src="/assets/images/logo.png" alt="SHOOT Studios Logo" class="hero-logo-img">
-  <p class="hero-desc">Three distinctive spaces. One address. Built for photographers, directors, and creators who take their work seriously.</p>
-  <a href="#book" class="hero-cta" onclick="openBookingModal();return false;">Book a Session</a>
+  <div class="hero-inner">
+    <img src="/assets/images/logo.png" alt="SHOOT Studios Logo" class="hero-logo-img">
+    <p class="hero-desc">Three distinctive spaces. One address. Built for photographers, directors, and creators who take their work seriously.</p>
+    <a href="#book" class="hero-cta" onclick="openBookingModal();return false;">Book a Session</a>
+  </div>
 </section>
 
 <!-- MAY PROMO BANNER -->
