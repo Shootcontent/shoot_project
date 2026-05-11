@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Studio One — SHOOT. Studios</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,700;0,900;1,900&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black:#000; --white:#fff; --grey-mid:#888;
+      --grey-dark:#1a1a1a; --grey-card:#111;
+      --border:rgba(255,255,255,0.15);
+      --font-display:'Montserrat',-apple-system,BlinkMacSystemFont,sans-serif;
+    }
+    html { scroll-behavior:smooth; scrollbar-gutter:stable; }
+    body { font-family:var(--font-display); background:var(--black); color:var(--white); overflow-x:hidden; }
+    nav { position:fixed; top:0; left:0; right:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:24px 48px; transition:background 0.3s; }
+    nav.scrolled { background:rgba(0,0,0,0.92); backdrop-filter:blur(12px); }
+    .nav-links { display:flex; gap:36px; list-style:none; }
+    .nav-links a { color:var(--white); text-decoration:none; font-size:13px; font-weight:500; letter-spacing:1.5px; text-transform:uppercase; opacity:0.7; transition:opacity 0.2s; }
+    .nav-links a:hover { opacity:1; }
+    .nav-book { background:var(--white); color:var(--black); padding:10px 24px; font-size:12px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; text-decoration:none; transition:background 0.2s, color 0.2s; }
+    .nav-book:hover { background:var(--grey-mid); color:var(--white); }
+    .nav-hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; margin-left:auto; }
+    .nav-hamburger span { display:block; width:24px; height:2px; background:var(--white); }
+    @media(max-width:768px){ nav{padding:20px 24px;} .nav-links,.nav-book{display:none;} .nav-hamburger{display:flex;} }
+    .space-hero { position:relative; height:70vh; min-height:480px; overflow:hidden; }
+    .space-hero img { width:100%; height:100%; object-fit:cover; display:block; }
+    .space-hero-overlay { position:absolute; inset:0; background:linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.6) 100%); display:flex; align-items:flex-end; padding:60px 48px; }
+    .space-hero-name { font-size:clamp(52px,8vw,96px); font-weight:900; font-style:italic; text-transform:uppercase; letter-spacing:-2px; line-height:1; color:#fff; }
+    @media(max-width:768px){ .space-hero-overlay{padding:40px 24px;} }
+    .space-page-inner { max-width:1280px; margin:0 auto; padding:0 48px; }
+    @media(max-width:768px){ .space-page-inner{padding:0 24px;} }
+    .space-page-section { padding:80px 0; }
+    .space-page-grid { display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:start; }
+    @media(max-width:768px){ .space-page-grid{grid-template-columns:1fr; gap:40px;} }
+    .space-page-desc { font-size:17px; line-height:1.75; color:rgba(255,255,255,0.7); margin-bottom:32px; }
+    .space-page-features { list-style:none; }
+    .space-page-features li { font-size:14px; color:rgba(255,255,255,0.65); padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.08); display:flex; align-items:center; gap:10px; }
+    .space-page-features li::before { content:''; width:6px; height:6px; background:#fff; flex-shrink:0; }
+    .space-page-features li:last-child { border-bottom:none; }
+    .space-pricing-title { font-size:10px; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; color:rgba(255,255,255,0.35); margin-bottom:20px; }
+    .pricing-box { border-top:1px solid rgba(255,255,255,0.12); padding-top:28px; }
+    .pricing-grid { display:flex; flex-direction:column; }
+    .pricing-row { display:flex; justify-content:space-between; align-items:center; padding:13px 0; border-bottom:1px solid rgba(255,255,255,0.06); font-size:14px; }
+    .pricing-row:last-child { border-bottom:none; }
+    .pricing-row span:first-child { color:rgba(255,255,255,0.65); font-weight:400; }
+    .pricing-row span:last-child { font-weight:600; font-size:15px; }
+    .promo-original { text-decoration:line-through; color:rgba(255,255,255,0.25); font-size:12px; font-weight:400; margin-right:6px; }
+    .promo-price { color:var(--white); font-weight:600; font-size:15px; }
+    .promo-row-badge { font-size:9px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,255,255,0.4); border:1px solid rgba(255,255,255,0.2); padding:2px 7px; margin-left:8px; vertical-align:middle; }
+    .charges-section { background:var(--grey-card); padding:32px; margin-top:40px; }
+    .charges-section h4 { font-size:10px; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; color:rgba(255,255,255,0.35); margin-bottom:12px; }
+    .charges-section p { font-size:13px; color:var(--grey-mid); margin-bottom:10px; }
+    .charges-section .amount { font-family:var(--font-display); font-size:24px; font-weight:900; font-style:italic; }
+    .space-cta-section { padding:0 0 80px; }
+    .btn-book-space { display:inline-block; background:var(--white); color:var(--black); padding:16px 48px; font-size:13px; font-weight:700; letter-spacing:2px; text-transform:uppercase; text-decoration:none; transition:background 0.2s; font-family:var(--font-display); }
+    .btn-book-space:hover { background:#e0e0e0; }
+    .btn-back { font-size:12px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,255,255,0.4); text-decoration:none; transition:color 0.2s; }
+    .btn-back:hover { color:#fff; }
+    footer { background:var(--black); border-top:1px solid rgba(255,255,255,0.1); padding:40px 0 28px; }
+    .footer-bottom { display:flex; justify-content:space-between; align-items:center; font-size:12px; color:rgba(255,255,255,0.35); }
+    .footer-bottom a { color:rgba(255,255,255,0.35); text-decoration:none; }
+    @media(max-width:768px){ .footer-bottom{flex-direction:column;gap:8px;text-align:center;} }
+  </style>
+</head>
+<body>
+<nav id="mainNav">
+  <ul class="nav-links">
+    <li><a href="/#services">Services</a></li>
+    <li><a href="/#spaces">Spaces</a></li>
+    <li><a href="/#photography">Photography</a></li>
+    <li><a href="/#contact">Contact</a></li>
+  </ul>
+  <a href="/?space=studio1" class="nav-book">Book Now</a>
+  <div class="nav-hamburger" onclick="this.closest('body').querySelector('.mobile-menu').classList.add('open')">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+<div class="mobile-menu" style="display:none;position:fixed;inset:0;background:#000;z-index:200;flex-direction:column;align-items:center;justify-content:center;gap:32px;">
+  <button style="position:absolute;top:28px;right:28px;font-size:32px;color:#fff;cursor:pointer;background:none;border:none;" onclick="this.closest('.mobile-menu').style.display='none'">✕</button>
+  <a href="/#spaces" style="font-family:var(--font-display);font-size:48px;font-weight:900;font-style:italic;color:#fff;text-decoration:none;text-transform:uppercase;letter-spacing:-1px;opacity:0.6;" onclick="this.closest('.mobile-menu').style.display='none'">Spaces</a>
+  <a href="/?space=studio1" style="font-family:var(--font-display);font-size:48px;font-weight:900;font-style:italic;color:#fff;text-decoration:none;text-transform:uppercase;letter-spacing:-1px;">Book Now</a>
+</div>
+<section class="space-hero">
+  <img src="../assets/images/our-spaces/studio-one.jpg" alt="Studio One" loading="eager">
+  <div class="space-hero-overlay">
+    <h1 class="space-hero-name">Studio One</h1>
+  </div>
+</section>
+<section class="space-page-section">
+  <div class="space-page-inner">
+    <div class="space-page-grid">
+      <div>
+        <p class="space-page-desc">A bold, high-contrast space built for creative work. Strong natural light, a distinctive architectural feel, and a colour palette that shoots beautifully.</p>
+        <ul class="space-page-features">
+          <li>Natural Light</li>
+          <li>Vibrant Colors</li>
+          <li>Unique Architecture</li>
+          <li>Versatile Setup</li>
+        </ul>
+        <div class="charges-section">
+          <h4>Additional Charges</h4>
+          <p>Applies to weekends, public holidays, and bookings starting after 17:00. Minimum 2 hour booking.</p>
+          <div class="amount">+R200 per hour</div>
+        </div>
+      </div>
+      <div>
+        <div class="space-pricing-title">Pricing</div>
+        <div class="pricing-box">
+          <div class="pricing-grid">
+            <div class="pricing-row"><span>90 minutes</span><span>R550</span></div>
+            <div class="pricing-row"><span>2 hours</span><span>R700</span></div>
+            <div class="pricing-row" id="promo-3hr">
+              <span>3 hours <span class="promo-row-badge">May Special</span></span>
+              <span><span class="promo-original">R1,050</span><span class="promo-price">R700</span></span>
+            </div>
+            <div class="pricing-row"><span>Half day (5 hrs)</span><span>R1,650</span></div>
+            <div class="pricing-row"><span>Full day (10 hrs)</span><span>R3,150</span></div>
+          </div>
+        </div>
+        <div style="margin-top:16px;font-size:12px;color:rgba(255,255,255,0.35);line-height:1.6;">Basic lighting included: 2× Godox MS200 soft boxes + 2× Godox LED 500.</div>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="space-cta-section">
+  <div class="space-page-inner" style="display:flex;align-items:center;gap:28px;flex-wrap:wrap;">
+    <a href="/?space=studio1" class="btn-book-space">Book This Space</a>
+    <a href="/#spaces" class="btn-back">← All Spaces</a>
+  </div>
+</div>
+<footer>
+  <div class="space-page-inner">
+    <div class="footer-bottom">
+      <span>© 2026 SHOOT. Studios CT. All rights reserved.</span>
+      <a href="/terms">Terms &amp; Conditions</a>
+    </div>
+  </div>
+</footer>
+<script>
+  document.addEventListener('scroll', () => { document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 60); });
+  if (new Date().getMonth() !== 4) { const r = document.getElementById('promo-3hr'); if (r) r.style.display = 'none'; }
+</script>
+</body>
+</html>

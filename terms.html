@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Terms &amp; Conditions — SHOOT. Studios</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,700;0,900;1,900&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black:#000; --white:#fff; --grey-mid:#888;
+      --grey-dark:#1a1a1a; --grey-card:#111;
+      --font-display:'Montserrat',-apple-system,BlinkMacSystemFont,sans-serif;
+    }
+    html { scroll-behavior:smooth; scrollbar-gutter:stable; }
+    body { font-family:var(--font-display); background:var(--black); color:var(--white); overflow-x:hidden; }
+
+    /* NAV */
+    nav { position:fixed; top:0; left:0; right:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:24px 48px; background:rgba(0,0,0,0.92); backdrop-filter:blur(12px); }
+    .nav-links { display:flex; gap:36px; list-style:none; }
+    .nav-links a { color:var(--white); text-decoration:none; font-size:13px; font-weight:500; letter-spacing:1.5px; text-transform:uppercase; opacity:0.7; transition:opacity 0.2s; }
+    .nav-links a:hover { opacity:1; }
+    .nav-book { background:var(--white); color:var(--black); padding:10px 24px; font-size:12px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; text-decoration:none; transition:background 0.2s, color 0.2s; }
+    .nav-book:hover { background:var(--grey-mid); color:var(--white); }
+    .nav-hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; margin-left:auto; }
+    .nav-hamburger span { display:block; width:24px; height:2px; background:var(--white); }
+    @media(max-width:768px){ nav{padding:20px 24px;} .nav-links,.nav-book{display:none;} .nav-hamburger{display:flex;} }
+
+    /* PAGE */
+    .page-inner { max-width:800px; margin:0 auto; padding:140px 48px 100px; }
+    @media(max-width:768px){ .page-inner{padding:100px 24px 80px;} }
+
+    .page-heading {
+      font-family:var(--font-display);
+      font-size:clamp(48px,8vw,80px);
+      font-weight:900; font-style:italic;
+      text-transform:uppercase; letter-spacing:-2px; line-height:1;
+      margin-bottom:16px;
+    }
+    .page-sub { font-size:14px; color:var(--grey-mid); margin-bottom:72px; }
+
+    /* TERMS CONTENT */
+    .terms-section {
+      border-left:3px solid rgba(255,255,255,0.12);
+      padding-left:32px;
+      margin-bottom:52px;
+    }
+    .terms-section h3 {
+      font-size:16px; font-weight:700; font-style:italic;
+      margin-bottom:18px; color:var(--white);
+      letter-spacing:0.01em;
+    }
+    .terms-section ul { list-style:none; }
+    .terms-section ul li {
+      font-size:14px; line-height:1.8;
+      color:rgba(255,255,255,0.65);
+      padding:5px 0;
+      display:flex; gap:14px;
+    }
+    .terms-section ul li::before { content:'·'; color:var(--grey-mid); flex-shrink:0; font-size:18px; line-height:1.4; }
+
+    .terms-footer {
+      border-top:1px solid rgba(255,255,255,0.1);
+      padding-top:40px;
+      margin-top:40px;
+    }
+    .terms-footer p { color:rgba(255,255,255,0.4); font-size:13px; margin-bottom:6px; }
+    .terms-footer p:first-child { color:rgba(255,255,255,0.6); font-size:14px; margin-bottom:12px; }
+
+    /* FOOTER */
+    footer { background:var(--black); border-top:1px solid rgba(255,255,255,0.1); padding:40px 0 28px; }
+    .footer-inner { max-width:800px; margin:0 auto; padding:0 48px; }
+    @media(max-width:768px){ .footer-inner{padding:0 24px;} }
+    .footer-bottom { display:flex; justify-content:space-between; align-items:center; font-size:12px; color:rgba(255,255,255,0.35); }
+    .footer-bottom a { color:rgba(255,255,255,0.35); text-decoration:none; }
+    @media(max-width:768px){ .footer-bottom{flex-direction:column;gap:8px;text-align:center;} }
+  </style>
+</head>
+<body>
+
+<nav>
+  <ul class="nav-links">
+    <li><a href="/#services">Services</a></li>
+    <li><a href="/#spaces">Spaces</a></li>
+    <li><a href="/#photography">Photography</a></li>
+    <li><a href="/#contact">Contact</a></li>
+  </ul>
+  <a href="/" class="nav-book">Back to Site</a>
+  <div class="nav-hamburger" onclick="document.querySelector('.mobile-menu').style.display='flex'">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<div class="mobile-menu" style="display:none;position:fixed;inset:0;background:#000;z-index:200;flex-direction:column;align-items:center;justify-content:center;gap:32px;">
+  <button style="position:absolute;top:28px;right:28px;font-size:32px;color:#fff;cursor:pointer;background:none;border:none;" onclick="this.closest('.mobile-menu').style.display='none'">✕</button>
+  <a href="/" style="font-family:var(--font-display);font-size:40px;font-weight:900;font-style:italic;color:#fff;text-decoration:none;text-transform:uppercase;letter-spacing:-1px;" onclick="this.closest('.mobile-menu').style.display='none'">← Home</a>
+</div>
+
+<div class="page-inner">
+  <h1 class="page-heading">Terms &amp;<br>Conditions</h1>
+  <p class="page-sub">SHOOT. Photographic Studios</p>
+
+  <div class="terms-section">
+    <h3>Booking &amp; Payment</h3>
+    <ul>
+      <li>Full payment is required to confirm your booking.</li>
+      <li>Bookings are only secured once payment is received.</li>
+      <li>Session times include setup and breakdown, please plan accordingly.</li>
+      <li>Cancellations made less than 48 hours before the shoot are non-refundable. Rescheduling more than 48 hours before the shoot is subject to availability. Rescheduling within 48 hours of the shoot will incur a 50% fee. Rescheduling on the day of the shoot will be charged at 100% of the original fee.</li>
+    </ul>
+  </div>
+
+  <div class="terms-section">
+    <h3>Use of the Curve</h3>
+    <ul>
+      <li>The Curve is a specialty backdrop and must be treated with care.</li>
+      <li>No shoes, liquids, or any props that may mark or damage the Curve are allowed unless pre-approved.</li>
+      <li>Any damage caused to the Curve during your session will be assessed and billed accordingly.</li>
+      <li>A maximum of 10 people are allowed per booking. An additional fee of R50 per extra person will be charged for any attendees beyond this limit.</li>
+    </ul>
+  </div>
+
+  <div class="terms-section">
+    <h3>Lighting Equipment</h3>
+    <ul>
+      <li>Lighting gear is available for use or hire as agreed in your booking.</li>
+      <li>All equipment must be used responsibly. You will be held liable for any loss or damage during your session.</li>
+      <li>Please notify studio staff immediately if equipment appears faulty or becomes damaged.</li>
+      <li>We can hire certain equipment at an extra fee.</li>
+    </ul>
+  </div>
+
+  <div class="terms-section">
+    <h3>Studio Conduct</h3>
+    <ul>
+      <li>The studio must be left in the condition it was found.</li>
+      <li>All props &amp; personal items must be removed, and surfaces wiped down if needed. Rubbish to be placed in the bins provided.</li>
+      <li>Any furniture or equipment moved during your session must be returned to its original position.</li>
+    </ul>
+  </div>
+
+  <div class="terms-section">
+    <h3>Overtime</h3>
+    <ul>
+      <li>Please respect your allocated time. You will be charged if you go over your booked time.</li>
+      <li>Overtime is billed in 15-minute increments and is subject to studio availability.</li>
+    </ul>
+  </div>
+
+  <div class="terms-section">
+    <h3>Liability</h3>
+    <ul>
+      <li>SHOOT. Studio is not liable for any injury, loss, or damage to personal property during your session.</li>
+      <li>Clients are responsible for any damage caused to the studio or equipment.</li>
+    </ul>
+  </div>
+
+  <div class="terms-section">
+    <h3>Usage &amp; Rights</h3>
+    <ul>
+      <li>The studio is to be used for creative content production only. No unlawful or hazardous activity is permitted.</li>
+      <li>The space may not be sublet or shared without prior written consent.</li>
+      <li>Unless otherwise agreed, all intellectual property created by SHOOT. remains the property of the studio.</li>
+    </ul>
+  </div>
+
+  <div class="terms-footer">
+    <p>By booking with SHOOT. Studio, you agree to these terms and conditions.</p>
+    <p>Last updated: November 2024</p>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-bottom">
+      <span>© 2026 SHOOT. Studios CT. All rights reserved.</span>
+      <a href="/">← Back to Homepage</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

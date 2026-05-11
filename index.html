@@ -153,7 +153,7 @@
       max-width: 520px;
       font-size: 15px;
       font-weight: 400;
-      color: rgba(255,255,255,0.55);
+      color: rgba(255,255,255,0.75);
       line-height: 1.75;
       margin-top: 0;
       letter-spacing: 0.2px;
@@ -755,6 +755,96 @@
       margin-top: 8px;
     }
 
+    /* ── SPACE SUMMARY CARDS ── */
+    .spaces-card-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      margin-top: 60px;
+    }
+    .space-summary-card {
+      position: relative;
+      overflow: hidden;
+      background: var(--grey-dark);
+    }
+    .space-summary-img {
+      width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block;
+      transition: transform 0.5s ease;
+    }
+    .space-summary-card:hover .space-summary-img { transform: scale(1.04); }
+    .space-summary-body {
+      background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 60%, transparent 100%);
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 24px 22px;
+    }
+    .space-summary-name {
+      font-family: var(--font-display);
+      font-size: clamp(20px,2.2vw,28px);
+      font-weight: 900; text-transform: uppercase;
+      letter-spacing: -0.5px; color: #fff; line-height: 1;
+      margin-bottom: 6px;
+    }
+    .space-summary-desc {
+      font-size: 12px; color: rgba(255,255,255,0.6);
+      line-height: 1.5; margin-bottom: 10px;
+    }
+    .space-summary-price {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: rgba(255,255,255,0.45);
+      margin-bottom: 14px;
+    }
+    .space-summary-link {
+      display: inline-block;
+      border: 1px solid rgba(255,255,255,0.45); color: #fff;
+      padding: 8px 18px; font-size: 10px; font-weight: 700;
+      letter-spacing: 2.5px; text-transform: uppercase; text-decoration: none;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+    .space-summary-link:hover { background: #fff; color: #000; border-color: #fff; }
+
+    /* ── PHOTO SUMMARY CARDS ── */
+    .photo-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      border: 1.5px solid var(--black);
+      margin-bottom: 48px;
+    }
+    .photo-summary-card {
+      padding: 36px 32px;
+      border-right: 1.5px solid var(--black);
+      display: flex; flex-direction: column;
+    }
+    .photo-summary-card:last-child { border-right: none; }
+    .photo-summary-tag {
+      font-size: 10px; font-weight: 700; letter-spacing: 2.5px;
+      text-transform: uppercase; color: #aaa; margin-bottom: 16px;
+    }
+    .photo-summary-name {
+      font-family: var(--font-display);
+      font-size: 26px; font-weight: 900; font-style: italic;
+      text-transform: uppercase; letter-spacing: -0.5px;
+      color: var(--black); margin-bottom: 6px;
+    }
+    .photo-summary-price {
+      font-family: var(--font-display);
+      font-size: 36px; font-weight: 900; font-style: italic;
+      color: var(--black); letter-spacing: -1px; margin-bottom: 10px;
+    }
+    .photo-summary-desc {
+      font-size: 13px; color: #666; line-height: 1.6; margin-bottom: 24px; flex: 1;
+    }
+    .photo-summary-cta {
+      display: inline-block;
+      background: var(--black); color: var(--white);
+      padding: 13px 24px; font-size: 11px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase; text-decoration: none;
+      text-align: center; border: none;
+      transition: background 0.2s; cursor: pointer;
+    }
+    .photo-summary-cta:hover { background: #222; }
+
     /* ── BOOKING SECTION ── */
     #book {
       background: var(--grey-light);
@@ -960,7 +1050,7 @@
     .wa-btn {
       position: fixed;
       bottom: 28px;
-      right: 28px;
+      left: 20px;
       width: 52px;
       height: 52px;
       background: #25D366;
@@ -1032,9 +1122,16 @@
     }
 
     @media (max-width: 768px) {
-      /* Hero logo negative margin scales down with actual rendered size */
+      /* Hero: ensure CTA visible on standard phones without scrolling */
+      #hero { height: auto; min-height: 100svh; padding: 80px 24px 60px; justify-content: center; }
       .hero-logo-img { margin-bottom: -100px; }
       .hero-cta { padding: 14px 44px; font-size: 11px; }
+
+      /* Space & photo cards: single column on mobile */
+      .spaces-card-grid { grid-template-columns: 1fr; gap: 2px; margin-top: 32px; }
+      .photo-summary-grid { grid-template-columns: 1fr; border: none; margin-bottom: 32px; }
+      .photo-summary-card { border-right: none; border-bottom: 1.5px solid var(--black); padding: 28px 20px; }
+      .photo-summary-card:last-child { border-bottom: none; }
 
       nav { padding: 20px 24px; }
       .nav-links, .nav-book { display: none; }
@@ -1308,108 +1405,34 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
       </div>
     </div>
 
-    <!-- THE CURVE -->
-    <div class="space-row">
-      <img src="assets/images/our-spaces/the-curve.jpg" alt="The Curve Studio" class="space-img scroll-reveal" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;">
-      <div class="space-content scroll-reveal" data-delay="150">
-        <div class="space-name">The Curve</div>
-        <p class="space-desc">A seamless white infinity curve. Clean, minimal, timeless. The default choice for portraits, product work, and anything that needs to breathe.</p>
-        <ul class="space-features">
-          <li>Professional Lighting</li>
-          <li>Curved Backdrop</li>
-          <li>Minimalist Design</li>
-          <li>Portrait Ready</li>
-        </ul>
-        <div class="pricing-box">
-          <h4>Pricing</h4>
-          <div class="pricing-grid">
-            <div class="pricing-row"><span>90 minutes</span><span>R550</span></div>
-            <div class="pricing-row"><span>2 hours</span><span>R900</span></div>
-            <div class="pricing-row promo-row">
-              <span>3 hours <span class="promo-row-badge">May Special</span></span>
-              <span><span class="promo-original">R1,350</span><span class="promo-price">R900</span></span>
-            </div>
-            <div class="pricing-row"><span>Half day (5hrs)</span><span>R1,750</span></div>
-            <div class="pricing-row"><span>Full day (10hrs)</span><span>R3,300</span></div>
-          </div>
-        </div>
-        <a href="#book" class="btn-outline" onclick="openBookingModal('curve');return false;">Book This Space</a>
-      </div>
-    </div>
-
-    <!-- STUDIO ONE -->
-    <div class="space-row reverse">
-      <div class="space-content scroll-reveal">
-        <div class="space-name">Studio One</div>
-        <p class="space-desc">A bold, high-contrast space built for creative work. Strong natural light, a distinctive architectural feel, and a colour palette that shoots beautifully.</p>
-        <ul class="space-features">
-          <li>Natural Light</li>
-          <li>Vibrant Colors</li>
-          <li>Unique Architecture</li>
-          <li>Versatile Setup</li>
-        </ul>
-        <div class="pricing-box">
-          <h4>Pricing</h4>
-          <div class="pricing-grid">
-            <div class="pricing-row"><span>90 minutes</span><span>R550</span></div>
-            <div class="pricing-row"><span>2 hours</span><span>R700</span></div>
-            <div class="pricing-row promo-row">
-              <span>3 hours <span class="promo-row-badge">May Special</span></span>
-              <span><span class="promo-original">R1,050</span><span class="promo-price">R700</span></span>
-            </div>
-            <div class="pricing-row"><span>Half day (5hrs)</span><span>R1,650</span></div>
-            <div class="pricing-row"><span>Full day (10hrs)</span><span>R3,150</span></div>
-          </div>
-        </div>
-        <a href="#book" class="btn-outline" onclick="openBookingModal('studio1');return false;">Book This Space</a>
-      </div>
-      <img src="assets/images/our-spaces/studio-one.jpg" alt="Studio One" class="space-img scroll-reveal" data-delay="150">
-    </div>
-
-    <!-- THE POOL -->
-    <div class="space-row">
-      <img src="assets/images/our-spaces/the-pool.jpg" alt="The Pool" class="space-img scroll-reveal">
-      <div class="space-content scroll-reveal" data-delay="150">
-        <div class="space-name">The Pool</div>
-        <p class="space-desc">An outdoor space that does things studios can't. Pool, murals, open sky. Built for music videos, events, and content with real energy.</p>
-        <ul class="space-features">
-          <li>Outdoor Pool</li>
-          <li>Colorful Murals</li>
-          <li>Event Ready</li>
-          <li>Social Media Perfect</li>
-        </ul>
-        <div class="pricing-box">
-          <h4>Pricing</h4>
-          <div class="pricing-grid">
-            <div class="pricing-row"><span>90 minutes</span><span>R850</span></div>
-            <div class="pricing-row"><span>2 hours</span><span>R1,100</span></div>
-            <div class="pricing-row promo-row">
-              <span>3 hours <span class="promo-row-badge">May Special</span></span>
-              <span><span class="promo-original">R1,650</span><span class="promo-price">R1,100</span></span>
-            </div>
-            <div class="pricing-row"><span>Half day (5hrs)</span><span>R2,650</span></div>
-            <div class="pricing-row"><span>Full day (10hrs)</span><span>R5,300</span></div>
-          </div>
-        </div>
-        <a href="#book" class="btn-outline" onclick="openBookingModal('pool');return false;">Book This Space</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ADDITIONAL CHARGES -->
-<section id="additional">
-  <div class="section-inner">
-    <div class="charges-wrapper scroll-reveal">
-      <div class="charges-title">Additional Charges</div>
-      <div class="charges-grid">
-        <div class="charge-card scroll-reveal" data-delay="100">
-          <h4>Weekend &amp; After-Hours Surcharge</h4>
-          <p>Applies to weekends, public holidays, and bookings starting after 17:00. Minimum 2 hour booking.</p>
-          <div class="charge-amount">+R200 per hour</div>
+    <div class="spaces-card-grid">
+      <div class="space-summary-card scroll-reveal">
+        <img src="assets/images/our-spaces/the-curve.jpg" alt="The Curve" class="space-summary-img" loading="lazy">
+        <div class="space-summary-body">
+          <div class="space-summary-name">The Curve</div>
+          <p class="space-summary-desc">Seamless white infinity curve. Portraits, product, editorial.</p>
+          <div class="space-summary-price">From R550</div>
+          <a href="/spaces/the-curve" class="space-summary-link">View Space →</a>
         </div>
       </div>
-      <p class="charges-note">Additional charges apply to all bookings</p>
+      <div class="space-summary-card scroll-reveal" data-delay="100">
+        <img src="assets/images/our-spaces/studio-one.jpg" alt="Studio One" class="space-summary-img" loading="lazy">
+        <div class="space-summary-body">
+          <div class="space-summary-name">Studio One</div>
+          <p class="space-summary-desc">Bold, high-contrast space with strong natural light.</p>
+          <div class="space-summary-price">From R550</div>
+          <a href="/spaces/studio-one" class="space-summary-link">View Space →</a>
+        </div>
+      </div>
+      <div class="space-summary-card scroll-reveal" data-delay="200">
+        <img src="assets/images/our-spaces/the-pool.jpg" alt="The Pool" class="space-summary-img" loading="lazy">
+        <div class="space-summary-body">
+          <div class="space-summary-name">The Pool</div>
+          <p class="space-summary-desc">Outdoor pool, murals, open sky. Music videos, events, content.</p>
+          <div class="space-summary-price">From R850</div>
+          <a href="/spaces/the-pool" class="space-summary-link">View Space →</a>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -1445,50 +1468,28 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
       </div>
     </div>
 
-    <!-- Pricing Cards -->
-    <div class="pricing-cards">
-      <div class="price-card scroll-reveal" data-delay="0">
-        <div class="plan-name">Starter</div>
-        <div class="plan-price">R1,400</div>
-        <p class="plan-desc">Perfect for individuals and personal projects</p>
-        <ul class="plan-features">
-          <li>1 hour studio time</li>
-          <li>Basic lighting setup</li>
-          <li>25–30 edited photos</li>
-          <li>Digital delivery</li>
-          <li>One outfit change</li>
-        </ul>
-        <a href="#book" class="btn-book-plan" onclick="openBookingModal();return false;">Book Now</a>
+    <!-- Photography Package Summary -->
+    <div class="photo-summary-grid">
+      <div class="photo-summary-card scroll-reveal">
+        <div class="photo-summary-tag">Starter</div>
+        <div class="photo-summary-name">Starter</div>
+        <div class="photo-summary-price">R1,400</div>
+        <p class="photo-summary-desc">1 hr studio · Basic lighting · 25–30 edited photos</p>
+        <a href="#book" class="photo-summary-cta" onclick="openBookingModal();return false;">Book Now</a>
       </div>
-      <div class="price-card featured scroll-reveal" data-delay="100">
-        <div class="most-popular">Most Popular</div>
-        <div class="plan-name">Professional</div>
-        <div class="plan-price">R2,500</div>
-        <p class="plan-desc">Ideal for content creators and small brands</p>
-        <ul class="plan-features">
-          <li>2 hour studio time</li>
-          <li>Professional lighting</li>
-          <li>55–60 edited photos</li>
-          <li>Multiple outfit changes</li>
-          <li>Studio space of choice</li>
-        </ul>
-        <a href="#book" class="btn-book-plan" onclick="openBookingModal();return false;">Book Now</a>
+      <div class="photo-summary-card scroll-reveal" data-delay="100">
+        <div class="photo-summary-tag">Most Popular</div>
+        <div class="photo-summary-name">Professional</div>
+        <div class="photo-summary-price">R2,500</div>
+        <p class="photo-summary-desc">2 hrs studio · Pro lighting · 55–60 edited photos</p>
+        <a href="#book" class="photo-summary-cta" onclick="openBookingModal();return false;">Book Now</a>
       </div>
-      <div class="price-card scroll-reveal" data-delay="200">
-        <div class="plan-name">Premium</div>
-        <div class="plan-price">R10,000</div>
-        <p class="plan-desc">Complete package for campaigns and productions</p>
-        <ul class="plan-features">
-          <li>Full day studio access</li>
-          <li>The Curve space included</li>
-          <li>Advanced lighting setup</li>
-          <li>100+ edited photos</li>
-          <li>Priority delivery</li>
-          <li>Unlimited outfit changes</li>
-          <li>All studio spaces</li>
-          <li>Optional short form video add-on</li>
-        </ul>
-        <a href="#book" class="btn-book-plan" onclick="openBookingModal();return false;">Book Now</a>
+      <div class="photo-summary-card scroll-reveal" data-delay="200">
+        <div class="photo-summary-tag">Premium</div>
+        <div class="photo-summary-name">Premium</div>
+        <div class="photo-summary-price">R10,000</div>
+        <p class="photo-summary-desc">Full day · All spaces · 100+ edited photos · Campaign ready</p>
+        <a href="#book" class="photo-summary-cta" onclick="openBookingModal();return false;">Book Now</a>
       </div>
     </div>
 
@@ -1518,84 +1519,12 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
       </div>
       <div class="contact-card">
         <div class="contact-label">Location</div>
-        <p class="contact-value">135 Albert Rd,<br>Woodstock</p>
+        <a href="https://maps.google.com/?q=135+Albert+Rd+Woodstock+Cape+Town" target="_blank" rel="noopener" class="contact-value contact-link">135 Albert Rd,<br>Woodstock</a>
       </div>
     </div>
   </div>
 </section>
 
-<!-- TERMS & CONDITIONS -->
-<section id="terms">
-  <div class="section-inner">
-    <div class="terms-header scroll-reveal">
-      <div class="section-heading">Terms &amp; Conditions</div>
-      <p>SHOOT. Studio</p>
-    </div>
-    <div class="terms-content">
-      <div class="terms-section scroll-reveal">
-        <h3>Booking &amp; Payment</h3>
-        <ul>
-          <li>Full payment is required to confirm your booking.</li>
-          <li>Bookings are only secured once payment is received.</li>
-          <li>Session times include setup and breakdown, please plan accordingly.</li>
-          <li>Cancellations made less than 48 hours before the shoot are non-refundable. Rescheduling more than 48 hours before the shoot is subject to availability. Rescheduling within 48 hours of the shoot will incur a 50% fee. Rescheduling on the day of the shoot will be charged at 100% of the original fee.</li>
-        </ul>
-      </div>
-      <div class="terms-section scroll-reveal">
-        <h3>Use of the Curve</h3>
-        <ul>
-          <li>The Curve is a specialty backdrop and must be treated with care.</li>
-          <li>No shoes, liquids, or any props that may mark or damage the Curve are allowed unless pre-approved.</li>
-          <li>Any damage caused to the Curve during your session will be assessed and billed accordingly.</li>
-          <li>A maximum of 10 people are allowed per booking. An additional fee of R50 per extra person will be charged for any attendees beyond this limit.</li>
-        </ul>
-      </div>
-      <div class="terms-section scroll-reveal">
-        <h3>Lighting Equipment</h3>
-        <ul>
-          <li>Lighting gear is available for use or hire as agreed in your booking.</li>
-          <li>All equipment must be used responsibly. You will be held liable for any loss or damage during your session.</li>
-          <li>Please notify studio staff immediately if equipment appears faulty or becomes damaged.</li>
-          <li>We can hire certain equipment at an extra fee.</li>
-        </ul>
-      </div>
-      <div class="terms-section scroll-reveal">
-        <h3>Studio Conduct</h3>
-        <ul>
-          <li>The studio must be left in the condition it was found.</li>
-          <li>All props &amp; personal items must be removed, and surfaces wiped down if needed. Rubbish to be placed in the bins provided.</li>
-          <li>Any furniture or equipment moved during your session must be returned to its original position.</li>
-        </ul>
-      </div>
-      <div class="terms-section scroll-reveal">
-        <h3>Overtime</h3>
-        <ul>
-          <li>Please respect your allocated time. You will be charged if you go over your booked time.</li>
-          <li>Overtime is billed in 15-minute increments and is subject to studio availability.</li>
-        </ul>
-      </div>
-      <div class="terms-section scroll-reveal">
-        <h3>Liability</h3>
-        <ul>
-          <li>SHOOT. Studio is not liable for any injury, loss, or damage to personal property during your session.</li>
-          <li>Clients are responsible for any damage caused to the studio or equipment.</li>
-        </ul>
-      </div>
-      <div class="terms-section scroll-reveal">
-        <h3>Usage &amp; Rights</h3>
-        <ul>
-          <li>The studio is to be used for creative content production only. No unlawful or hazardous activity is permitted.</li>
-          <li>The space may not be sublet or shared without prior written consent.</li>
-          <li>Unless otherwise agreed, all intellectual property created by SHOOT. remains the property of the studio.</li>
-        </ul>
-      </div>
-      <div class="terms-footer">
-        <p>By booking with SHOOT. Studio, you agree to these terms and conditions.</p>
-        <p>Last updated: November 2024</p>
-      </div>
-    </div>
-  </div>
-</section>
 
 
 <!-- ══════════════════════════════════════════
@@ -2572,10 +2501,10 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z"/></svg>
           060 994 8107
         </a>
-        <span class="footer-contact-item">
+        <a href="https://maps.google.com/?q=135+Albert+Rd+Woodstock+Cape+Town" target="_blank" rel="noopener" class="footer-contact-item">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-          Cape Town, South Africa
-        </span>
+          135 Albert Rd, Woodstock
+        </a>
       </div>
       <div class="footer-col scroll-reveal" data-delay="200">
         <h5>Follow Us</h5>
@@ -2594,8 +2523,8 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2025 SHOOT. Studios CT. All rights reserved.</span>
-      <a href="#terms">Terms &amp; Conditions</a>
+      <span>© 2026 SHOOT. Studios CT. All rights reserved.</span>
+      <a href="/terms">Terms &amp; Conditions</a>
     </div>
   </div>
 </footer>
@@ -3219,6 +3148,9 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
     document.querySelectorAll('a[href="#book"]').forEach(a => {
       a.addEventListener('click', e => { e.preventDefault(); openBookingModal(); });
     });
+    // Open modal pre-selected when arriving from a space page (e.g. /?space=curve)
+    const spaceParam = new URLSearchParams(window.location.search).get('space');
+    if (spaceParam) setTimeout(() => openBookingModal(spaceParam), 400);
     // Set today as min date
     document.getElementById('bm-date').min = new Date().toISOString().split('T')[0];
     updateSidebar();
@@ -3479,14 +3411,22 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
     }
   });
 
-  // Schedule display
+  // Trigger popup after user has scrolled past 80% of the page (not mid-scroll on mobile)
   if (shouldShow()) {
-    setTimeout(function () {
-      // Don't show if booking modal is open
-      const modal = document.getElementById('bookingModal');
-      if (modal && modal.style.display === 'block') return;
-      openNewsletter();
-    }, SHOW_DELAY_MS);
+    let fired = false;
+    function onScroll() {
+      if (fired) return;
+      const scrolled = window.scrollY + window.innerHeight;
+      const total    = document.documentElement.scrollHeight;
+      if (scrolled / total >= 0.8) {
+        fired = true;
+        window.removeEventListener('scroll', onScroll);
+        const modal = document.getElementById('bookingModal');
+        if (modal && modal.style.display === 'block') return;
+        openNewsletter();
+      }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
   }
 })();
 
