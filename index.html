@@ -1251,59 +1251,260 @@
 
     /* ── MAY PROMO BANNER ── */
     #may-promo {
-      background: var(--black);
-      border-top: 1px solid rgba(255,255,255,0.08);
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      padding: 100px 0;
+      position: relative;
+      overflow: hidden;
+      background: #000;
+      padding: 130px 0 0;
+      border-top: 1px solid rgba(255,255,255,0.06);
     }
-    .promo-inner {
-      text-align: center;
-      max-width: 640px;
-      margin: 0 auto;
+
+    /* Floating green atmospheric blocks */
+    .promo-bg-block {
+      position: absolute;
+      background: #B6FF00;
+      pointer-events: none;
+      will-change: transform;
     }
-    .promo-badge {
-      display: inline-block;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 3.5px;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.4);
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 6px 16px;
-      margin-bottom: 40px;
+    .promo-bg-block--1 {
+      width: 540px; height: 540px;
+      top: -140px; left: -220px;
+      opacity: 0.055;
+      filter: blur(100px);
+      animation: promo-float-1 20s ease-in-out infinite;
     }
-    .promo-headline {
+    .promo-bg-block--2 {
+      width: 360px; height: 360px;
+      bottom: 60px; right: -120px;
+      opacity: 0.06;
+      filter: blur(80px);
+      animation: promo-float-2 16s ease-in-out infinite;
+    }
+    .promo-bg-block--3 {
+      width: 96px; height: 5px;
+      top: 46%; right: 7%;
+      opacity: 0;
+      filter: none;
+      transform-origin: left center;
+      animation: promo-bar-reveal 1s cubic-bezier(0.16,1,0.3,1) forwards 1.4s,
+                 promo-float-bar 7s ease-in-out infinite 2.4s;
+    }
+
+    /* Radial green glow behind headline */
+    .promo-glow {
+      position: absolute;
+      width: 820px; height: 520px;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -62%);
+      background: radial-gradient(ellipse at center, rgba(182,255,0,0.07) 0%, transparent 68%);
+      pointer-events: none;
+      animation: promo-glow-pulse 9s ease-in-out infinite;
+    }
+
+    /* Giant ghost outlined text — background depth layer */
+    .promo-ghost {
+      position: absolute;
+      top: 44%; left: 50%;
+      transform: translate(-50%, -50%);
       font-family: var(--font-display);
-      font-size: clamp(52px, 8vw, 96px);
+      font-size: clamp(160px, 27vw, 310px);
       font-weight: 900;
       font-style: italic;
       text-transform: uppercase;
-      letter-spacing: -3px;
-      line-height: 0.95;
-      color: var(--white);
-      margin-bottom: 32px;
+      letter-spacing: -8px;
+      line-height: 1;
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(182,255,0,0.065);
+      white-space: nowrap;
+      pointer-events: none;
+      user-select: none;
+      animation: promo-ghost-drift 22s ease-in-out infinite;
     }
+
+    /* SVG grain noise overlay */
+    .promo-grain {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.038;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 160px;
+    }
+
+    /* Cinematic vignette */
+    .promo-vignette {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 90% 80% at 50% 50%, transparent 30%, rgba(0,0,0,0.7) 100%);
+      pointer-events: none;
+    }
+
+    /* Light sweep — slow cinematic pass */
+    .promo-sweep {
+      position: absolute;
+      top: 0; bottom: 0;
+      left: 0;
+      width: 120px;
+      background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,0.022) 50%, transparent 80%);
+      transform: translateX(-180px) skewX(-10deg);
+      pointer-events: none;
+      animation: promo-sweep-anim 7s ease-in-out infinite 2s;
+    }
+
+    /* Main content layer */
+    .promo-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 0 24px 110px;
+    }
+
+    /* Label with flanking lines */
+    .promo-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      margin-bottom: 44px;
+    }
+    .promo-label-row::before,
+    .promo-label-row::after {
+      content: '';
+      flex: 0 0 44px;
+      height: 1px;
+      background: #B6FF00;
+      opacity: 0.5;
+    }
+    .promo-label-text {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 4.5px;
+      text-transform: uppercase;
+      color: #B6FF00;
+    }
+
+    /* Headline */
+    .promo-headline {
+      font-family: var(--font-display);
+      font-size: clamp(68px, 11vw, 140px);
+      font-weight: 900;
+      font-style: italic;
+      text-transform: uppercase;
+      letter-spacing: -4px;
+      line-height: 0.88;
+      color: var(--white);
+      margin-bottom: 40px;
+    }
+
+    /* Green accent bar */
+    .promo-accent-bar {
+      width: 56px;
+      height: 4px;
+      background: #B6FF00;
+      margin: 0 auto 34px;
+    }
+
+    /* Sub-text */
     .promo-sub {
-      font-size: 13px;
-      font-weight: 400;
-      color: rgba(255,255,255,0.35);
-      letter-spacing: 1px;
-      margin-bottom: 48px;
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 2.5px;
+      margin-bottom: 56px;
       text-transform: uppercase;
     }
+
+    /* CTA — green fill, white hover sweep */
     .promo-cta {
+      position: relative;
       display: inline-block;
-      border: 1px solid rgba(255,255,255,0.45);
-      color: var(--white);
-      padding: 14px 52px;
+      overflow: hidden;
+      padding: 17px 62px;
+      font-family: var(--font-display);
       font-size: 11px;
       font-weight: 700;
-      letter-spacing: 2.5px;
+      letter-spacing: 3px;
       text-transform: uppercase;
       text-decoration: none;
-      transition: background 0.2s, border-color 0.2s, color 0.2s;
+      color: #000;
+      background: #B6FF00;
+      transition: color 0.35s cubic-bezier(0.16,1,0.3,1);
     }
-    .promo-cta:hover { background: var(--white); border-color: var(--white); color: var(--black); }
+    .promo-cta-inner {
+      position: relative;
+      z-index: 1;
+    }
+    .promo-cta::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: #fff;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.45s cubic-bezier(0.16,1,0.3,1);
+    }
+    .promo-cta:hover::before { transform: scaleX(1); }
+    .promo-cta:focus-visible { outline: 2px solid #B6FF00; outline-offset: 3px; }
+
+    /* Marquee strip */
+    .promo-marquee-track {
+      position: relative;
+      z-index: 2;
+      border-top: 1px solid rgba(182,255,0,0.1);
+      padding: 13px 0;
+      overflow: hidden;
+      background: rgba(182,255,0,0.025);
+    }
+    .promo-marquee-inner {
+      display: flex;
+      width: max-content;
+      animation: promo-marquee 30s linear infinite;
+      white-space: nowrap;
+    }
+    .promo-marquee-inner span {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 3.5px;
+      text-transform: uppercase;
+      color: rgba(182,255,0,0.38);
+    }
+
+    /* Keyframes */
+    @keyframes promo-float-1 {
+      0%, 100% { transform: translateY(0) translateX(0); }
+      30%  { transform: translateY(-30px) translateX(16px); }
+      65%  { transform: translateY(16px) translateX(-10px); }
+    }
+    @keyframes promo-float-2 {
+      0%, 100% { transform: translateY(0) translateX(0); }
+      40%  { transform: translateY(24px) translateX(-18px); }
+      70%  { transform: translateY(-14px) translateX(12px); }
+    }
+    @keyframes promo-float-bar {
+      0%, 100% { transform: translateY(0); opacity: 0.7; }
+      50%  { transform: translateY(-10px); opacity: 0.38; }
+    }
+    @keyframes promo-bar-reveal {
+      from { opacity: 0; transform: scaleX(0); }
+      to   { opacity: 0.7; transform: scaleX(1); }
+    }
+    @keyframes promo-glow-pulse {
+      0%, 100% { opacity: 1; transform: translate(-50%, -62%) scale(1); }
+      50%  { opacity: 0.5; transform: translate(-50%, -62%) scale(1.14); }
+    }
+    @keyframes promo-ghost-drift {
+      0%, 100% { transform: translate(-50%, -50%); }
+      50%  { transform: translate(-50%, -46%) skewX(-1.5deg); }
+    }
+    @keyframes promo-sweep-anim {
+      0%   { transform: translateX(-180px) skewX(-10deg); opacity: 0; }
+      8%   { opacity: 1; }
+      92%  { opacity: 0.7; }
+      100% { transform: translateX(calc(100vw + 180px)) skewX(-10deg); opacity: 0; }
+    }
+    @keyframes promo-marquee {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
 
     /* Promo pricing row in spaces section */
     .pricing-row.promo-row { padding: 13px 0; }
@@ -1329,8 +1530,19 @@
     }
 
     @media (max-width: 768px) {
-      .promo-inner { padding: 0 8px; }
+      #may-promo { padding: 90px 0 0; }
+      .promo-ghost { display: none; }
       .promo-headline { letter-spacing: -2px; }
+      .promo-content { padding: 0 20px 88px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .promo-bg-block,
+      .promo-glow,
+      .promo-ghost,
+      .promo-sweep,
+      .promo-marquee-inner { animation: none !important; }
+      .promo-bg-block--3 { opacity: 0.55; transform: scaleX(1); }
     }
 
     /* ── BOOKING MODAL PROMO ADDITIONS ── */
@@ -1422,12 +1634,36 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
 
 <!-- MAY PROMO BANNER -->
 <section id="may-promo">
-  <div class="section-inner">
-    <div class="promo-inner scroll-reveal">
-      <div class="promo-badge">May Special</div>
-      <div class="promo-headline">Book 3 Hours.<br>Pay for 2.</div>
-      <p class="promo-sub">Studio hire only &nbsp;·&nbsp; Valid throughout May</p>
-      <a href="#book" class="promo-cta" onclick="openBookingModal();return false;">Book Now</a>
+  <!-- Atmospheric background layers -->
+  <div class="promo-bg-block promo-bg-block--1" aria-hidden="true"></div>
+  <div class="promo-bg-block promo-bg-block--2" aria-hidden="true"></div>
+  <div class="promo-bg-block promo-bg-block--3" aria-hidden="true"></div>
+  <div class="promo-glow" aria-hidden="true"></div>
+  <div class="promo-ghost" aria-hidden="true">MAY</div>
+  <div class="promo-grain" aria-hidden="true"></div>
+  <div class="promo-vignette" aria-hidden="true"></div>
+  <div class="promo-sweep" aria-hidden="true"></div>
+  <!-- Content -->
+  <div class="promo-content">
+    <div class="promo-label-row scroll-reveal" data-delay="0">
+      <span class="promo-label-text">May Special</span>
+    </div>
+    <h2 class="promo-headline scroll-reveal" data-delay="100">Book 3 Hours.<br>Pay for 2.</h2>
+    <div class="promo-accent-bar scroll-reveal" data-delay="200" aria-hidden="true"></div>
+    <p class="promo-sub scroll-reveal" data-delay="280">Studio hire only &nbsp;·&nbsp; Valid throughout May</p>
+    <a href="#book" class="promo-cta scroll-reveal" data-delay="380"
+       onclick="openBookingModal();return false;"
+       aria-label="Book now — May Special offer">
+      <span class="promo-cta-inner">Book Now</span>
+    </a>
+  </div>
+  <!-- Marquee -->
+  <div class="promo-marquee-track" aria-hidden="true">
+    <div class="promo-marquee-inner">
+      <span>May Special&nbsp;&nbsp;·&nbsp;&nbsp;Book 3 Hours, Pay for 2&nbsp;&nbsp;·&nbsp;&nbsp;Studio Hire Only&nbsp;&nbsp;·&nbsp;&nbsp;Valid Throughout May&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+      <span>May Special&nbsp;&nbsp;·&nbsp;&nbsp;Book 3 Hours, Pay for 2&nbsp;&nbsp;·&nbsp;&nbsp;Studio Hire Only&nbsp;&nbsp;·&nbsp;&nbsp;Valid Throughout May&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+      <span>May Special&nbsp;&nbsp;·&nbsp;&nbsp;Book 3 Hours, Pay for 2&nbsp;&nbsp;·&nbsp;&nbsp;Studio Hire Only&nbsp;&nbsp;·&nbsp;&nbsp;Valid Throughout May&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+      <span>May Special&nbsp;&nbsp;·&nbsp;&nbsp;Book 3 Hours, Pay for 2&nbsp;&nbsp;·&nbsp;&nbsp;Studio Hire Only&nbsp;&nbsp;·&nbsp;&nbsp;Valid Throughout May&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
     </div>
   </div>
 </section>
