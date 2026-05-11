@@ -135,11 +135,11 @@
     }
 
     .hero-logo-img {
-      max-width: 600px;
+      max-width: 520px;
       width: 100%;
       height: auto;
-      margin-top: 40px;
       animation: fadeUp 0.8s ease both;
+      mix-blend-mode: screen;
     }
 
     .hero-desc {
@@ -865,7 +865,7 @@
     .footer-contact-item svg { flex-shrink: 0; opacity: 0.6; }
 
     .footer-ig {
-      display: inline-flex;
+      display: flex;
       align-items: center;
       gap: 10px;
       border: 1px solid rgba(255,255,255,0.25);
@@ -875,6 +875,7 @@
       text-decoration: none;
       transition: border-color 0.2s;
     }
+    .footer-ig + .footer-ig { margin-top: 10px; }
     .footer-ig:hover { border-color: var(--white); }
 
     .footer-bottom {
@@ -980,6 +981,9 @@
       .pricing-grid { grid-template-columns: 1fr; }
       .charges-wrapper { padding: 28px 20px; }
       .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
+      .contact-grid { grid-template-columns: 1fr !important; }
+      .contact-grid > div { border-right: none !important; border-bottom: 1.5px solid var(--black); }
+      .contact-grid > div:last-child { border-bottom: none; }
     }
 
     /* ── MAY PROMO BANNER ── */
@@ -1078,13 +1082,13 @@
     .promo-block {
       text-align: center;
       border: 1.5px solid rgba(255,255,255,0.12);
-      padding: 32px 36px;
-      min-width: 140px;
+      padding: 40px 48px;
+      min-width: 160px;
     }
     .promo-block.original { opacity: 0.4; }
     .promo-block-num {
       font-family: var(--font-display);
-      font-size: 64px;
+      font-size: 80px;
       font-weight: 900;
       font-style: italic;
       color: var(--white);
@@ -1107,7 +1111,7 @@
       letter-spacing: 2px;
       text-transform: uppercase;
       color: rgba(255,255,255,0.4);
-      margin-top: 8px;
+      margin-top: 14px;
     }
     .promo-block.discounted { border-color: rgba(74,222,128,0.35); }
     .promo-block.discounted .promo-block-num { color: #4ade80; }
@@ -1210,14 +1214,14 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
 
 <!-- NAV -->
 <nav id="mainNav">
-  <a href="#hero" class="nav-logo"><img src="assets/images/logo.png" alt="SHOOT. Studios" style="height:36px;width:auto;display:block;"></a>
+  <a href="#hero" class="nav-logo"><img src="assets/images/logo.png" alt="SHOOT. Studios" style="height:36px;width:auto;display:block;mix-blend-mode:screen;"></a>
   <ul class="nav-links">
     <li><a href="#services">Services</a></li>
     <li><a href="#spaces">Spaces</a></li>
     <li><a href="#photography">Photography</a></li>
-    <li><a href="#terms">Terms</a></li>
+    <li><a href="#contact">Contact</a></li>
   </ul>
-  <a href="#book" class="nav-book">Book Now</a>
+  <a href="#book" class="nav-book" onclick="openBookingModal();return false;">Book Now</a>
   <div class="nav-hamburger" id="hamburger" onclick="openMenu()">
     <span></span><span></span><span></span>
   </div>
@@ -1229,15 +1233,15 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
   <a href="#services" onclick="closeMenu()">Services</a>
   <a href="#spaces" onclick="closeMenu()">Spaces</a>
   <a href="#photography" onclick="closeMenu()">Photography</a>
-  <a href="#terms" onclick="closeMenu()">Terms</a>
-  <a href="#book" onclick="closeMenu()">Book Now</a>
+  <a href="#contact" onclick="closeMenu()">Contact</a>
+  <a href="#book" onclick="closeMenu();openBookingModal();return false;">Book Now</a>
 </div>
 
 <!-- HERO -->
 <section id="hero">
   <img src="/assets/images/logo.png" alt="SHOOT Studios Logo" class="hero-logo-img">
-  <p class="hero-desc">Whatever you can imagine, you can create it at our studio. From portraits to music videos, ad campaigns to content creation — we bring your vision to life.</p>
-  <a href="#book" class="hero-cta">Book Now</a>
+  <p class="hero-desc">Three distinctive spaces. One address. Built for photographers, directors, and creators who take their work seriously.</p>
+  <a href="#book" class="hero-cta" onclick="openBookingModal();return false;">Book a Session</a>
 </section>
 
 <!-- MAY PROMO BANNER -->
@@ -1247,12 +1251,11 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
       <div class="scroll-reveal">
         <div class="promo-badge">
           <span class="promo-badge-dot"></span>
-          May Special
+          May Special — Ends 31 May
         </div>
-        <div class="promo-headline">Book 3 Hours,<br>Pay for 2</div>
-        <p class="promo-sub">Studio bookings only. Discount automatically applied when you select 3 hours for a May date.</p>
-        <a href="#book" class="promo-cta">Book Now</a>
-        <p class="promo-urgency">Ends May 31 &nbsp;·&nbsp; Studio bookings only</p>
+        <div class="promo-headline">Book 3 Hours.<br>Pay for 2.</div>
+        <p class="promo-sub">Studio hire only. Select 3 hours for any May date and the discount applies automatically.</p>
+        <a href="#book" class="promo-cta" onclick="openBookingModal();return false;">Book Now</a>
       </div>
       <div class="scroll-reveal" data-delay="100">
         <div class="promo-visual">
@@ -1264,7 +1267,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
           <div class="promo-block discounted">
             <span class="promo-block-num">2</span>
             <div class="promo-block-label">Hours charged</div>
-            <div class="promo-save-tag">You save 1 hr</div>
+            <div class="promo-save-tag">Save 1 hour</div>
           </div>
         </div>
       </div>
@@ -1275,8 +1278,8 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
 <!-- WHAT WE OFFER -->
 <section id="services">
   <div class="section-inner">
-    <div class="section-heading scroll-reveal">What We Offer</div>
-    <p class="section-sub scroll-reveal" data-delay="100">Everything you need to create</p>
+    <div class="section-heading scroll-reveal">What We Do</div>
+    <p class="section-sub scroll-reveal" data-delay="100">Studio hire, photography packages, and equipment rental — all under one roof</p>
     <div class="services-grid">
       <div class="service-card scroll-reveal" data-delay="0">
         <svg class="service-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -1286,7 +1289,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
           <rect x="14" y="6" width="8" height="4" rx="1"/>
         </svg>
         <div class="service-title">Photography</div>
-        <p class="service-desc">Professional photography packages for all occasions. From portraits to product shots, we capture your vision perfectly.</p>
+        <p class="service-desc">Portrait, fashion, product, editorial — we shoot it all. Packages available for individuals, brands, and productions of any scale.</p>
       </div>
       <div class="service-card scroll-reveal" data-delay="100">
         <svg class="service-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -1294,7 +1297,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
           <path d="M30 17l8-5v18l-8-5V17z"/>
         </svg>
         <div class="service-title">Content Creation</div>
-        <p class="service-desc">Create stunning content for social media, advertising campaigns, and more. Modern studios equipped for any creative vision.</p>
+        <p class="service-desc">Reels, lookbooks, brand campaigns, music videos. Our spaces are designed to make content that stops the scroll.</p>
       </div>
       <div class="service-card scroll-reveal" data-delay="200">
         <svg class="service-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -1303,7 +1306,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
           <path d="M5 34c0-5.5 4.5-10 10-10h12c5.5 0 10 4.5 10 10"/>
         </svg>
         <div class="service-title">Studio Rental</div>
-        <p class="service-desc">Three unique studio spaces available for hourly or daily rental. Perfect for shoots, events, and creative projects.</p>
+        <p class="service-desc">Hourly, half-day, or full-day bookings. The Curve, Studio One, and The Pool are ready when you are — no fuss, no waiting.</p>
       </div>
       <div class="service-card scroll-reveal" data-delay="300">
         <svg class="service-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -1311,7 +1314,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
           <path d="M8 32l24-24M8 26l6 6"/>
         </svg>
         <div class="service-title">Equipment Rental</div>
-        <p class="service-desc">Professional cameras and lenses available for rent. High-end Canon cameras and premium glass to elevate your shoot.</p>
+        <p class="service-desc">Canon EOS RP and R6 MK II bodies, plus prime and zoom lenses. Add them to any booking — no separate rental elsewhere needed.</p>
       </div>
     </div>
   </div>
@@ -1322,7 +1325,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
   <div class="section-inner">
     <div class="spaces-header scroll-reveal">
       <div class="section-heading">Our Spaces</div>
-      <p class="section-sub">Three distinctive studio spaces</p>
+      <p class="section-sub">Three spaces, each with its own character</p>
     </div>
 
     <div class="included-banner scroll-reveal" data-delay="100">
@@ -1341,7 +1344,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
       <img src="assets/images/our-spaces/the-curve.jpg" alt="The Curve Studio" class="space-img scroll-reveal" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;">
       <div class="space-content scroll-reveal" data-delay="150">
         <div class="space-name">The Curve</div>
-        <p class="space-desc">A pristine white space with curved walls and professional lighting setup. Perfect for clean, minimalist shoots and portraits.</p>
+        <p class="space-desc">A seamless white infinity curve. Clean, minimal, timeless. The default choice for portraits, product work, and anything that needs to breathe.</p>
         <ul class="space-features">
           <li>Professional Lighting</li>
           <li>Curved Backdrop</li>
@@ -1361,7 +1364,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
             <div class="pricing-row"><span>Full day (10hrs)</span><span>R3,300</span></div>
           </div>
         </div>
-        <a href="#book" class="btn-outline" onclick="preselect('The Curve')">Book This Space</a>
+        <a href="#book" class="btn-outline" onclick="openBookingModal('curve');return false;">Book This Space</a>
       </div>
     </div>
 
@@ -1369,7 +1372,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
     <div class="space-row reverse">
       <div class="space-content scroll-reveal">
         <div class="space-name">Studio One</div>
-        <p class="space-desc">Bold pink space with unique architecture and natural light. Ideal for creative campaigns and dynamic content.</p>
+        <p class="space-desc">A bold, high-contrast space built for creative work. Strong natural light, a distinctive architectural feel, and a colour palette that shoots beautifully.</p>
         <ul class="space-features">
           <li>Natural Light</li>
           <li>Vibrant Colors</li>
@@ -1389,7 +1392,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
             <div class="pricing-row"><span>Full day (10hrs)</span><span>R3,150</span></div>
           </div>
         </div>
-        <a href="#book" class="btn-outline" onclick="preselect('Studio One')">Book This Space</a>
+        <a href="#book" class="btn-outline" onclick="openBookingModal('studio1');return false;">Book This Space</a>
       </div>
       <img src="assets/images/our-spaces/studio-one.jpg" alt="Studio One" class="space-img scroll-reveal" data-delay="150">
     </div>
@@ -1399,7 +1402,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
       <img src="assets/images/our-spaces/the-pool.jpg" alt="The Pool" class="space-img scroll-reveal">
       <div class="space-content scroll-reveal" data-delay="150">
         <div class="space-name">The Pool</div>
-        <p class="space-desc">Colorful outdoor area with pool and eye-catching murals. Perfect for music videos, events, and creative content.</p>
+        <p class="space-desc">An outdoor space that does things studios can't. Pool, murals, open sky. Built for music videos, events, and content with real energy.</p>
         <ul class="space-features">
           <li>Outdoor Pool</li>
           <li>Colorful Murals</li>
@@ -1419,7 +1422,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
             <div class="pricing-row"><span>Full day (10hrs)</span><span>R5,300</span></div>
           </div>
         </div>
-        <a href="#book" class="btn-outline" onclick="preselect('The Pool')">Book This Space</a>
+        <a href="#book" class="btn-outline" onclick="openBookingModal('pool');return false;">Book This Space</a>
       </div>
     </div>
   </div>
@@ -1486,7 +1489,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
           <li>Digital delivery</li>
           <li>One outfit change</li>
         </ul>
-        <a href="#book" class="btn-book-plan" onclick="preselect('Photography – Starter')">Book Now</a>
+        <a href="#book" class="btn-book-plan" onclick="openBookingModal();return false;">Book Now</a>
       </div>
       <div class="price-card featured scroll-reveal" data-delay="100">
         <div class="most-popular">Most Popular</div>
@@ -1500,7 +1503,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
           <li>Multiple outfit changes</li>
           <li>Studio space of choice</li>
         </ul>
-        <a href="#book" class="btn-book-plan" onclick="preselect('Photography – Professional')">Book Now</a>
+        <a href="#book" class="btn-book-plan" onclick="openBookingModal();return false;">Book Now</a>
       </div>
       <div class="price-card scroll-reveal" data-delay="200">
         <div class="plan-name">Premium</div>
@@ -1516,13 +1519,38 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
           <li>All studio spaces</li>
           <li>Optional short form video add-on</li>
         </ul>
-        <a href="#book" class="btn-book-plan" onclick="preselect('Photography – Premium')">Book Now</a>
+        <a href="#book" class="btn-book-plan" onclick="openBookingModal();return false;">Book Now</a>
       </div>
     </div>
 
     <div class="custom-quote scroll-reveal" data-delay="100">
       <p>Need a custom package? We work with all budgets.</p>
-      <a href="#book" class="btn-filled">Contact Us for Custom Quote</a>
+      <a href="#contact" class="btn-filled">Contact Us for a Custom Quote</a>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" style="background:var(--white);color:var(--black);padding:100px 0;">
+  <div class="section-inner">
+    <div style="text-align:center;margin-bottom:64px;" class="scroll-reveal">
+      <div class="section-heading" style="color:var(--black);">Get in Touch</div>
+      <p style="color:#777;margin-top:12px;font-size:15px;">Questions? Collaborations? Just reach out.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border:1.5px solid var(--black);max-width:900px;margin:0 auto;" class="scroll-reveal contact-grid">
+      <div style="padding:48px 40px;border-right:1.5px solid var(--black);">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#999;margin-bottom:16px;">Email</div>
+        <a href="mailto:hello@shootstudios.co.za" style="font-size:17px;font-weight:600;color:var(--black);text-decoration:none;line-height:1.5;display:block;word-break:break-all;">hello@shootstudios.co.za</a>
+      </div>
+      <div style="padding:48px 40px;border-right:1.5px solid var(--black);">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#999;margin-bottom:16px;">Phone</div>
+        <a href="tel:+27609948107" style="font-size:17px;font-weight:600;color:var(--black);text-decoration:none;">060 994 8107</a>
+        <p style="font-size:13px;color:#888;margin-top:8px;">WhatsApp available</p>
+      </div>
+      <div style="padding:48px 40px;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#999;margin-bottom:16px;">Location</div>
+        <p style="font-size:15px;font-weight:600;color:var(--black);line-height:1.6;">Cape Town<br>South Africa</p>
+      </div>
     </div>
   </div>
 </section>
@@ -2548,14 +2576,14 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
   <div class="section-inner">
     <div class="footer-grid">
       <div class="scroll-reveal" data-delay="0">
-        <div class="footer-logo"><img src="assets/images/logo.png" alt="SHOOT. Studios" style="height:44px;width:auto;display:block;filter:brightness(0) invert(1);"></div>
-        <p class="footer-tagline">Professional photography studio and event space in Cape Town</p>
+        <div class="footer-logo"><img src="assets/images/logo.png" alt="SHOOT. Studios" style="height:44px;width:auto;display:block;mix-blend-mode:screen;"></div>
+        <p class="footer-tagline">Professional photographic studio in Cape Town.</p>
       </div>
       <div class="footer-col scroll-reveal" data-delay="100">
         <h5>Contact</h5>
-        <a href="/cdn-cgi/l/email-protection#88fbe0e7e7fcfbfcfdece1e7fbebfcc8efe5e9e1e4a6ebe7e5" class="footer-contact-item">
+        <a href="mailto:hello@shootstudios.co.za" class="footer-contact-item">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg>
-          <span class="__cf_email__" data-cfemail="b6c5ded9d9c2c5c2c3d2dfd9c5d5c2f6d1dbd7dfda98d5d9db">[email&#160;protected]</span>
+          hello@shootstudios.co.za
         </a>
         <a href="tel:+27609948107" class="footer-contact-item">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z"/></svg>
@@ -2570,7 +2598,15 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
         <h5>Follow Us</h5>
         <a href="https://instagram.com/shootstudios" target="_blank" class="footer-ig">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
-          @shootstudios
+          Instagram
+        </a>
+        <a href="https://facebook.com/shootstudios" target="_blank" class="footer-ig">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+          Facebook
+        </a>
+        <a href="https://tiktok.com/@shootstudios" target="_blank" class="footer-ig">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12a4 4 0 104 4V4a5 5 0 005 5"/></svg>
+          TikTok
         </a>
       </div>
     </div>
