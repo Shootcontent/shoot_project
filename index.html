@@ -350,31 +350,33 @@
     }
 
     .pricing-box {
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 28px;
-      margin-bottom: 28px;
-      background: rgba(255,255,255,0.03);
+      border-top: 1px solid rgba(255,255,255,0.12);
+      padding: 28px 0 0;
+      margin-bottom: 32px;
     }
     .pricing-box h4 {
-      font-weight: 600;
-      font-size: 16px;
-      margin-bottom: 16px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+      margin-bottom: 20px;
     }
     .pricing-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0;
+      display: flex;
+      flex-direction: column;
     }
     .pricing-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding: 13px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
       font-size: 14px;
     }
     .pricing-row:last-child { border-bottom: none; }
-    .pricing-row span:last-child { font-weight: 700; font-size: 16px; }
+    .pricing-row span:first-child { color: rgba(255,255,255,0.65); font-weight: 400; }
+    .pricing-row span:last-child { font-weight: 600; font-size: 15px; color: var(--white); }
 
     .btn-outline {
       display: inline-block;
@@ -991,171 +993,83 @@
       background: var(--black);
       border-top: 1px solid rgba(255,255,255,0.08);
       border-bottom: 1px solid rgba(255,255,255,0.08);
-      padding: 80px 0;
-      overflow: hidden;
-      position: relative;
-    }
-    #may-promo::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse at 70% 50%, rgba(74,222,128,0.05) 0%, transparent 65%);
-      pointer-events: none;
+      padding: 100px 0;
     }
     .promo-inner {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 80px;
-      align-items: center;
+      text-align: center;
+      max-width: 640px;
+      margin: 0 auto;
     }
     .promo-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(74,222,128,0.1);
-      border: 1px solid rgba(74,222,128,0.35);
-      color: #4ade80;
-      font-size: 11px;
+      display: inline-block;
+      font-size: 10px;
       font-weight: 700;
-      letter-spacing: 2px;
+      letter-spacing: 3.5px;
       text-transform: uppercase;
-      padding: 6px 14px;
-      margin-bottom: 20px;
-    }
-    .promo-badge-dot {
-      width: 6px;
-      height: 6px;
-      background: #4ade80;
-      border-radius: 50%;
-      animation: promoPulse 1.6s ease-in-out infinite;
-    }
-    @keyframes promoPulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.3; transform: scale(0.7); }
+      color: rgba(255,255,255,0.4);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 6px 16px;
+      margin-bottom: 40px;
     }
     .promo-headline {
       font-family: var(--font-display);
-      font-size: clamp(36px, 5vw, 64px);
+      font-size: clamp(52px, 8vw, 96px);
       font-weight: 900;
       font-style: italic;
       text-transform: uppercase;
-      letter-spacing: -2px;
-      line-height: 1;
+      letter-spacing: -3px;
+      line-height: 0.95;
       color: var(--white);
+      margin-bottom: 32px;
     }
     .promo-sub {
-      font-size: 16px;
-      color: rgba(255,255,255,0.55);
-      margin-top: 14px;
-      margin-bottom: 28px;
-      line-height: 1.6;
+      font-size: 13px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 1px;
+      margin-bottom: 48px;
+      text-transform: uppercase;
     }
     .promo-cta {
       display: inline-block;
-      background: #4ade80;
-      color: #000;
-      padding: 16px 44px;
-      font-family: var(--font-display);
-      font-size: 15px;
-      font-weight: 900;
-      font-style: italic;
-      letter-spacing: 1.5px;
+      border: 1px solid rgba(255,255,255,0.45);
+      color: var(--white);
+      padding: 14px 52px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
       text-transform: uppercase;
       text-decoration: none;
-      border: 2px solid #4ade80;
-      transition: background 0.25s, color 0.25s;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
     }
-    .promo-cta:hover { background: transparent; color: #4ade80; }
-    .promo-urgency {
-      font-size: 12px;
-      color: rgba(255,255,255,0.3);
-      margin-top: 16px;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-    .promo-visual {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 20px;
-    }
-    .promo-block {
-      text-align: center;
-      border: 1.5px solid rgba(255,255,255,0.12);
-      padding: 40px 48px;
-      min-width: 160px;
-    }
-    .promo-block.original { opacity: 0.4; }
-    .promo-block-num {
-      font-family: var(--font-display);
-      font-size: 80px;
-      font-weight: 900;
-      font-style: italic;
-      color: var(--white);
-      line-height: 1;
-      position: relative;
-      display: block;
-    }
-    .promo-block.original .promo-block-num::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: -6px; right: -6px;
-      height: 3px;
-      background: rgba(255,255,255,0.65);
-      transform: translateY(-50%) rotate(-10deg);
-    }
-    .promo-block-label {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.4);
-      margin-top: 14px;
-    }
-    .promo-block.discounted { border-color: rgba(74,222,128,0.35); }
-    .promo-block.discounted .promo-block-num { color: #4ade80; }
-    .promo-block.discounted .promo-block-label { color: rgba(74,222,128,0.6); }
-    .promo-arrow { font-size: 28px; color: rgba(255,255,255,0.2); line-height: 1; }
-    .promo-save-tag {
-      background: rgba(74,222,128,0.12);
-      border: 1px solid rgba(74,222,128,0.25);
-      color: #4ade80;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      padding: 4px 12px;
-      margin-top: 10px;
-      display: inline-block;
-    }
+    .promo-cta:hover { background: var(--white); border-color: var(--white); color: var(--black); }
 
     /* Promo pricing row in spaces section */
-    .pricing-row.promo-row { background: rgba(74,222,128,0.05); padding: 10px 0; }
+    .pricing-row.promo-row { padding: 13px 0; }
+    .pricing-row.promo-row span:first-child { color: rgba(255,255,255,0.65); }
     .pricing-row.promo-row .promo-original {
       text-decoration: line-through;
-      color: rgba(255,255,255,0.3);
+      color: rgba(255,255,255,0.25);
       font-size: 12px;
-      margin-right: 4px;
+      font-weight: 400;
+      margin-right: 6px;
     }
-    .pricing-row.promo-row .promo-price { color: #4ade80; font-weight: 700; font-size: 16px; }
+    .pricing-row.promo-row .promo-price { color: var(--white); font-weight: 600; font-size: 15px; }
     .promo-row-badge {
       font-size: 9px;
       font-weight: 700;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
       text-transform: uppercase;
-      color: #4ade80;
-      background: rgba(74,222,128,0.12);
-      border: 1px solid rgba(74,222,128,0.25);
-      padding: 2px 6px;
-      margin-left: 6px;
+      color: rgba(255,255,255,0.4);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 2px 7px;
+      margin-left: 8px;
       vertical-align: middle;
     }
 
     @media (max-width: 768px) {
-      .promo-inner { grid-template-columns: 1fr; gap: 40px; }
-      .promo-block { padding: 22px 24px; min-width: 110px; }
-      .promo-block-num { font-size: 48px; }
+      .promo-inner { padding: 0 8px; }
+      .promo-headline { letter-spacing: -2px; }
     }
 
     /* ── BOOKING MODAL PROMO ADDITIONS ── */
@@ -1247,30 +1161,11 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
 <!-- MAY PROMO BANNER -->
 <section id="may-promo">
   <div class="section-inner">
-    <div class="promo-inner">
-      <div class="scroll-reveal">
-        <div class="promo-badge">
-          <span class="promo-badge-dot"></span>
-          May Special — Ends 31 May
-        </div>
-        <div class="promo-headline">Book 3 Hours.<br>Pay for 2.</div>
-        <p class="promo-sub">Studio hire only. Select 3 hours for any May date and the discount applies automatically.</p>
-        <a href="#book" class="promo-cta" onclick="openBookingModal();return false;">Book Now</a>
-      </div>
-      <div class="scroll-reveal" data-delay="100">
-        <div class="promo-visual">
-          <div class="promo-block original">
-            <span class="promo-block-num">3</span>
-            <div class="promo-block-label">Hours booked</div>
-          </div>
-          <div class="promo-arrow">→</div>
-          <div class="promo-block discounted">
-            <span class="promo-block-num">2</span>
-            <div class="promo-block-label">Hours charged</div>
-            <div class="promo-save-tag">Save 1 hour</div>
-          </div>
-        </div>
-      </div>
+    <div class="promo-inner scroll-reveal">
+      <div class="promo-badge">May Special</div>
+      <div class="promo-headline">Book 3 Hours.<br>Pay for 2.</div>
+      <p class="promo-sub">Studio hire only &nbsp;·&nbsp; Valid throughout May</p>
+      <a href="#book" class="promo-cta" onclick="openBookingModal();return false;">Book Now</a>
     </div>
   </div>
 </section>
