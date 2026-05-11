@@ -1537,10 +1537,65 @@
       vertical-align: middle;
     }
 
+    /* ── OUR WORK — mobile accordion ── */
+    @media (max-width: 768px) {
+      /* Toggle heading */
+      #work-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        user-select: none;
+        -webkit-user-select: none;
+        margin-bottom: 0;
+        padding-bottom: 18px;
+        border-bottom: 1px solid rgba(0,0,0,0.12);
+      }
+      #work-toggle:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+      .work-toggle-icon {
+        font-size: 22px;
+        font-weight: 300;
+        line-height: 1;
+        opacity: 0.45;
+        flex-shrink: 0;
+        transition: transform 0.38s cubic-bezier(0.4,0,0.2,1),
+                    opacity  0.25s ease;
+      }
+      #work-toggle[aria-expanded="true"] .work-toggle-icon {
+        transform: rotate(45deg);
+        opacity: 0.7;
+      }
+      /* Collapsible panel */
+      .gallery-panel-outer {
+        display: grid;
+        grid-template-rows: 0fr;
+        transition: grid-template-rows 420ms cubic-bezier(0.4,0,0.2,1);
+        margin-top: 0;
+      }
+      .gallery-panel-outer.is-open {
+        grid-template-rows: 1fr;
+      }
+      .gallery-panel-inner {
+        min-height: 0;
+        overflow: hidden;
+      }
+      /* Top spacing inside panel once open */
+      .gallery-panel-inner .gallery-grid {
+        margin-top: 20px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .gallery-panel-outer { transition: none !important; }
+      .work-toggle-icon { transition: none !important; }
+    }
+
+    /* ── MAY PROMO — mobile fixes ── */
     @media (max-width: 768px) {
       #may-promo { padding: 90px 0 0; }
       .promo-ghost { display: none; }
-      .promo-headline { letter-spacing: -2px; }
+      /* Scale headline to fit exactly 2 lines without wrapping */
+      .promo-headline { font-size: 11vw; letter-spacing: -1.5px; line-height: 0.9; }
       .promo-content { padding: 0 20px 88px; }
       .promo-sub { font-size: 8px; letter-spacing: 1.5px; margin-bottom: 40px; }
     }
@@ -1876,27 +1931,37 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
     <div class="section-heading scroll-reveal">Photography</div>
     <p class="section-sub scroll-reveal" data-delay="100">Professional packages for your vision</p>
 
-    <div class="work-heading scroll-reveal" data-delay="150">Our Work</div>
-    <div class="gallery-grid">
-      <div class="gallery-item scroll-reveal" data-delay="0">
-        <div class="gallery-bg gallery-bg-fashion" style="width:100%;height:100%;position:absolute;inset:0;"></div>
-        <div class="gallery-label">
-          <strong>Fashion</strong>
-          <span>View Gallery</span>
-        </div>
-      </div>
-      <div class="gallery-item scroll-reveal" data-delay="100">
-        <div class="gallery-bg gallery-bg-product" style="width:100%;height:100%;position:absolute;inset:0;"></div>
-        <div class="gallery-label">
-          <strong>Product</strong>
-          <span>View Gallery</span>
-        </div>
-      </div>
-      <div class="gallery-item scroll-reveal" data-delay="200">
-        <div class="gallery-bg gallery-bg-creative" style="width:100%;height:100%;position:absolute;inset:0;"></div>
-        <div class="gallery-label">
-          <strong>Creative</strong>
-          <span>View Gallery</span>
+    <div class="work-heading scroll-reveal" data-delay="150"
+         id="work-toggle"
+         role="button" tabindex="0"
+         aria-expanded="false" aria-controls="gallery-panel">
+      <span>Our Work</span>
+      <span class="work-toggle-icon" aria-hidden="true">+</span>
+    </div>
+    <div class="gallery-panel-outer" id="gallery-panel" role="region" aria-label="Our Work galleries">
+      <div class="gallery-panel-inner">
+        <div class="gallery-grid">
+          <div class="gallery-item scroll-reveal" data-delay="0">
+            <div class="gallery-bg gallery-bg-fashion" style="width:100%;height:100%;position:absolute;inset:0;"></div>
+            <div class="gallery-label">
+              <strong>Fashion</strong>
+              <span>View Gallery</span>
+            </div>
+          </div>
+          <div class="gallery-item scroll-reveal" data-delay="100">
+            <div class="gallery-bg gallery-bg-product" style="width:100%;height:100%;position:absolute;inset:0;"></div>
+            <div class="gallery-label">
+              <strong>Product</strong>
+              <span>View Gallery</span>
+            </div>
+          </div>
+          <div class="gallery-item scroll-reveal" data-delay="200">
+            <div class="gallery-bg gallery-bg-creative" style="width:100%;height:100%;position:absolute;inset:0;"></div>
+            <div class="gallery-label">
+              <strong>Creative</strong>
+              <span>View Gallery</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -3950,6 +4015,28 @@ window.applyDiscountCode = async function () {
       }
     });
   });
+})();
+
+// Our Work mobile accordion
+(function () {
+  var toggle = document.getElementById('work-toggle');
+  var panel  = document.getElementById('gallery-panel');
+  if (!toggle || !panel) return;
+
+  function activate() {
+    var open = toggle.getAttribute('aria-expanded') === 'true';
+    var opening = !open;
+    toggle.setAttribute('aria-expanded', String(opening));
+    panel.classList.toggle('is-open', opening);
+  }
+
+  // Only wire up click on mobile; on desktop the panel is always visible
+  if (window.matchMedia('(max-width: 768px)').matches) {
+    toggle.addEventListener('click', activate);
+    toggle.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); }
+    });
+  }
 })();
 
 // Reset discount when modal reopens
