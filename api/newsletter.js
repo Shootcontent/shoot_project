@@ -45,7 +45,7 @@ async function sendWelcomeEmail(email) {
   </table>
 </body></html>`;
 
-  return brevo('/smtp/email', 'POST', {
+  return await brevo('/smtp/email', 'POST', {
     sender: { name: FROM_NAME, email: FROM_EMAIL },
     to: [{ email }],
     subject: 'Welcome to SHOOT. — your exclusive code inside',
@@ -104,10 +104,17 @@ export default async function handler(req, res) {
       throw new Error(`Brevo create returned ${created.status}: ${JSON.stringify(created.data)}`);
     }
 
-    // Fire and forget — welcome email
-    sendWelcomeEmail(addr).catch(err => console.error('Welcome email failed:', err));
+    // Send welcome email — await so failures are logged and surfaced
+    const emailResult = await sendWelcomeEmail(addr);
+    if (emailResult.status >= 400) {
+      // Contact was created but email failed. Log the full Brevo error for debugging.
+      console.error('[newsletter] Welcome email failed:', JSON.stringify(emailResult.data));
+      // Still return success for the signup — contact is stored.
+      // Common cause: sender not verified in Brevo → Settings → Senders.
+      return res.status(200).json({ status: 'success', email_sent: false });
+    }
 
-    return res.status(200).json({ status: 'success' });
+    return res.status(200).json({ status: 'success', email_sent: true });
 
   } catch (err) {
     console.error('[newsletter]', err);
