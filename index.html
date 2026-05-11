@@ -3384,15 +3384,27 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
   const COOLDOWN_MS    = 30 * 24 * 60 * 60 * 1000; // 30 days
   const SHOW_DELAY_MS  = 10000;
 
+  // Dev reset: append ?reset_popup to any URL to clear the cooldown
+  (function devReset() {
+    try {
+      if (/[?&]reset_popup/.test(window.location.search)) {
+        localStorage.removeItem(STORAGE_KEY);
+        console.log('[SHOOT] Popup cooldown cleared. Remove ?reset_popup to test auto-show.');
+      }
+    } catch {}
+  })();
+
   function shouldShow() {
     try {
       const ts = localStorage.getItem(STORAGE_KEY);
       if (!ts) return true;
       return Date.now() - parseInt(ts, 10) > COOLDOWN_MS;
-    } catch { return false; }
+    } catch { return true; } // fallback: show if localStorage unavailable
   }
 
-  function markShown() {
+  // Stamp cooldown only after popup is DISMISSED (not when it opens),
+  // so the 30-day window starts from the last time the user actively saw it.
+  function markDismissed() {
     try { localStorage.setItem(STORAGE_KEY, Date.now().toString()); } catch {}
   }
 
@@ -3401,7 +3413,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
     if (!el) return;
     el.style.display = 'flex';
     document.body.style.overflow = 'hidden';
-    markShown();
+    // No stamp here — stamp on dismiss so cooldown starts from last seen date
   };
 
   window.closeNewsletter = function () {
@@ -3409,6 +3421,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
     const overlay = document.getElementById('np-overlay');
     const popup   = document.getElementById('newsletterPopup');
     if (!card) return;
+    markDismissed(); // stamp cooldown at dismiss time, not open time
     card.classList.add('np-hiding');
     overlay.classList.add('np-overlay-hiding');
     setTimeout(() => {
@@ -3442,6 +3455,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
       if (data.status === 'success') {
         document.getElementById('np-form-wrap').style.display = 'none';
         document.getElementById('np-success').style.display = 'block';
+        markDismissed(); // signed up — suppress for full cooldown period
         if (typeof gtag !== 'undefined') gtag('event', 'newsletter_signup', { email });
         if (typeof fbq  !== 'undefined') fbq('trackCustom', 'NewsletterSignup');
         setTimeout(closeNewsletter, 4000);
