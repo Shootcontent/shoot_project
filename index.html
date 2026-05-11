@@ -1972,6 +1972,26 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
 .bm-submit-btn:hover { background:#222; }
 .bm-submit-btn:disabled { background:#999;cursor:not-allowed; }
 
+/* Discount code row */
+.bm-discount-row { display:flex;gap:8px;margin-top:6px; }
+.bm-discount-input {
+  flex:1;padding:10px 12px;border:1.5px solid #e0e0e0;border-radius:6px;
+  font-family:inherit;font-size:14px;color:#111;outline:none;
+  transition:border-color 0.2s;text-transform:uppercase;letter-spacing:1px;
+}
+.bm-discount-input:focus { border-color:#000; }
+.bm-discount-input:disabled { background:#f5f5f5;color:#999; }
+.bm-discount-apply-btn {
+  padding:10px 18px;background:#000;color:#fff;border:none;border-radius:6px;
+  font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.5px;
+  cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background 0.2s;
+}
+.bm-discount-apply-btn:hover:not(:disabled) { background:#333; }
+.bm-discount-apply-btn:disabled { background:#ccc;cursor:not-allowed; }
+.bm-discount-status { font-size:11px;margin-top:7px;min-height:16px; }
+.bm-discount-status--ok  { color:#16a34a; }
+.bm-discount-status--err { color:#dc2626; }
+
 /* Review step */
 .bm-review-grid { display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px; }
 .bm-review-item label { font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#888;display:block;margin-bottom:4px; }
@@ -2412,6 +2432,16 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
                 <input type="tel" id="bm-phone" placeholder="+27 000 000 0000" />
               </div>
             </div>
+            <div class="bm-form-group" style="margin-top:4px;">
+              <label>Discount Code <span style="color:#bbb;font-weight:400;letter-spacing:0;text-transform:none;font-size:10px;">(optional)</span></label>
+              <div class="bm-discount-row">
+                <input class="bm-discount-input" id="bm-discount-input" type="text"
+                  placeholder="e.g. SHOOT10" maxlength="20" autocomplete="off"
+                  oninput="this.value=this.value.toUpperCase()">
+                <button class="bm-discount-apply-btn" id="bm-discount-btn" type="button" onclick="applyDiscountCode()">Apply</button>
+              </div>
+              <div class="bm-discount-status" id="bm-discount-status"></div>
+            </div>
             <div class="bm-check-row">
               <input type="checkbox" id="bm-terms" />
               <label for="bm-terms">I have read and agree to the <a href="#terms" onclick="closeBookingModal()">Terms &amp; Conditions</a>. I understand full payment is required to confirm my booking.</label>
@@ -2486,6 +2516,10 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
       <div class="bm-price-row" id="sb-surcharge-row" style="display:none;">
         <span class="bm-price-label" id="sb-surcharge-label">After-hours surcharge:</span>
         <span class="bm-price-val" id="sb-surcharge">R0</span>
+      </div>
+      <div class="bm-price-row" id="sb-discount-row" style="display:none;">
+        <span class="bm-price-label" id="sb-discount-label">Discount:</span>
+        <span class="bm-price-val" id="sb-discount" style="color:#4ade80;">−R0</span>
       </div>
       <div class="bm-price-divider"></div>
       <div class="bm-total-row">
@@ -2874,9 +2908,13 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
     const { surchargeHours, surchargeLabel } = getBookingConditions(BM.date, BM.time, BM.duration, BM.extraHours);
     const surchargeTotal = Math.round(surchargeHours * SURCHARGE_RATE);
 
+    const subtotal      = studioTotal + photoTotal + addonTotal + extraTotal + cameraTotal + surchargeTotal;
+    const discountPct   = (typeof DC !== 'undefined' && DC.applied) ? DC.discount : 0;
+    const discountAmt   = discountPct ? Math.round(subtotal * discountPct / 100) : 0;
     return { studioTotal, studioOriginal, promoDiscount, promoApplied: promo.applied,
              photoTotal, addonTotal, extraTotal, cameraTotal, surchargeTotal, surchargeLabel,
-             total: studioTotal + photoTotal + addonTotal + extraTotal + cameraTotal + surchargeTotal };
+             discountPct, discountAmt,
+             total: subtotal - discountAmt };
   }
 
   function fmt(n) { return 'R' + n.toLocaleString('en-ZA'); }
@@ -2905,7 +2943,8 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
       minDurationRequired ? 'block' : 'none';
 
     const { studioTotal, studioOriginal, promoDiscount, promoApplied,
-            photoTotal, addonTotal, extraTotal, cameraTotal, surchargeTotal, total } = calcTotal();
+            photoTotal, addonTotal, extraTotal, cameraTotal, surchargeTotal,
+            discountPct, discountAmt, total } = calcTotal();
 
     // Studio price row: show strikethrough original when promo active
     const sbStudio = document.getElementById('sb-studio');
@@ -2952,6 +2991,16 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
       surchargeRow.style.display = '';
     } else {
       surchargeRow.style.display = 'none';
+    }
+
+    // Discount code row
+    const discountRow = document.getElementById('sb-discount-row');
+    if (discountAmt > 0) {
+      document.getElementById('sb-discount-label').textContent = DC.code + ' (' + discountPct + '% off):';
+      document.getElementById('sb-discount').textContent = '−' + fmt(discountAmt);
+      discountRow.style.display = '';
+    } else {
+      discountRow.style.display = 'none';
     }
 
     document.getElementById('sb-total').textContent = fmt(total);
@@ -3078,6 +3127,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
     const durLabels = { '90min': '90 minutes', '2hrs': '2 hours', '3hrs': '3 hours', halfday: 'Half day (5hrs)', fullday: 'Full day (10hrs)' };
     const { total, promoApplied, promoDiscount } = calcTotal();
 
+    const { discountPct, discountAmt } = calcTotal();
     const formData = new FormData();
     formData.append('firstName', document.getElementById('bm-first').value);
     formData.append('lastName',  document.getElementById('bm-last').value);
@@ -3105,6 +3155,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
       (cameraTotal > 0 ? `Rental Total: ${fmt(cameraTotal)}\n` : '') +
       `Start Time: ${BM.time}\n` +
       (promoApplied ? `PROMO APPLIED: May Special — Book 3 hours, pay for 2 (Save ${fmt(promoDiscount)})\n` : '') +
+      (DC.applied ? `DISCOUNT CODE: ${DC.code} (${DC.discount}% off — saving ${fmt(discountAmt)})\n` : '') +
       `Estimated Total: ${fmt(total)}`
     );
     formData.append('terms', 'agreed');
@@ -3120,6 +3171,14 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
         if (typeof fbq !== 'undefined') {
           fbq('track', 'Lead', { value: total, currency: 'ZAR' });
           fbq('track', 'Purchase', { value: total, currency: 'ZAR' });
+        }
+        // Redeem discount code if one was applied
+        if (DC.applied && DC.code) {
+          fetch('/api/redeem-discount', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: document.getElementById('bm-email').value.trim(), code: DC.code }),
+          }).catch(() => {});
         }
         goToStep(4); return;
       }
@@ -3161,6 +3220,312 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
       if (opt3hrs) opt3hrs.textContent = '3 hours';
     }
   });
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     NEWSLETTER POPUP
+═══════════════════════════════════════════════════════════ -->
+<div id="newsletterPopup" aria-modal="true" role="dialog" aria-label="Join the SHOOT. mailing list" style="display:none;">
+<style>
+#newsletterPopup {
+  position: fixed; inset: 0; z-index: 2000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+.np-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  cursor: pointer;
+  animation: npFadeIn 0.4s ease both;
+}
+.np-card {
+  position: relative; z-index: 1;
+  background: #0a0a0a;
+  width: 100%; max-width: 480px;
+  padding: 0;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.07);
+  animation: npSlideUp 0.45s cubic-bezier(0.16,1,0.3,1) both;
+}
+.np-top-bar {
+  height: 2px;
+  background: var(--white);
+  width: 100%;
+}
+.np-inner {
+  padding: 40px 44px 44px;
+}
+.np-label {
+  font-size: 9px; font-weight: 700; letter-spacing: 3.5px;
+  text-transform: uppercase; color: rgba(255,255,255,0.3);
+  margin-bottom: 28px;
+}
+.np-headline {
+  font-size: 38px; font-weight: 900; font-style: italic;
+  letter-spacing: -1.5px; line-height: 1; color: #fff;
+  margin-bottom: 16px;
+}
+.np-sub {
+  font-size: 13px; line-height: 1.7; color: rgba(255,255,255,0.45);
+  margin-bottom: 32px;
+}
+.np-sub em { color: rgba(255,255,255,0.7); font-style: normal; }
+.np-form { position: relative; }
+.np-row {
+  display: flex; gap: 0;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.np-input {
+  flex: 1; padding: 14px 18px;
+  background: transparent; border: none; outline: none;
+  font-family: inherit; font-size: 14px; color: #fff;
+}
+.np-input::placeholder { color: rgba(255,255,255,0.3); }
+.np-btn {
+  padding: 14px 24px; background: #fff; color: #000; border: none;
+  font-family: inherit; font-size: 11px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer;
+  white-space: nowrap; flex-shrink: 0;
+  transition: background 0.2s, color 0.2s;
+}
+.np-btn:hover { background: #e0e0e0; }
+.np-btn:disabled { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.4); cursor: not-allowed; }
+.np-trap { position: absolute; left: -9999px; opacity: 0; height: 0; }
+.np-status {
+  font-size: 12px; margin-top: 12px; min-height: 18px;
+  color: rgba(255,255,255,0.5); display: none;
+}
+.np-status.np-status--ok  { color: rgba(255,255,255,0.7); display: block; }
+.np-status.np-status--err { color: #f87171; display: block; }
+.np-dismiss {
+  margin-top: 22px; display: block; text-align: center;
+  font-size: 11px; color: rgba(255,255,255,0.25);
+  cursor: pointer; letter-spacing: 0.5px;
+  background: none; border: none; font-family: inherit;
+  transition: color 0.2s; padding: 0;
+}
+.np-dismiss:hover { color: rgba(255,255,255,0.5); }
+.np-success {
+  display: none; text-align: center; padding: 20px 0 4px;
+}
+.np-success h3 {
+  font-size: 22px; font-weight: 900; font-style: italic;
+  color: #fff; letter-spacing: -0.5px; margin-bottom: 10px;
+}
+.np-success p { font-size: 13px; color: rgba(255,255,255,0.45); line-height: 1.7; }
+@keyframes npFadeIn  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes npSlideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes npSlideDown { from { opacity:1; transform:translateY(0); } to { opacity:0; transform:translateY(20px); } }
+.np-hiding { animation: npSlideDown 0.3s ease both; }
+.np-overlay-hiding { animation: npFadeIn 0.3s ease reverse both; }
+@media (max-width: 540px) {
+  .np-inner { padding: 32px 28px 36px; }
+  .np-headline { font-size: 30px; }
+  .np-row { flex-direction: column; }
+  .np-btn { padding: 14px; width: 100%; }
+}
+</style>
+<div class="np-overlay" id="np-overlay" onclick="closeNewsletter()"></div>
+<div class="np-card" id="np-card">
+  <div class="np-top-bar"></div>
+  <div class="np-inner">
+    <div class="np-label">SHOOT. Photographic Studios</div>
+    <div class="np-headline">Join the<br>Studio.</div>
+    <p class="np-sub">
+      Creative professionals, brands, and directors.<br>
+      <em>First booking: 10% off with code SHOOT10.</em>
+    </p>
+    <div id="np-form-wrap">
+      <form class="np-form" onsubmit="submitNewsletter(event)">
+        <input class="np-trap" type="text" name="_trap" tabindex="-1" autocomplete="off">
+        <div class="np-row">
+          <input class="np-input" id="np-email" type="email" name="email"
+            placeholder="Your email address" required autocomplete="email">
+          <button class="np-btn" id="np-submit-btn" type="submit">Join</button>
+        </div>
+      </form>
+      <div class="np-status" id="np-status"></div>
+      <button class="np-dismiss" onclick="closeNewsletter()">Not now</button>
+    </div>
+    <div class="np-success" id="np-success">
+      <h3>You're in.</h3>
+      <p>Check your inbox for your welcome email<br>and exclusive discount code.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     POPUP + DISCOUNT JS
+═══════════════════════════════════════════════════════════ -->
+<script>
+/* ── Newsletter Popup ── */
+(function () {
+  const STORAGE_KEY    = 'shoot_popup_ts';
+  const COOLDOWN_MS    = 30 * 24 * 60 * 60 * 1000; // 30 days
+  const SHOW_DELAY_MS  = 10000;
+
+  function shouldShow() {
+    try {
+      const ts = localStorage.getItem(STORAGE_KEY);
+      if (!ts) return true;
+      return Date.now() - parseInt(ts, 10) > COOLDOWN_MS;
+    } catch { return false; }
+  }
+
+  function markShown() {
+    try { localStorage.setItem(STORAGE_KEY, Date.now().toString()); } catch {}
+  }
+
+  window.openNewsletter = function () {
+    const el = document.getElementById('newsletterPopup');
+    if (!el) return;
+    el.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    markShown();
+  };
+
+  window.closeNewsletter = function () {
+    const card    = document.getElementById('np-card');
+    const overlay = document.getElementById('np-overlay');
+    const popup   = document.getElementById('newsletterPopup');
+    if (!card) return;
+    card.classList.add('np-hiding');
+    overlay.classList.add('np-overlay-hiding');
+    setTimeout(() => {
+      popup.style.display = 'none';
+      card.classList.remove('np-hiding');
+      overlay.classList.remove('np-overlay-hiding');
+      document.body.style.overflow = '';
+    }, 320);
+  };
+
+  window.submitNewsletter = async function (e) {
+    e.preventDefault();
+    const email   = document.getElementById('np-email').value.trim();
+    const btn     = document.getElementById('np-submit-btn');
+    const status  = document.getElementById('np-status');
+    const trap    = document.querySelector('.np-trap');
+
+    btn.disabled = true;
+    btn.textContent = '...';
+    status.className = 'np-status';
+    status.textContent = '';
+
+    try {
+      const res = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, _trap: trap?.value || '' }),
+      });
+      const data = await res.json();
+
+      if (data.status === 'success') {
+        document.getElementById('np-form-wrap').style.display = 'none';
+        document.getElementById('np-success').style.display = 'block';
+        if (typeof gtag !== 'undefined') gtag('event', 'newsletter_signup', { email });
+        if (typeof fbq  !== 'undefined') fbq('trackCustom', 'NewsletterSignup');
+        setTimeout(closeNewsletter, 4000);
+      } else if (data.status === 'existing') {
+        status.textContent  = data.message;
+        status.className    = 'np-status np-status--ok';
+        btn.disabled = false; btn.textContent = 'Join';
+      } else {
+        throw new Error(data.error || 'Unknown error');
+      }
+    } catch (err) {
+      status.textContent = err.message || 'Something went wrong. Please try again.';
+      status.className   = 'np-status np-status--err';
+      btn.disabled = false; btn.textContent = 'Join';
+    }
+  };
+
+  // Dismiss on Escape
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && document.getElementById('newsletterPopup')?.style.display !== 'none') {
+      closeNewsletter();
+    }
+  });
+
+  // Schedule display
+  if (shouldShow()) {
+    setTimeout(function () {
+      // Don't show if booking modal is open
+      const modal = document.getElementById('bookingModal');
+      if (modal && modal.style.display === 'block') return;
+      openNewsletter();
+    }, SHOW_DELAY_MS);
+  }
+})();
+
+/* ── Discount Code (booking modal) ── */
+const DC = { code: null, discount: 0, applied: false };
+
+window.applyDiscountCode = async function () {
+  const input  = document.getElementById('bm-discount-input');
+  const email  = document.getElementById('bm-email').value.trim();
+  const status = document.getElementById('bm-discount-status');
+  const btn    = document.getElementById('bm-discount-btn');
+
+  const code = input.value.trim().toUpperCase();
+  if (!code) return;
+  if (!email) {
+    status.textContent = 'Enter your email above before applying a code.';
+    status.className   = 'bm-discount-status bm-discount-status--err';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '…';
+  status.className = 'bm-discount-status';
+  status.textContent = '';
+
+  try {
+    const res  = await fetch('/api/validate-discount', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, code }),
+    });
+    const data = await res.json();
+
+    if (data.valid) {
+      DC.code     = data.code;
+      DC.discount = data.discount;
+      DC.applied  = true;
+      status.textContent = data.message;
+      status.className   = 'bm-discount-status bm-discount-status--ok';
+      input.disabled     = true;
+      btn.textContent    = '✓ Applied';
+      updateSidebar();
+    } else {
+      DC.applied  = false;
+      DC.discount = 0;
+      status.textContent = data.message || 'Invalid code.';
+      status.className   = 'bm-discount-status bm-discount-status--err';
+      btn.disabled = false; btn.textContent = 'Apply';
+      updateSidebar();
+    }
+  } catch {
+    status.textContent = 'Could not validate. Please try again.';
+    status.className   = 'bm-discount-status bm-discount-status--err';
+    btn.disabled = false; btn.textContent = 'Apply';
+  }
+};
+
+// Reset discount when modal reopens
+const _origOpen = window.openBookingModal;
+window.openBookingModal = function (preStudio) {
+  DC.code = null; DC.discount = 0; DC.applied = false;
+  const inp = document.getElementById('bm-discount-input');
+  const sts = document.getElementById('bm-discount-status');
+  const btn = document.getElementById('bm-discount-btn');
+  if (inp) { inp.value = ''; inp.disabled = false; }
+  if (sts) { sts.textContent = ''; sts.className = 'bm-discount-status'; }
+  if (btn) { btn.disabled = false; btn.textContent = 'Apply'; }
+  _origOpen(preStudio);
+};
 </script>
 </body>
 </html>
