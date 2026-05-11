@@ -135,41 +135,44 @@
     }
 
     .hero-logo-img {
-      max-width: 520px;
+      max-width: 400px;
       width: 100%;
       height: auto;
-      animation: fadeUp 0.8s ease both;
+      /* PNG has ~35% blank at bottom — pull content up into that space */
+      margin-bottom: -88px;
       mix-blend-mode: screen;
+      animation: fadeUp 0.8s ease both;
     }
 
     .hero-desc {
-      max-width: 580px;
-      font-size: 16px;
+      max-width: 480px;
+      font-size: 14px;
       font-weight: 400;
-      color: rgba(255,255,255,0.65);
-      line-height: 1.7;
-      margin-top: 28px;
-      animation: fadeUp 0.8s 0.25s ease both;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.75;
+      margin-top: 0;
+      letter-spacing: 0.2px;
+      animation: fadeUp 0.8s 0.2s ease both;
     }
 
     .hero-cta {
-      margin-top: 48px;
+      margin-top: 32px;
       display: inline-block;
-      background: var(--white);
-      color: var(--black);
-      padding: 20px 56px;
+      background: transparent;
+      color: var(--white);
+      padding: 13px 44px;
       font-family: var(--font-display);
-      font-size: 18px;
-      font-weight: 900;
-      font-style: italic;
-      letter-spacing: 2px;
+      font-size: 11px;
+      font-weight: 700;
+      font-style: normal;
+      letter-spacing: 3px;
       text-transform: uppercase;
       text-decoration: none;
-      border: 2px solid var(--white);
-      transition: background 0.25s, color 0.25s;
-      animation: fadeUp 0.8s 0.35s ease both;
+      border: 1px solid rgba(255,255,255,0.5);
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+      animation: fadeUp 0.8s 0.3s ease both;
     }
-    .hero-cta:hover { background: transparent; color: var(--white); }
+    .hero-cta:hover { background: var(--white); color: var(--black); border-color: var(--white); }
 
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(30px); }
