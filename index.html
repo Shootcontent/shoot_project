@@ -1263,7 +1263,18 @@
       overflow: hidden;
       background: #000;
       padding: 130px 0 0;
-      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    /* Ambient green glow at the section entry — intentional cinematic transition */
+    #may-promo::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 70%;
+      height: 1px;
+      background: linear-gradient(to right, transparent 0%, rgba(182,255,0,0.18) 50%, transparent 100%);
+      pointer-events: none;
+      z-index: 3;
     }
 
     /* Floating green atmospheric blocks */
@@ -1592,7 +1603,7 @@
 
     /* ── MAY PROMO — mobile fixes ── */
     @media (max-width: 768px) {
-      #may-promo { padding: 90px 0 0; }
+      #may-promo { padding: 52px 0 0; }
       .promo-ghost { display: none; }
       /* Scale headline to fit exactly 2 lines without wrapping */
       .promo-headline { font-size: 11vw; letter-spacing: -1.5px; line-height: 0.9; }
