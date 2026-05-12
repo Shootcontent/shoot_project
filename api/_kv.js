@@ -1,11 +1,25 @@
 /**
- * Vercel KV (Upstash Redis) REST API helper.
- * Uses the raw REST API via fetch — no npm package required.
- * Env vars: KV_REST_API_URL, KV_REST_API_TOKEN (auto-injected by Vercel KV).
+ * Redis helper using ioredis — works with standard redis:// URLs (Redis Cloud).
+ * Env var: REDIS_URL  e.g. redis://default:password@host:port
  */
 
-const KV_URL   = process.env.KV_REST_API_URL;
-const KV_TOKEN = process.env.KV_REST_API_TOKEN;
+import Redis from 'ioredis';
+
+// Reuse connection across warm lambda invocations
+let _client = null;
+
+function getClient() {
+  if (!_client || _client.status === 'end' || _client.status === 'close') {
+    if (!process.env.REDIS_URL) throw new Error('REDIS_URL is not configured');
+    _client = new Redis(process.env.REDIS_URL, {
+      maxRetriesPerRequest: 3,
+      connectTimeout:       5000,
+      enableOfflineQueue:   false,
+    });
+    _client.on('error', err => console.error('[kv] Redis error:', err.message));
+  }
+  return _client;
+}
 
 /**
  * Execute a single Redis command.
@@ -14,43 +28,21 @@ const KV_TOKEN = process.env.KV_REST_API_TOKEN;
  * kv('DEL', 'key')                            → number
  * kv('KEYS', 'pattern:*')                     → string[]
  */
-export async function kv(...args) {
-  if (!KV_URL || !KV_TOKEN) throw new Error('KV not configured (KV_REST_API_URL / KV_REST_API_TOKEN missing)');
-
-  const res = await fetch(KV_URL, {
-    method:  'POST',
-    headers: { Authorization: `Bearer ${KV_TOKEN}`, 'Content-Type': 'application/json' },
-    body:    JSON.stringify(args),
-  });
-
-  if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw new Error(`KV HTTP ${res.status}: ${text}`);
-  }
-
-  const { result, error } = await res.json();
-  if (error) throw new Error(`KV error: ${error}`);
-  return result;
+export async function kv(command, ...args) {
+  return getClient().call(command, ...args);
 }
 
 /**
  * Execute multiple commands in a single pipeline round-trip.
- * Returns an array of results in the same order.
  */
 export async function kvPipeline(commands) {
-  if (!KV_URL || !KV_TOKEN) throw new Error('KV not configured');
-
-  const res = await fetch(`${KV_URL}/pipeline`, {
-    method:  'POST',
-    headers: { Authorization: `Bearer ${KV_TOKEN}`, 'Content-Type': 'application/json' },
-    body:    JSON.stringify(commands),
-  });
-
-  if (!res.ok) throw new Error(`KV pipeline HTTP ${res.status}`);
-
-  const items = await res.json();
-  return items.map(({ result, error }) => {
-    if (error) throw new Error(`KV pipeline error: ${error}`);
+  const pipeline = getClient().pipeline();
+  for (const [command, ...args] of commands) {
+    pipeline.call(command, ...args);
+  }
+  const results = await pipeline.exec();
+  return results.map(([err, result]) => {
+    if (err) throw err;
     return result;
   });
 }
