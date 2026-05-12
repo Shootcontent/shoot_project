@@ -3679,6 +3679,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
   async function processPayment() {
     const btn    = document.getElementById('bm-pay-btn');
     const errDiv = document.getElementById('bm-pay-error');
+    const modal  = document.getElementById('bookingModal');
     errDiv.style.display = 'none';
     btn.disabled    = true;
     btn.textContent = 'Loading payment…';
@@ -3702,17 +3703,21 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
       btn.disabled    = false;
       btn.textContent = `Pay ${fmt(total)} Now`;
 
+      // Drop modal z-index so Yoco popup renders on top, restore in callback
+      modal.style.zIndex = '1';
+
       yoco.showPopup({
         amountInCents,
         currency:    'ZAR',
         name:        'SHOOT. Studios',
         description,
         callback: async function (result) {
+          modal.style.zIndex = '1000'; // Restore modal z-index
           if (result.error) {
-            errDiv.textContent  = result.error.message || 'Payment declined. Please try again.';
+            errDiv.textContent   = result.error.message || 'Payment declined. Please try again.';
             errDiv.style.display = 'block';
-            btn.disabled        = false;
-            btn.textContent     = 'Try Again';
+            btn.disabled         = false;
+            btn.textContent      = 'Try Again';
             return;
           }
           btn.disabled    = true;
@@ -3721,6 +3726,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
         },
       });
     } catch (err) {
+      modal.style.zIndex = '1000'; // Restore on error
       console.error('[processPayment]', err);
       errDiv.textContent   = 'Could not load payment. Please refresh the page and try again.';
       errDiv.style.display = 'block';
