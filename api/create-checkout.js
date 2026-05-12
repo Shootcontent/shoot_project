@@ -138,8 +138,8 @@ async function loadIntervals(studio, date) {
 
     if (field.startsWith('p:')) {
       const bId = field.slice(2);
-      const exists = await kv('EXISTS', `booking:pending:${bId}`);
-      if (!exists) { stale.push(field); continue; } // expired pending → skip
+      const stillPending = await kv('GET', `booking:pending:${bId}`);
+      if (!stillPending) { stale.push(field); continue; } // expired pending → skip
     }
     valid.push({ startMins, endMins });
   }
