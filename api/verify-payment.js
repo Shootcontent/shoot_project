@@ -88,11 +88,21 @@ async function sendEmails(booking) {
     `Txn:      ${booking.transactionId || '—'}\n` +
     `Status:   CONFIRMED (paid)`;
 
-  const post = p => fetch(BREVO_API_URL, {
-    method: 'POST',
-    headers: { 'api-key': apiKey, 'Content-Type': 'application/json' },
-    body:    JSON.stringify(p),
-  }).catch(e => console.error('[verify-payment] email:', e));
+  const post = async p => {
+    try {
+      const r = await fetch(BREVO_API_URL, {
+        method:  'POST',
+        headers: { 'api-key': apiKey, 'Content-Type': 'application/json' },
+        body:    JSON.stringify(p),
+      });
+      if (!r.ok) {
+        const body = await r.text();
+        console.error('[verify-payment] Brevo error', r.status, body);
+      }
+    } catch (e) {
+      console.error('[verify-payment] email fetch failed:', e.message);
+    }
+  };
 
   await post({
     sender:      { name: 'SHOOT. Studios', email: from },
