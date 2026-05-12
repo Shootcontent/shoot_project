@@ -3259,12 +3259,18 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
     }
 
     updateSidebar();
+    // Re-evaluate blocked slots whenever duration changes
+    fetchAvailability();
   }
 
   function changeExtraHours(delta) {
     BM.extraHours = Math.max(0, Math.min(8, BM.extraHours + delta));
     document.getElementById('bm-extra-val').textContent = BM.extraHours;
     updateSidebar();
+    // Extra hours extend the booking window — re-check which slots are still free
+    applyAvailability(_availCache[
+      Object.keys(BM.studios).filter(id => BM.studios[id]).sort().join(',') + ':' + BM.date
+    ] || {});
   }
 
   // ── Photo package ──
@@ -3603,37 +3609,68 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
   // ══════════════════════════════════════════
   let _availCache = {};
 
+  // Duration in minutes — must match server-side DURATION_MINS
+  const FRONTEND_DUR_MINS = { '90min': 90, '2hrs': 120, '3hrs': 180, halfday: 300, fullday: 600 };
+
+  function timeToMins(t) {
+    const [h, m] = t.split(':').map(Number);
+    return h * 60 + m;
+  }
+
   async function fetchAvailability() {
     const selectedStudios = Object.keys(BM.studios).filter(id => BM.studios[id]);
     if (!BM.date || selectedStudios.length === 0) return;
+    // Cache key includes duration because blocked slots differ by duration
     const cacheKey = selectedStudios.slice().sort().join(',') + ':' + BM.date;
-    if (_availCache[cacheKey]) { applyAvailability(_availCache[cacheKey]); return; }
+    if (_availCache[cacheKey]) {
+      applyAvailability(_availCache[cacheKey]);
+      return;
+    }
     try {
       const r = await fetch(`/api/check-availability?date=${BM.date}&studios=${selectedStudios.join(',')}`);
       if (!r.ok) return;
       const data = await r.json();
-      _availCache[cacheKey] = data.bookedSlots || {};
+      _availCache[cacheKey] = data.intervals || {};
       applyAvailability(_availCache[cacheKey]);
     } catch (e) { /* silently fail — availability check is non-blocking */ }
   }
 
-  function applyAvailability(bookedSlots) {
+  /**
+   * Disables time-slot options that would overlap an existing booking.
+   * Uses full interval overlap logic: newStart < existingEnd && newEnd > existingStart
+   */
+  function applyAvailability(intervals) {
     const selectedStudios = Object.keys(BM.studios).filter(id => BM.studios[id]);
-    const booked = new Set();
-    selectedStudios.forEach(s => (bookedSlots[s] || []).forEach(t => booked.add(t)));
+    // Collect all booked intervals across selected studios
+    const bookedIntervals = [];
+    selectedStudios.forEach(s => (intervals[s] || []).forEach(iv => bookedIntervals.push(iv)));
+
+    const durMins = (FRONTEND_DUR_MINS[BM.duration] || 0) + ((BM.extraHours || 0) * 60);
     const sel = document.getElementById('bm-time');
+
     sel.querySelectorAll('option').forEach(opt => {
       if (!opt.value) return;
-      if (booked.has(opt.value)) {
-        opt.disabled = true;
-        opt.style.color = '#bbb';
-        if (!opt.dataset.orig) opt.dataset.orig = opt.textContent;
-        opt.textContent = opt.dataset.orig.replace(/ — Booked$/, '') + ' — Booked';
-        if (BM.time === opt.value) { BM.time = ''; sel.value = ''; updateSidebar(); }
-      } else {
-        opt.disabled = false;
-        opt.style.color = '';
-        if (opt.dataset.orig) { opt.textContent = opt.dataset.orig; }
+      if (!opt.dataset.orig) opt.dataset.orig = opt.textContent;
+
+      const slotStart = timeToMins(opt.value);
+      const slotEnd   = slotStart + (durMins || 0);
+
+      const blocked = durMins > 0 && bookedIntervals.some(iv => {
+        const ivStart = timeToMins(iv.start);
+        const ivEnd   = timeToMins(iv.end);
+        return slotStart < ivEnd && slotEnd > ivStart;
+      });
+
+      opt.disabled = blocked;
+      opt.style.color = blocked ? '#bbb' : '';
+      opt.textContent = blocked
+        ? opt.dataset.orig.replace(/ — Unavailable$/, '') + ' — Unavailable'
+        : opt.dataset.orig;
+
+      if (blocked && BM.time === opt.value) {
+        BM.time = '';
+        sel.value = '';
+        updateSidebar();
       }
     });
   }

@@ -1,8 +1,21 @@
 /**
  * GET /api/check-availability?date=YYYY-MM-DD&studios=curve,studio1,pool
  *
- * Returns all booked (or pending) time slots for the given studios on a date.
- * Frontend uses this to disable unavailable options in the time picker.
+ * Returns booked time intervals for the requested studios on a given date.
+ * The frontend uses these intervals — combined with the user's chosen duration —
+ * to disable time slots that would cause an overlap.
+ *
+ * Response shape:
+ *   {
+ *     date: "2026-05-13",
+ *     intervals: {
+ *       curve:   [{ start: "09:00", end: "11:00" }, ...],
+ *       studio1: [],
+ *       pool:    [{ start: "14:00", end: "19:00" }]
+ *     }
+ *   }
+ *
+ * Stale pending intervals (whose booking:pending key expired) are pruned lazily.
  */
 
 import { kv } from './_kv.js';
@@ -16,6 +29,40 @@ function setCors(res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 }
 
+/** minutes-since-midnight → "HH:MM" */
+function minsToTime(m) {
+  return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+}
+
+/**
+ * Reads all valid intervals from booking:intervals:{studio}:{date}.
+ * Expired pending entries are cleaned up in the background.
+ */
+async function getIntervals(studio, date) {
+  const hashKey = `booking:intervals:${studio}:${date}`;
+  const raw = await kv('HGETALL', hashKey);
+  if (!raw) return [];
+
+  const valid = [];
+  const stale = [];
+
+  for (const [field, val] of Object.entries(raw)) {
+    if (!val || !val.includes(':')) continue;
+    const [startMins, endMins] = val.split(':').map(Number);
+    if (isNaN(startMins) || isNaN(endMins)) continue;
+
+    if (field.startsWith('p:')) {
+      const bId = field.slice(2);
+      const exists = await kv('EXISTS', `booking:pending:${bId}`);
+      if (!exists) { stale.push(field); continue; }
+    }
+    valid.push({ start: minsToTime(startMins), end: minsToTime(endMins) });
+  }
+
+  if (stale.length) kv('HDEL', hashKey, ...stale).catch(() => {});
+  return valid;
+}
+
 export default async function handler(req, res) {
   setCors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -23,50 +70,35 @@ export default async function handler(req, res) {
 
   const { date, studios } = req.query;
 
-  // Validate date
   if (!date || !DATE_RE.test(date)) {
-    return res.status(400).json({ error: 'Invalid or missing date. Use YYYY-MM-DD format.' });
+    return res.status(400).json({ error: 'Invalid or missing date. Use YYYY-MM-DD.' });
   }
 
-  // Reject past dates
   const today = new Date().toISOString().split('T')[0];
   if (date < today) {
     return res.status(400).json({ error: 'Cannot check availability for past dates.' });
   }
 
-  // Validate studios
   const studioList = (studios || '')
     .split(',')
     .map(s => s.trim().toLowerCase())
     .filter(s => VALID_STUDIOS.has(s));
 
   if (studioList.length === 0) {
-    return res.status(400).json({ error: 'Provide at least one valid studio (curve, studio1, pool).' });
+    return res.status(400).json({ error: 'Provide at least one valid studio.' });
   }
 
   try {
-    const bookedSlots = {};
-
+    const result = {};
     for (const studio of studioList) {
-      // KEYS returns all slot keys matching booking:slot:{studio}:{date}:*
-      // Each key is "booking:slot:curve:2025-06-15:10:00" → time = "10:00"
-      const keys = await kv('KEYS', `booking:slot:${studio}:${date}:*`);
-
-      bookedSlots[studio] = (keys || []).map(k => {
-        // Key format: booking:slot:{studio}:{date}:{HH}:{MM}
-        const parts = k.split(':');
-        // Extract time portion: parts[4] = HH, parts[5] = MM
-        return parts.slice(4).join(':');
-      });
+      result[studio] = await getIntervals(studio, date);
     }
-
-    return res.status(200).json({ bookedSlots, date });
+    return res.status(200).json({ date, intervals: result });
 
   } catch (err) {
     console.error('[check-availability]', err.message);
-    // Return empty availability on error — do not block the user
     const fallback = {};
     studioList.forEach(s => { fallback[s] = []; });
-    return res.status(200).json({ bookedSlots: fallback, date, degraded: true });
+    return res.status(200).json({ date, intervals: fallback, degraded: true });
   }
 }

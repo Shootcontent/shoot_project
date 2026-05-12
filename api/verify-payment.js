@@ -163,6 +163,17 @@ export default async function handler(req, res) {
       await kv('SET', `booking:slot:${studio}:${pending.date}:${pending.time}`, bookingId);
     }
 
+    // Promote interval from pending → confirmed in the intervals hash
+    const startMins = pending.startMins ?? null;
+    const endMins   = pending.endMins   ?? null;
+    if (startMins !== null && endMins !== null) {
+      for (const studio of pending.studios) {
+        const hashKey = `booking:intervals:${studio}:${pending.date}`;
+        await kv('HDEL', hashKey, `p:${bookingId}`);
+        await kv('HSET', hashKey, `c:${bookingId}`, `${startMins}:${endMins}`);
+      }
+    }
+
     // Clean up pending state
     await kv('DEL', `booking:pending:${bookingId}`);
 
