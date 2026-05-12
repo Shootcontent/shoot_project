@@ -8,16 +8,16 @@ export default async function handler(req, res) {
   const url = process.env.REDIS_URL;
   if (!url) return res.status(500).json({ error: 'REDIS_URL not set' });
 
-  // Mask password in URL for safe logging
-  const safe = url.replace(/:([^@]+)@/, ':***@');
+  const safe = url.replace(/:([^@]{4})[^@]*@/, ':$1***@');
 
   try {
     const client = new Redis(url, {
+      lazyConnect:         true,
       maxRetriesPerRequest: 1,
-      connectTimeout: 5000,
-      enableOfflineQueue: false,
+      connectTimeout:      8000,
       tls: url.includes('redislabs.com') ? { rejectUnauthorized: false } : undefined,
     });
+    await client.connect();
     await client.set('ping-test', 'ok', 'EX', '60');
     const val = await client.get('ping-test');
     await client.quit();
