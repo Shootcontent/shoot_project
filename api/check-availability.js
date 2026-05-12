@@ -18,7 +18,7 @@
  * Stale pending intervals (whose booking:pending key expired) are pruned lazily.
  */
 
-import { kv } from './_kv.js';
+import { kv, kvHGetAll } from './_kv.js';
 
 const VALID_STUDIOS = new Set(['curve', 'studio1', 'pool']);
 const DATE_RE       = /^\d{4}-\d{2}-\d{2}$/;
@@ -43,8 +43,8 @@ function minsToTime(m) {
  */
 async function getIntervals(studio, date) {
   const hashKey = `booking:intervals:${studio}:${date}`;
-  const raw = await kv('HGETALL', hashKey);
-  if (!raw) return [];
+  const raw = await kvHGetAll(hashKey);
+  if (!raw || typeof raw !== 'object') return { valid: [], debugEntries: [] };
 
   const valid = [];
   const stale = [];
@@ -95,13 +95,11 @@ export default async function handler(req, res) {
 
   try {
     const result = {};
-    const debug = {};
     for (const studio of studioList) {
-      const { valid, debugEntries } = await getIntervals(studio, date);
+      const { valid } = await getIntervals(studio, date);
       result[studio] = valid;
-      debug[studio] = debugEntries;
     }
-    return res.status(200).json({ date, intervals: result, _debug: debug });
+    return res.status(200).json({ date, intervals: result });
 
   } catch (err) {
     console.error('[check-availability]', err.message);

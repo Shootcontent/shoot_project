@@ -11,7 +11,7 @@
  * Race-condition protection: per-studio-date lock  booking:lock:{studio}:{date}
  */
 
-import { kv } from './_kv.js';
+import { kv, kvHGetAll } from './_kv.js';
 
 const YOCO_CHECKOUT_URL = 'https://payments.yoco.com/api/checkouts';
 
@@ -125,8 +125,8 @@ function setCors(res) {
  */
 async function loadIntervals(studio, date) {
   const hashKey = `booking:intervals:${studio}:${date}`;
-  const raw = await kv('HGETALL', hashKey);
-  if (!raw) return [];
+  const raw = await kvHGetAll(hashKey);
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return [];
 
   const valid = [];
   const stale = [];

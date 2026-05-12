@@ -38,6 +38,12 @@ export async function kv(command, ...args) {
   return client.call(command, ...args);
 }
 
+/** Returns a plain {field: value} object (not a flat array like client.call does) */
+export async function kvHGetAll(key) {
+  const client = await getClient();
+  return client.hgetall(key); // returns {} for missing key, {field:val,...} for existing
+}
+
 export async function kvPipeline(commands) {
   const client = await getClient();
   const pipeline = client.pipeline();
