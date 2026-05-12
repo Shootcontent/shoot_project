@@ -11,10 +11,13 @@ let _client = null;
 function getClient() {
   if (!_client || _client.status === 'end' || _client.status === 'close') {
     if (!process.env.REDIS_URL) throw new Error('REDIS_URL is not configured');
-    _client = new Redis(process.env.REDIS_URL, {
+    const url = process.env.REDIS_URL;
+    _client = new Redis(url, {
       maxRetriesPerRequest: 3,
       connectTimeout:       5000,
       enableOfflineQueue:   false,
+      // Redis Cloud (redislabs.com) requires TLS even when the URL uses redis://
+      tls: url.includes('redislabs.com') ? { rejectUnauthorized: false } : undefined,
     });
     _client.on('error', err => console.error('[kv] Redis error:', err.message));
   }
