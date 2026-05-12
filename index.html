@@ -3679,72 +3679,14 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
   async function processPayment() {
     const btn    = document.getElementById('bm-pay-btn');
     const errDiv = document.getElementById('bm-pay-error');
-    const modal  = document.getElementById('bookingModal');
     errDiv.style.display = 'none';
     btn.disabled    = true;
-    btn.textContent = 'Loading payment…';
-    try {
-      if (!_yocoKey) {
-        const r    = await fetch('/api/get-config');
-        const d    = await r.json();
-        _yocoKey   = d.yocoPublicKey;
-      }
-      if (!_yocoKey) throw new Error('Payment configuration unavailable');
+    btn.textContent = 'Preparing payment…';
 
-      const { total } = calcTotal();
-      const amountInCents = Math.round(total * 100);
-      const selected      = Object.keys(BM.studios).filter(id => BM.studios[id]);
-      const studioNames   = { curve: 'The Curve', studio1: 'Studio One', pool: 'The Pool Area' };
-      const description   = selected.map(id => studioNames[id]).join(' + ') + ' — ' + BM.date;
-
-      if (!window.YocoSDK) throw new Error('Yoco SDK not loaded');
-      const yoco = new window.YocoSDK({ publicKey: _yocoKey });
-
-      btn.disabled    = false;
-      btn.textContent = `Pay ${fmt(total)} Now`;
-
-      // Drop modal z-index so Yoco popup renders on top, restore in callback
-      modal.style.zIndex = '1';
-
-      yoco.showPopup({
-        amountInCents,
-        currency:    'ZAR',
-        name:        'SHOOT. Studios',
-        description,
-        callback: async function (result) {
-          modal.style.zIndex = '1000'; // Restore modal z-index
-          if (result.error) {
-            errDiv.textContent   = result.error.message || 'Payment declined. Please try again.';
-            errDiv.style.display = 'block';
-            btn.disabled         = false;
-            btn.textContent      = 'Try Again';
-            return;
-          }
-          btn.disabled    = true;
-          btn.textContent = 'Confirming booking…';
-          await completeBooking(result.id, amountInCents);
-        },
-      });
-    } catch (err) {
-      modal.style.zIndex = '1000'; // Restore on error
-      console.error('[processPayment]', err);
-      errDiv.textContent   = 'Could not load payment. Please refresh the page and try again.';
-      errDiv.style.display = 'block';
-      const { total } = calcTotal();
-      btn.disabled    = false;
-      btn.textContent = `Pay ${fmt(total)} Now`;
-    }
-  }
-
-  async function completeBooking(token, amountInCents) {
-    const btn    = document.getElementById('bm-pay-btn');
-    const errDiv = document.getElementById('bm-pay-error');
     const selected = Object.keys(BM.studios).filter(id => BM.studios[id]);
     const { total } = calcTotal();
 
     const payload = {
-      token,
-      amountInCents,
       studios:        selected,
       duration:       BM.duration,
       extraHours:     BM.extraHours,
@@ -3763,42 +3705,132 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
     };
 
     try {
-      const res  = await fetch('/api/create-booking', {
+      const res  = await fetch('/api/create-checkout', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify(payload),
       });
       const data = await res.json();
 
-      if (data.success) {
-        if (typeof fbq !== 'undefined') {
-          fbq('track', 'Purchase', { value: total, currency: 'ZAR' });
-        }
-        const refEl = document.getElementById('bm-success-ref');
-        if (refEl) refEl.textContent = data.bookingId;
-        // Clear availability cache for this date (slot is now taken)
-        _availCache = {};
-        goToStep(5);
-      } else if (data.slotConflict) {
-        errDiv.innerHTML     = '<strong>This time slot has just been taken by another booking.</strong> Please go back and select a different time.';
+      if (data.slotConflict) {
+        errDiv.innerHTML     = '<strong>This time slot was just taken.</strong> Please go back and select a different time.';
         errDiv.style.display = 'block';
         btn.disabled         = false;
         btn.textContent      = '← Select a Different Time';
         btn.onclick          = () => { _availCache = {}; goToStep(1); };
-      } else {
-        errDiv.textContent   = data.error || 'Booking failed. Please contact us at hello@shootstudios.co.za.';
-        errDiv.style.display = 'block';
-        btn.disabled         = false;
-        btn.textContent      = 'Try Again';
-        btn.onclick          = processPayment;
+        return;
       }
+
+      if (!data.redirectUrl) {
+        throw new Error(data.error || 'Could not create payment session.');
+      }
+
+      // Redirect to Yoco hosted payment page
+      btn.textContent = 'Redirecting to payment…';
+      window.location.href = data.redirectUrl;
+
     } catch (err) {
-      errDiv.textContent   = 'Connection error. Please try again or contact us directly.';
+      console.error('[processPayment]', err);
+      errDiv.textContent   = err.message || 'Could not start payment. Please try again.';
       errDiv.style.display = 'block';
       btn.disabled         = false;
-      btn.textContent      = 'Try Again';
-      btn.onclick          = processPayment;
+      btn.textContent      = `Pay ${fmt(total)} Now`;
     }
+  }
+
+  // ── Handle return from Yoco payment page ────────────────────────────────────
+  async function handleYocoReturn() {
+    const params     = new URLSearchParams(window.location.search);
+    const bookingId  = params.get('booking_id');
+    const isSuccess  = params.get('yoco_success') === '1';
+    const isCancel   = params.get('yoco_cancel')  === '1';
+    const isFail     = params.get('yoco_fail')    === '1';
+
+    if (!bookingId) return;
+
+    // Clean URL
+    window.history.replaceState({}, '', window.location.pathname);
+
+    if (isSuccess) {
+      showReturnOverlay('Confirming your booking…');
+      try {
+        const res  = await fetch(`/api/verify-payment?bookingId=${encodeURIComponent(bookingId)}`);
+        const data = await res.json();
+        hideReturnOverlay();
+        if (data.success) {
+          if (typeof fbq !== 'undefined') fbq('track', 'Purchase', { currency: 'ZAR' });
+          showReturnSuccess(bookingId);
+        } else {
+          showReturnError(data.error || 'Could not confirm booking. Please contact us.');
+        }
+      } catch (e) {
+        hideReturnOverlay();
+        showReturnError('Connection error. Please contact us at hello@shootstudios.co.za.');
+      }
+    } else if (isCancel || isFail) {
+      showReturnError(isCancel
+        ? 'Payment was cancelled. Your time slot has been released.'
+        : 'Payment failed. Your time slot has been released. Please try again.');
+    }
+  }
+
+  function showReturnOverlay(msg) {
+    let el = document.getElementById('yoco-return-overlay');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'yoco-return-overlay';
+      el.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Montserrat,sans-serif;color:#fff;';
+      el.innerHTML = '<div style="width:40px;height:40px;border:3px solid rgba(255,255,255,0.2);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:20px;"></div><div id="yoco-return-msg" style="font-size:15px;font-weight:600;letter-spacing:0.5px;"></div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>';
+      document.body.appendChild(el);
+    }
+    document.getElementById('yoco-return-msg').textContent = msg;
+    el.style.display = 'flex';
+  }
+
+  function hideReturnOverlay() {
+    const el = document.getElementById('yoco-return-overlay');
+    if (el) el.style.display = 'none';
+  }
+
+  function showReturnSuccess(bookingId) {
+    let el = document.getElementById('yoco-return-success');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'yoco-return-success';
+      el.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.9);display:flex;align-items:center;justify-content:center;font-family:Montserrat,sans-serif;padding:24px;';
+      el.innerHTML = `
+        <div style="background:#fff;border-radius:12px;padding:40px 36px;max-width:460px;width:100%;text-align:center;">
+          <div style="width:64px;height:64px;background:#000;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;">
+            <svg width="28" height="28" viewBox="0 0 32 32" fill="none" stroke="white" stroke-width="2.5"><circle cx="16" cy="16" r="14"/><path d="M10 16l4 4 8-8"/></svg>
+          </div>
+          <h2 style="font-size:26px;font-weight:900;color:#000;margin:0 0 12px;letter-spacing:-0.5px;">Booking Confirmed!</h2>
+          <p style="font-size:14px;color:#666;line-height:1.6;margin:0 0 24px;">Your payment was successful. A confirmation email is on its way.</p>
+          <div style="background:#f5f5f5;border-radius:8px;padding:16px 20px;margin-bottom:28px;text-align:left;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#999;margin-bottom:6px;">Booking Reference</div>
+            <div id="yoco-success-ref" style="font-size:20px;font-weight:900;letter-spacing:2px;color:#000;">${bookingId}</div>
+          </div>
+          <button onclick="document.getElementById('yoco-return-success').remove()" style="background:#000;color:#fff;border:none;border-radius:6px;padding:14px 36px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;width:100%;">Done</button>
+        </div>`;
+      document.body.appendChild(el);
+    }
+  }
+
+  function showReturnError(msg) {
+    let el = document.getElementById('yoco-return-error');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'yoco-return-error';
+      el.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;font-family:Montserrat,sans-serif;padding:24px;';
+      el.innerHTML = `
+        <div style="background:#fff;border-radius:12px;padding:40px 36px;max-width:420px;width:100%;text-align:center;">
+          <div style="font-size:32px;margin-bottom:16px;">⚠</div>
+          <h3 style="font-size:20px;font-weight:800;color:#000;margin:0 0 12px;">Payment Not Completed</h3>
+          <p id="yoco-error-msg" style="font-size:14px;color:#666;line-height:1.6;margin:0 0 28px;"></p>
+          <button onclick="document.getElementById('yoco-return-error').remove();openBookingModal();" style="background:#000;color:#fff;border:none;border-radius:6px;padding:14px 36px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;width:100%;">Try Again</button>
+        </div>`;
+      document.body.appendChild(el);
+    }
+    document.getElementById('yoco-error-msg').textContent = msg;
   }
 
   // Wire up all "Book Now" / "Book This Space" buttons to open modal
@@ -3828,6 +3860,9 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
       const opt3hrs = document.querySelector('#bm-duration option[value="3hrs"]');
       if (opt3hrs) opt3hrs.textContent = '3 hours';
     }
+
+    // Handle return from Yoco hosted checkout page
+    handleYocoReturn();
   });
 </script>
 
