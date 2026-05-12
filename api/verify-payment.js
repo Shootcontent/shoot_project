@@ -187,8 +187,8 @@ export default async function handler(req, res) {
     // Clean up pending state
     await kv('DEL', `booking:pending:${bookingId}`);
 
-    // Send confirmation emails (non-blocking)
-    sendEmails(confirmed).catch(e => console.error('[verify-payment] sendEmails:', e));
+    // Send confirmation emails — must be awaited before returning or Vercel kills the function
+    await sendEmails(confirmed);
 
     return res.status(200).json({ success: true, bookingId });
 
