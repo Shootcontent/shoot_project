@@ -48,6 +48,7 @@ async function getIntervals(studio, date) {
 
   const valid = [];
   const stale = [];
+  const debugEntries = [];
 
   for (const [field, val] of Object.entries(raw)) {
     if (!val || !val.includes(':')) continue;
@@ -57,13 +58,14 @@ async function getIntervals(studio, date) {
     if (field.startsWith('p:')) {
       const bId = field.slice(2);
       const stillPending = await kv('GET', `booking:pending:${bId}`);
+      debugEntries.push({ field, bId, stillPending: !!stillPending, raw: stillPending?.slice?.(0,20) });
       if (!stillPending) { stale.push(field); continue; }
     }
     valid.push({ start: minsToTime(startMins), end: minsToTime(endMins) });
   }
 
   if (stale.length) kv('HDEL', hashKey, ...stale).catch(() => {});
-  return valid;
+  return { valid, debugEntries };
 }
 
 export default async function handler(req, res) {
@@ -93,10 +95,13 @@ export default async function handler(req, res) {
 
   try {
     const result = {};
+    const debug = {};
     for (const studio of studioList) {
-      result[studio] = await getIntervals(studio, date);
+      const { valid, debugEntries } = await getIntervals(studio, date);
+      result[studio] = valid;
+      debug[studio] = debugEntries;
     }
-    return res.status(200).json({ date, intervals: result });
+    return res.status(200).json({ date, intervals: result, _debug: debug });
 
   } catch (err) {
     console.error('[check-availability]', err.message);
