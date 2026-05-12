@@ -14,11 +14,11 @@ async function getClient() {
   if (!url) throw new Error('REDIS_URL is not configured');
 
   const client = new Redis(url, {
-    lazyConnect:         true,
+    lazyConnect:          true,
     maxRetriesPerRequest: 3,
-    connectTimeout:      8000,
-    // Redis Cloud requires TLS even on redis:// URLs
-    tls: url.includes('redislabs.com') ? { rejectUnauthorized: false } : undefined,
+    connectTimeout:       8000,
+    // Only use TLS for rediss:// URLs — Redis Cloud port 14xxx is plain TCP
+    tls: url.startsWith('rediss://') ? { rejectUnauthorized: false } : undefined,
   });
 
   client.on('error', err => console.error('[kv] Redis error:', err.message));
@@ -28,7 +28,6 @@ async function getClient() {
 }
 
 /**
- * Execute a single Redis command.
  * kv('SET', 'key', 'val', 'NX', 'EX', '900') → 'OK' | null
  * kv('GET', 'key')                            → string | null
  * kv('DEL', 'key')                            → number
@@ -39,9 +38,6 @@ export async function kv(command, ...args) {
   return client.call(command, ...args);
 }
 
-/**
- * Execute multiple commands in a single pipeline round-trip.
- */
 export async function kvPipeline(commands) {
   const client = await getClient();
   const pipeline = client.pipeline();
