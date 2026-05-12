@@ -626,26 +626,7 @@
     }
     .price-card.featured .btn-book-plan:hover { background: var(--white); color: var(--black); }
 
-    .custom-quote {
-      text-align: center;
-      padding: 40px;
-    }
-    .custom-quote p { font-size: 15px; color: #666; margin-bottom: 20px; }
-
-    .btn-filled {
-      display: inline-block;
-      background: var(--black);
-      color: var(--white);
-      padding: 16px 40px;
-      font-size: 14px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-decoration: none;
-      transition: background 0.2s;
-      cursor: pointer;
-      border: none;
-    }
-    .btn-filled:hover { background: #333; }
+    /* .custom-quote and .btn-filled removed — replaced by .photo-custom-cta */
 
     /* ── TERMS ── */
     #terms {
@@ -895,46 +876,62 @@
     }
 
     /* ── PHOTO SUMMARY CARDS ── */
-    .photo-summary-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0;
-      border: 1.5px solid var(--black);
-      margin-bottom: 48px;
+    /* ── PHOTOGRAPHY CUSTOM QUOTE CTA ── */
+    .photo-custom-cta {
+      text-align: center;
+      padding: 72px 24px 80px;
     }
-    .photo-summary-card {
-      padding: 36px 32px;
-      border-right: 1.5px solid var(--black);
-      display: flex; flex-direction: column;
-    }
-    .photo-summary-card:last-child { border-right: none; }
-    .photo-summary-tag {
-      font-size: 10px; font-weight: 700; letter-spacing: 2.5px;
-      text-transform: uppercase; color: #aaa; margin-bottom: 16px;
-    }
-    .photo-summary-name {
+    .photo-custom-headline {
       font-family: var(--font-display);
-      font-size: 26px; font-weight: 900; font-style: italic;
-      text-transform: uppercase; letter-spacing: -0.5px;
-      color: var(--black); margin-bottom: 6px;
+      font-size: clamp(32px, 5vw, 56px);
+      font-weight: 900;
+      font-style: italic;
+      text-transform: uppercase;
+      letter-spacing: -1.5px;
+      line-height: 1;
+      color: var(--black);
+      margin-bottom: 16px;
     }
-    .photo-summary-price {
-      font-family: var(--font-display);
-      font-size: 36px; font-weight: 900; font-style: italic;
-      color: var(--black); letter-spacing: -1px; margin-bottom: 10px;
+    .photo-custom-sub {
+      font-size: 14px;
+      color: #777;
+      font-weight: 400;
+      line-height: 1.6;
+      max-width: 380px;
+      margin: 0 auto 44px;
     }
-    .photo-summary-desc {
-      font-size: 13px; color: #666; line-height: 1.6; margin-bottom: 24px; flex: 1;
-    }
-    .photo-summary-cta {
+    .photo-custom-btn {
+      position: relative;
       display: inline-block;
-      background: var(--black); color: var(--white);
-      padding: 13px 24px; font-size: 11px; font-weight: 700;
-      letter-spacing: 2px; text-transform: uppercase; text-decoration: none;
-      text-align: center; border: none;
-      transition: background 0.2s; cursor: pointer;
+      overflow: hidden;
+      padding: 17px 52px;
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--white);
+      background: var(--black);
+      transition: color 0.35s cubic-bezier(0.16,1,0.3,1);
     }
-    .photo-summary-cta:hover { background: #222; }
+    .photo-custom-btn-inner { position: relative; z-index: 1; }
+    .photo-custom-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: #333;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.45s cubic-bezier(0.16,1,0.3,1);
+    }
+    .photo-custom-btn:hover::before { transform: scaleX(1); }
+    .photo-custom-btn:focus-visible { outline: 2px solid var(--black); outline-offset: 3px; }
+    @media (max-width: 768px) {
+      .photo-custom-cta { padding: 52px 20px 60px; }
+      .photo-custom-sub { font-size: 13px; margin-bottom: 32px; }
+      .photo-custom-btn { padding: 15px 36px; font-size: 10px; letter-spacing: 2px; }
+    }
 
     /* ── BOOKING SECTION ── */
     #book {
@@ -1220,10 +1217,6 @@
 
       /* Space & photo cards: single column on mobile */
       .spaces-card-grid { grid-template-columns: 1fr; gap: 2px; margin-top: 32px; }
-      .photo-summary-grid { grid-template-columns: 1fr; border: none; margin-bottom: 32px; }
-      .photo-summary-card { border-right: none; border-bottom: 1.5px solid var(--black); padding: 28px 20px; }
-      .photo-summary-card:last-child { border-bottom: none; }
-
       nav { padding: 20px 24px; }
       .nav-links, .nav-book { display: none; }
       .nav-hamburger { display: flex; }
@@ -1977,34 +1970,12 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
       </div>
     </div>
 
-    <!-- Photography Package Summary -->
-    <div class="photo-summary-grid">
-      <div class="photo-summary-card scroll-reveal">
-        <div class="photo-summary-tag">Starter</div>
-        <div class="photo-summary-name">Starter</div>
-        <div class="photo-summary-price">R1,400</div>
-        <p class="photo-summary-desc">1 hr studio · Basic lighting · 25–30 edited photos</p>
-        <a href="#book" class="photo-summary-cta" onclick="openBookingModal();return false;">Book Now</a>
-      </div>
-      <div class="photo-summary-card scroll-reveal" data-delay="100">
-        <div class="photo-summary-tag">Most Popular</div>
-        <div class="photo-summary-name">Professional</div>
-        <div class="photo-summary-price">R2,500</div>
-        <p class="photo-summary-desc">2 hrs studio · Pro lighting · 55–60 edited photos</p>
-        <a href="#book" class="photo-summary-cta" onclick="openBookingModal();return false;">Book Now</a>
-      </div>
-      <div class="photo-summary-card scroll-reveal" data-delay="200">
-        <div class="photo-summary-tag">Premium</div>
-        <div class="photo-summary-name">Premium</div>
-        <div class="photo-summary-price">R10,000</div>
-        <p class="photo-summary-desc">Full day · All spaces · 100+ edited photos · Campaign ready</p>
-        <a href="#book" class="photo-summary-cta" onclick="openBookingModal();return false;">Book Now</a>
-      </div>
-    </div>
-
-    <div class="custom-quote scroll-reveal" data-delay="100">
-      <p>Need a custom package? We work with all budgets.</p>
-      <a href="#contact" class="btn-filled">Contact Us for a Custom Quote</a>
+    <div class="photo-custom-cta scroll-reveal" data-delay="100">
+      <div class="photo-custom-headline">Need something custom?</div>
+      <p class="photo-custom-sub">Contact us for a tailored quote based on your project requirements.</p>
+      <a href="#contact" class="photo-custom-btn">
+        <span class="photo-custom-btn-inner">Contact Us for a Custom Quote</span>
+      </a>
     </div>
   </div>
 </section>
