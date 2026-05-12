@@ -2551,11 +2551,16 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
     <div class="bm-step-line"></div>
     <div class="bm-step" id="step-indicator-3">
       <div class="bm-step-num">3</div>
-      <div class="bm-step-label">Review &amp; Submit</div>
+      <div class="bm-step-label">Review</div>
     </div>
     <div class="bm-step-line"></div>
     <div class="bm-step" id="step-indicator-4">
       <div class="bm-step-num">4</div>
+      <div class="bm-step-label">Payment</div>
+    </div>
+    <div class="bm-step-line"></div>
+    <div class="bm-step" id="step-indicator-5">
+      <div class="bm-step-num">5</div>
       <div class="bm-step-label">Done!</div>
     </div>
   </div>
@@ -2628,7 +2633,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
             </div>
             <div class="bm-field">
               <label>Date *</label>
-              <input type="date" id="bm-date" onchange="updateSidebar()" />
+              <input type="date" id="bm-date" onchange="onDateChange()" />
             </div>
             <div class="bm-field bm-field-full">
               <label>Start Time *</label>
@@ -2885,15 +2890,45 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
           <div class="bm-section-title">Review Your Booking</div>
           <div class="bm-review-grid" id="bm-review-content"></div>
           <div id="bm-form-error" style="background:#fee;border:1px solid #fcc;color:#c00;padding:12px 16px;border-radius:6px;font-size:13px;margin-bottom:16px;display:none;"></div>
-          <button class="bm-submit-btn" id="bm-submit-btn" onclick="submitBooking()">Send Booking Request</button>
+          <button class="bm-submit-btn" id="bm-submit-btn" onclick="goToStep(4)">Review &amp; Pay →</button>
         </div>
         <div style="display:flex;justify-content:flex-start;margin-top:8px;">
           <button onclick="goToStep(2)" style="background:#fff;color:#000;border:1.5px solid #000;border-radius:6px;padding:13px 28px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;">← Back</button>
         </div>
       </div>
 
-      <!-- ── STEP 4: DONE ── -->
+      <!-- ── STEP 4: PAYMENT ── -->
       <div id="bm-step-4" style="display:none;">
+        <div class="bm-section">
+          <div class="bm-section-title">Complete Your Payment</div>
+          <div id="bm-pay-summary"></div>
+          <div id="bm-pay-error" style="display:none;background:#fee;border:1px solid #fcc;color:#c00;padding:12px 16px;border-radius:6px;font-size:13px;margin-bottom:16px;line-height:1.5;"></div>
+          <div style="margin-top:8px;margin-bottom:20px;">
+            <div style="display:flex;align-items:center;gap:10px;font-size:12px;color:#888;margin-bottom:8px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+              Secure payment powered by Yoco
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <img src="https://www.yoco.com/app/uploads/2022/09/Yoco-logo-black.svg" alt="Yoco" style="height:18px;opacity:0.35;" onerror="this.style.display='none'">
+              <span style="font-size:11px;color:#bbb;">Visa · Mastercard · Amex</span>
+            </div>
+          </div>
+          <button id="bm-pay-btn" onclick="processPayment()"
+            style="width:100%;background:#000;color:#fff;border:none;border-radius:6px;padding:16px 24px;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;letter-spacing:0.5px;transition:background 0.2s;"
+            onmouseover="this.style.background='#222'" onmouseout="this.style.background='#000'">
+            Pay Now
+          </button>
+          <p style="font-size:11px;color:#aaa;text-align:center;margin-top:12px;line-height:1.5;">
+            Your card details are entered in Yoco's secure popup and never touch our servers.
+          </p>
+        </div>
+        <div style="display:flex;justify-content:flex-start;margin-top:8px;">
+          <button onclick="goToStep(3)" style="background:#fff;color:#000;border:1.5px solid #000;border-radius:6px;padding:13px 28px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;">← Back</button>
+        </div>
+      </div>
+
+      <!-- ── STEP 5: DONE ── -->
+      <div id="bm-step-5" style="display:none;">
         <div class="bm-section">
           <div class="bm-success">
             <div class="bm-success-icon">
@@ -2902,9 +2937,14 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
                 <path d="M10 16l4 4 8-8"/>
               </svg>
             </div>
-            <h2>Booking Request Sent!</h2>
-            <p>Thank you! We'll review your request and be in touch within 24 hours to confirm your session and send payment details.</p>
-            <button onclick="closeBookingModal()" style="margin-top:28px;background:#000;color:#fff;border:none;border-radius:6px;padding:14px 36px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;">Close</button>
+            <h2>Booking Confirmed!</h2>
+            <p>Your payment was successful and your session is locked in. A confirmation email has been sent to your inbox.</p>
+            <div style="margin:20px 0;background:#f9f9f9;border-radius:8px;padding:16px 24px;text-align:left;">
+              <div style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#999;margin-bottom:6px;">Booking Reference</div>
+              <div id="bm-success-ref" style="font-size:22px;font-weight:900;letter-spacing:2px;color:#000;">—</div>
+            </div>
+            <p style="font-size:13px;color:#666;margin-top:4px;">Save your reference number. We'll see you at the studio!</p>
+            <button onclick="closeBookingModal()" style="margin-top:24px;background:#000;color:#fff;border:none;border-radius:6px;padding:14px 36px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;">Close</button>
           </div>
         </div>
       </div>
@@ -3015,6 +3055,9 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
     <path d="M16 2C8.28 2 2 8.28 2 16c0 2.45.64 4.74 1.76 6.74L2 30l7.48-1.73A13.93 13.93 0 0016 30c7.72 0 14-6.28 14-14S23.72 2 16 2zm0 25.5c-2.1 0-4.1-.56-5.84-1.54l-.42-.24-4.44 1.02 1.06-4.33-.28-.44A11.44 11.44 0 014.5 16C4.5 9.6 9.6 4.5 16 4.5S27.5 9.6 27.5 16 22.4 27.5 16 27.5zm6.3-8.56c-.34-.17-2.02-.99-2.34-1.1-.31-.12-.54-.17-.77.17-.22.34-.88 1.1-1.08 1.33-.2.22-.39.25-.73.08-.34-.17-1.44-.53-2.74-1.69-1.01-.9-1.7-2.02-1.9-2.36-.2-.34-.02-.52.15-.69.15-.15.34-.39.51-.59.17-.2.22-.34.34-.57.11-.22.06-.42-.03-.59-.09-.17-.77-1.85-1.05-2.53-.28-.67-.56-.58-.77-.59h-.66c-.22 0-.57.08-.87.42-.3.34-1.14 1.11-1.14 2.71s1.17 3.14 1.33 3.36c.17.22 2.3 3.51 5.57 4.92.78.34 1.39.54 1.86.69.78.25 1.49.21 2.05.13.63-.09 2.02-.82 2.3-1.62.28-.8.28-1.49.2-1.62-.08-.14-.3-.22-.65-.39z"/>
   </svg>
 </a>
+
+<!-- Yoco Payment SDK -->
+<script src="https://js.yoco.com/sdk/v1/yoco-sdk-web.js"></script>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
   // Nav scroll effect
@@ -3184,6 +3227,13 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
     BM.studios[id] = !BM.studios[id];
     document.getElementById('sc-' + id).classList.toggle('selected', !!BM.studios[id]);
     updateSidebar();
+    fetchAvailability();
+  }
+
+  // Called when date changes — updates sidebar then fetches availability
+  function onDateChange() {
+    updateSidebar();
+    fetchAvailability();
   }
 
   // ── Duration ──
@@ -3470,7 +3520,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
       buildReview();
     }
 
-    [1,2,3,4].forEach(i => {
+    [1,2,3,4,5].forEach(i => {
       const el = document.getElementById('bm-step-' + i);
       if (el) el.style.display = i === n ? 'block' : 'none';
       const ind = document.getElementById('step-indicator-' + i);
@@ -3485,9 +3535,21 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
     const sideBtn = document.getElementById('sb-next-btn');
     if (n === 1) {
       sideBtn.textContent = 'Continue';
+      sideBtn.style.display = '';
       sideBtn.onclick = () => goToStep(2);
     } else {
       sideBtn.style.display = 'none';
+    }
+
+    // Build payment summary when entering payment step
+    if (n === 4) buildPaymentSummary();
+
+    // Reset pay button state when going back to step 4
+    if (n === 4) {
+      const payBtn = document.getElementById('bm-pay-btn');
+      const payErr = document.getElementById('bm-pay-error');
+      if (payBtn) { payBtn.disabled = false; payBtn.onclick = processPayment; }
+      if (payErr) payErr.style.display = 'none';
     }
 
     // Scroll main to top
@@ -3539,84 +3601,197 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
     `;
   }
 
-  // ── Submit booking ──
-  async function submitBooking() {
-    const btn = document.getElementById('bm-submit-btn');
-    const errDiv = document.getElementById('bm-form-error');
-    btn.disabled = true;
-    btn.textContent = 'Sending…';
-    errDiv.style.display = 'none';
+  // ══════════════════════════════════════════
+  // AVAILABILITY CHECKING
+  // ══════════════════════════════════════════
+  let _availCache = {};
 
-    const selected = Object.keys(BM.studios).filter(id => BM.studios[id]);
+  async function fetchAvailability() {
+    const selectedStudios = Object.keys(BM.studios).filter(id => BM.studios[id]);
+    if (!BM.date || selectedStudios.length === 0) return;
+    const cacheKey = selectedStudios.slice().sort().join(',') + ':' + BM.date;
+    if (_availCache[cacheKey]) { applyAvailability(_availCache[cacheKey]); return; }
+    try {
+      const r = await fetch(`/api/check-availability?date=${BM.date}&studios=${selectedStudios.join(',')}`);
+      if (!r.ok) return;
+      const data = await r.json();
+      _availCache[cacheKey] = data.bookedSlots || {};
+      applyAvailability(_availCache[cacheKey]);
+    } catch (e) { /* silently fail — availability check is non-blocking */ }
+  }
+
+  function applyAvailability(bookedSlots) {
+    const selectedStudios = Object.keys(BM.studios).filter(id => BM.studios[id]);
+    const booked = new Set();
+    selectedStudios.forEach(s => (bookedSlots[s] || []).forEach(t => booked.add(t)));
+    const sel = document.getElementById('bm-time');
+    sel.querySelectorAll('option').forEach(opt => {
+      if (!opt.value) return;
+      if (booked.has(opt.value)) {
+        opt.disabled = true;
+        opt.style.color = '#bbb';
+        if (!opt.dataset.orig) opt.dataset.orig = opt.textContent;
+        opt.textContent = opt.dataset.orig.replace(/ — Booked$/, '') + ' — Booked';
+        if (BM.time === opt.value) { BM.time = ''; sel.value = ''; updateSidebar(); }
+      } else {
+        opt.disabled = false;
+        opt.style.color = '';
+        if (opt.dataset.orig) { opt.textContent = opt.dataset.orig; }
+      }
+    });
+  }
+
+  // ══════════════════════════════════════════
+  // PAYMENT FLOW
+  // ══════════════════════════════════════════
+  let _yocoKey = null;
+
+  function buildPaymentSummary() {
+    const { total, promoApplied, promoDiscount, discountAmt } = calcTotal();
     const studioNames = { curve: 'The Curve', studio1: 'Studio One', pool: 'The Pool Area' };
-    const durLabels = { '90min': '90 minutes', '2hrs': '2 hours', '3hrs': '3 hours', halfday: 'Half day (5hrs)', fullday: 'Full day (10hrs)' };
-    const { total, promoApplied, promoDiscount } = calcTotal();
+    const durLabels   = { '90min': '90 min', '2hrs': '2 hrs', '3hrs': '3 hrs', halfday: 'Half day', fullday: 'Full day' };
+    const selected    = Object.keys(BM.studios).filter(id => BM.studios[id]);
+    const dateStr     = BM.date
+      ? new Date(BM.date + 'T12:00').toLocaleDateString('en-ZA', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+      : '';
+    document.getElementById('bm-pay-summary').innerHTML = `
+      <div style="background:#f9f9f9;border-radius:8px;padding:20px 24px;margin-bottom:16px;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#999;margin-bottom:14px;">Booking Summary</div>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 20px;font-size:13px;">
+          <span style="color:#888;">Studio</span><span style="font-weight:700;">${selected.map(id => studioNames[id]).join(' + ')}</span>
+          <span style="color:#888;">Duration</span><span style="font-weight:700;">${durLabels[BM.duration] || BM.duration}${BM.extraHours > 0 ? ' + ' + BM.extraHours + ' extra hr' : ''}</span>
+          <span style="color:#888;">Date</span><span style="font-weight:700;">${dateStr}</span>
+          <span style="color:#888;">Time</span><span style="font-weight:700;">${BM.time}</span>
+        </div>
+      </div>
+      <div style="background:#000;color:#fff;border-radius:8px;padding:20px 24px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span style="font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;opacity:0.7;">Total Due</span>
+        <span style="font-size:30px;font-weight:900;">${fmt(total)}</span>
+      </div>
+      ${promoApplied ? `<div style="font-size:12px;color:#16a34a;padding:4px 0;">✦ May Special applied — saved ${fmt(promoDiscount)}</div>` : ''}
+      ${discountAmt > 0 ? `<div style="font-size:12px;color:#16a34a;padding:2px 0;">${DC.code} discount — saved ${fmt(discountAmt)}</div>` : ''}
+    `;
+    const { total: t } = calcTotal();
+    const payBtn = document.getElementById('bm-pay-btn');
+    if (payBtn) payBtn.textContent = `Pay ${fmt(t)} Now`;
+  }
 
-    const { discountPct, discountAmt } = calcTotal();
-    const formData = new FormData();
-    formData.append('firstName', document.getElementById('bm-first').value);
-    formData.append('lastName',  document.getElementById('bm-last').value);
-    formData.append('email',     document.getElementById('bm-email').value);
-    formData.append('phone',     document.getElementById('bm-phone').value);
-    formData.append('service',   selected.map(id => studioNames[id]).join(' + '));
-    formData.append('duration',  durLabels[BM.duration] + (BM.extraHours > 0 ? ' + ' + BM.extraHours + ' extra hour(s)' : ''));
-    formData.append('date',      BM.date);
-    const cameraNames = { rp: 'Canon EOS RP', r6: 'Canon EOS R6 MK II' };
-    const lensNames = { '2470': 'Canon 24–70mm f/2.8', '50': 'Canon 50mm f/1.8' };
-    const rentalDurLabels = { halfday: 'Half Day', fullday: 'Full Day' };
-    const { cameraTotal } = calcTotal();
-    let cameraLine = 'No';
-    if (BM.cameraRental && BM.cameraBody) {
-      cameraLine = `${cameraNames[BM.cameraBody]} — ${rentalDurLabels[BM.rentalDuration]} — ${fmt((BM.cameraPrices[BM.cameraBody]||{})[BM.rentalDuration]||0)}`;
+  async function processPayment() {
+    const btn    = document.getElementById('bm-pay-btn');
+    const errDiv = document.getElementById('bm-pay-error');
+    errDiv.style.display = 'none';
+    btn.disabled    = true;
+    btn.textContent = 'Loading payment…';
+    try {
+      if (!_yocoKey) {
+        const r    = await fetch('/api/get-config');
+        const d    = await r.json();
+        _yocoKey   = d.yocoPublicKey;
+      }
+      if (!_yocoKey) throw new Error('Payment configuration unavailable');
+
+      const { total } = calcTotal();
+      const amountInCents = Math.round(total * 100);
+      const selected      = Object.keys(BM.studios).filter(id => BM.studios[id]);
+      const studioNames   = { curve: 'The Curve', studio1: 'Studio One', pool: 'The Pool Area' };
+      const description   = selected.map(id => studioNames[id]).join(' + ') + ' — ' + BM.date;
+
+      if (!window.YocoSDK) throw new Error('Yoco SDK not loaded');
+      const yoco = new window.YocoSDK({ publicKey: _yocoKey });
+
+      btn.disabled    = false;
+      btn.textContent = `Pay ${fmt(total)} Now`;
+
+      yoco.showPopup({
+        amountInCents,
+        currency:    'ZAR',
+        name:        'SHOOT. Studios',
+        description,
+        callback: async function (result) {
+          if (result.error) {
+            errDiv.textContent  = result.error.message || 'Payment declined. Please try again.';
+            errDiv.style.display = 'block';
+            btn.disabled        = false;
+            btn.textContent     = 'Try Again';
+            return;
+          }
+          btn.disabled    = true;
+          btn.textContent = 'Confirming booking…';
+          await completeBooking(result.id, amountInCents);
+        },
+      });
+    } catch (err) {
+      console.error('[processPayment]', err);
+      errDiv.textContent   = 'Could not load payment. Please refresh the page and try again.';
+      errDiv.style.display = 'block';
+      const { total } = calcTotal();
+      btn.disabled    = false;
+      btn.textContent = `Pay ${fmt(total)} Now`;
     }
-    let lensLine = BM.cameraRental && BM.lensRental && BM.lensChoice
-      ? `${lensNames[BM.lensChoice]} — ${rentalDurLabels[BM.rentalDuration]} — ${fmt((BM.lensPrices[BM.lensChoice]||{})[BM.rentalDuration]||0)}`
-      : 'No';
-    formData.append('message',
-      `Photography: ${BM.photo !== 'none' ? BM.photo : 'None'}\n` +
-      `Add-ons: ${Object.keys(BM.addons).filter(k=>BM.addons[k]).join(', ') || 'None'}\n` +
-      `Camera Rental: ${cameraLine}\n` +
-      `Lens Rental: ${lensLine}\n` +
-      (cameraTotal > 0 ? `Rental Total: ${fmt(cameraTotal)}\n` : '') +
-      `Start Time: ${BM.time}\n` +
-      (promoApplied ? `PROMO APPLIED: May Special — Book 3 hours, pay for 2 (Save ${fmt(promoDiscount)})\n` : '') +
-      (DC.applied ? `DISCOUNT CODE: ${DC.code} (${DC.discount}% off — saving ${fmt(discountAmt)})\n` : '') +
-      `Estimated Total: ${fmt(total)}`
-    );
-    formData.append('terms', 'agreed');
+  }
+
+  async function completeBooking(token, amountInCents) {
+    const btn    = document.getElementById('bm-pay-btn');
+    const errDiv = document.getElementById('bm-pay-error');
+    const selected = Object.keys(BM.studios).filter(id => BM.studios[id]);
+    const { total } = calcTotal();
+
+    const payload = {
+      token,
+      amountInCents,
+      studios:        selected,
+      duration:       BM.duration,
+      extraHours:     BM.extraHours,
+      date:           BM.date,
+      time:           BM.time,
+      firstName:      document.getElementById('bm-first').value.trim(),
+      lastName:       document.getElementById('bm-last').value.trim(),
+      email:          document.getElementById('bm-email').value.trim(),
+      phone:          document.getElementById('bm-phone').value.trim(),
+      photo:          BM.photo,
+      addons:         Object.keys(BM.addons).filter(k => BM.addons[k]),
+      cameraBody:     BM.cameraBody,
+      rentalDuration: BM.rentalDuration,
+      lensChoice:     BM.lensChoice,
+      discountCode:   DC.applied ? DC.code : null,
+    };
 
     try {
-      const res = await fetch('https://formspree.io/f/xbdpbqra', {
-        method: 'POST',
-        body: formData,
-        headers: { 'Accept': 'application/json' }
+      const res  = await fetch('/api/create-booking', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(payload),
       });
-      const result = await res.json();
-      if (result.ok) {
+      const data = await res.json();
+
+      if (data.success) {
         if (typeof fbq !== 'undefined') {
-          fbq('track', 'Lead', { value: total, currency: 'ZAR' });
           fbq('track', 'Purchase', { value: total, currency: 'ZAR' });
         }
-        // Redeem discount code if one was applied
-        if (DC.applied && DC.code) {
-          fetch('/api/redeem-discount', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: document.getElementById('bm-email').value.trim(), code: DC.code }),
-          }).catch(() => {});
-        }
-        goToStep(4); return;
+        const refEl = document.getElementById('bm-success-ref');
+        if (refEl) refEl.textContent = data.bookingId;
+        // Clear availability cache for this date (slot is now taken)
+        _availCache = {};
+        goToStep(5);
+      } else if (data.slotConflict) {
+        errDiv.innerHTML     = '<strong>This time slot has just been taken by another booking.</strong> Please go back and select a different time.';
+        errDiv.style.display = 'block';
+        btn.disabled         = false;
+        btn.textContent      = '← Select a Different Time';
+        btn.onclick          = () => { _availCache = {}; goToStep(1); };
+      } else {
+        errDiv.textContent   = data.error || 'Booking failed. Please contact us at hello@shootstudios.co.za.';
+        errDiv.style.display = 'block';
+        btn.disabled         = false;
+        btn.textContent      = 'Try Again';
+        btn.onclick          = processPayment;
       }
-      throw new Error(result.error || 'Submission failed');
     } catch (err) {
-      // For demo/before PHP is configured: advance anyway
-      // Remove the line below once PHP email is working:
-      goToStep(4); return;
-
-      errDiv.textContent = 'Could not send — please email shootstudiosct@gmail.com directly.';
+      errDiv.textContent   = 'Connection error. Please try again or contact us directly.';
       errDiv.style.display = 'block';
-      btn.disabled = false;
-      btn.textContent = 'Send Booking Request';
+      btn.disabled         = false;
+      btn.textContent      = 'Try Again';
+      btn.onclick          = processPayment;
     }
   }
 
