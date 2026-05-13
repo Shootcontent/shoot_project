@@ -93,21 +93,28 @@
 
     /* ── HERO ── */
     #hero {
-      height: 100vh;
-      min-height: 600px;
+      min-height: 100svh;          /* svh = viewport minus browser chrome, reliable cross-browser */
       display: flex;
       align-items: center;
       justify-content: center;
       background: var(--black);
       position: relative;
       overflow: hidden;
+      /* Nav is position:fixed and overlays this section.
+         padding-top equal to nav height shifts the flex centre into
+         the actual visible area so the lockup is truly centred. */
+      padding-top: 72px;
+      box-sizing: border-box;
     }
     .hero-inner {
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       text-align: center;
       width: 100%;
+      position: relative;
+      z-index: 1;
     }
     #hero::before {
       content: '';
@@ -1238,7 +1245,7 @@
 
     @media (max-width: 768px) {
       /* Hero: ensure CTA visible on standard phones without scrolling */
-      #hero { height: auto; min-height: 100svh; padding: 80px 24px 60px; justify-content: center; }
+      #hero { min-height: 100svh; padding: 76px 24px 56px; }
       .hero-logo-img { margin-bottom: -100px; }
       .hero-cta { padding: 14px 44px; font-size: 11px; }
 
