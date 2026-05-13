@@ -735,6 +735,7 @@
       color: #aaa;
       margin-top: 8px;
     }
+    .location-short { display: none; }
 
     /* ── SPACE SUMMARY CARDS ── */
     .spaces-card-grid {
@@ -742,10 +743,12 @@
       grid-template-columns: repeat(3, 1fr);
       gap: 2px;
       margin-top: 60px;
+      align-items: start;
     }
     .space-summary-card {
       position: relative;
       background: var(--grey-dark);
+      align-self: start;
       /* overflow NOT hidden here — panel must expand below */
     }
     /* visual wrapper keeps the image+overlay contained */
@@ -811,7 +814,7 @@
     .space-panel-outer {
       display: grid;
       grid-template-rows: 0fr;
-      transition: grid-template-rows 360ms cubic-bezier(0.4, 0, 0.2, 1);
+      transition: grid-template-rows 380ms cubic-bezier(0.4, 0, 0.2, 1);
     }
     .space-panel-outer.is-open {
       grid-template-rows: 1fr;
@@ -821,56 +824,66 @@
       overflow: hidden;
     }
     .space-panel-content {
-      background: #0a0a0a;
-      border-top: 1px solid rgba(255,255,255,0.06);
-      padding: 24px 22px 22px;
+      background: #0d0d0d;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding: 26px 22px 24px;
+      opacity: 0;
+      transform: translateY(-6px);
+      transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1) 60ms,
+                  transform 300ms cubic-bezier(0.4, 0, 0.2, 1) 60ms;
     }
-    .sp-section { margin-bottom: 20px; }
+    .space-panel-outer.is-open .space-panel-content {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .sp-section { margin-bottom: 22px; }
     .sp-section:last-of-type { margin-bottom: 0; }
     .sp-label {
       font-size: 9px; font-weight: 700; letter-spacing: 2.5px;
-      text-transform: uppercase; color: rgba(255,255,255,0.3);
-      margin-bottom: 10px;
+      text-transform: uppercase; color: rgba(255,255,255,0.28);
+      margin-bottom: 12px;
     }
     .sp-pricing-row {
       display: flex; justify-content: space-between; align-items: center;
-      padding: 9px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
       font-size: 13px;
     }
-    .sp-pricing-row:last-child { border-bottom: none; }
-    .sp-pricing-row span:first-child { color: rgba(255,255,255,0.6); }
-    .sp-pricing-row span:last-child { font-weight: 600; }
+    .sp-pricing-row:first-of-type { padding-top: 0; }
+    .sp-pricing-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .sp-pricing-row span:first-child { color: rgba(255,255,255,0.55); }
+    .sp-pricing-row span:last-child { font-weight: 600; color: rgba(255,255,255,0.9); }
     .sp-features {
       list-style: none;
-      display: flex; flex-direction: column; gap: 6px;
+      display: flex; flex-direction: column; gap: 7px;
     }
     .sp-features li {
-      font-size: 12px; color: rgba(255,255,255,0.55);
+      font-size: 12px; color: rgba(255,255,255,0.5);
       display: flex; align-items: center; gap: 8px;
     }
     .sp-features li::before {
-      content: ''; width: 4px; height: 4px;
-      background: rgba(255,255,255,0.4); border-radius: 50%; flex-shrink: 0;
+      content: ''; width: 3px; height: 3px;
+      background: rgba(255,255,255,0.35); border-radius: 50%; flex-shrink: 0;
     }
     .sp-note {
-      font-size: 11px; color: rgba(255,255,255,0.25);
-      margin-top: 10px; line-height: 1.6;
+      font-size: 11px; color: rgba(255,255,255,0.22);
+      margin-top: 12px; line-height: 1.65;
     }
     .sp-book-btn {
-      display: block; width: 100%; margin-top: 20px;
+      display: block; width: 100%; margin-top: 22px;
       background: var(--white); color: var(--black);
-      padding: 13px; text-align: center;
+      padding: 14px; text-align: center;
       font-family: var(--font-display); font-size: 11px; font-weight: 700;
       letter-spacing: 2px; text-transform: uppercase; text-decoration: none;
       border: none; cursor: pointer;
-      transition: background 0.2s;
+      transition: background 0.2s, opacity 0.2s;
     }
     .sp-book-btn:hover { background: #e8e8e8; }
 
     /* skip animation for users who prefer reduced motion */
     @media (prefers-reduced-motion: reduce) {
       .space-panel-outer { transition: none; }
+      .space-panel-content { transition: none; }
       .space-toggle-icon { transition: none; }
       .space-summary-img { transition: none; }
     }
@@ -1247,6 +1260,8 @@
       .contact-card--bordered { border-right: none; border-bottom: 1.5px solid var(--black); }
       .contact-card--bordered:last-of-type { border-bottom: none; }
       .contact-value { font-size: 14px; white-space: normal; }
+      .location-full { display: none; }
+      .location-short { display: inline; }
       .contact-card { padding: 32px 28px; }
     }
 
@@ -1999,7 +2014,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
       </div>
       <div class="contact-card">
         <div class="contact-label">Location</div>
-        <a href="https://maps.google.com/?q=135+Albert+Rd+Woodstock+Cape+Town" target="_blank" rel="noopener" class="contact-value contact-link">135 Albert Rd,<br>Woodstock</a>
+        <a href="https://maps.google.com/?q=135+Albert+Rd+Woodstock+Cape+Town" target="_blank" rel="noopener" class="contact-value contact-link">135 Albert Rd,<br><span class="location-full">Cape Town, South Africa</span><span class="location-short">Cape Town</span></a>
       </div>
     </div>
   </div>
@@ -3023,7 +3038,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
         </a>
         <a href="https://maps.google.com/?q=135+Albert+Rd+Woodstock+Cape+Town" target="_blank" rel="noopener" class="footer-contact-item">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-          135 Albert Rd, Woodstock
+          135 Albert Rd, Cape Town, South Africa
         </a>
       </div>
       <div class="footer-col scroll-reveal" data-delay="200">
