@@ -239,13 +239,16 @@
 
     .service-title {
       font-family: var(--font-display);
-      font-size: 22px;
+      font-size: clamp(15px, 1.6vw, 22px);
       font-weight: 900;
       font-style: italic;
       text-transform: uppercase;
       letter-spacing: -0.5px;
       line-height: 1.1;
       margin-bottom: 16px;
+    }
+    @media (min-width: 769px) {
+      .service-title { white-space: nowrap; }
     }
 
     .service-desc {
@@ -750,6 +753,17 @@
       background: var(--grey-dark);
       align-self: start;
       /* overflow NOT hidden here — panel must expand below */
+    }
+
+    /* Desktop: cards stretch to equal height so panels align bottom-flush */
+    @media (min-width: 769px) {
+      .spaces-card-grid { align-items: stretch; }
+      .space-summary-card {
+        align-self: stretch;
+        display: flex;
+        flex-direction: column;
+      }
+      .space-panel-outer { margin-top: auto; }
     }
     /* visual wrapper keeps the image+overlay contained */
     .space-card-visual {
@@ -4229,37 +4243,60 @@ window.applyDiscountCode = async function () {
 
 // Space card expand interaction
 (function () {
-  var cards = document.querySelectorAll('.space-summary-card');
-  cards.forEach(function (card) {
-    var btn = card.querySelector('.space-toggle-btn');
-    var panel = card.querySelector('.space-panel-outer');
+  var cards    = Array.from(document.querySelectorAll('.space-summary-card'));
+  var allBtns  = cards.map(function(c){ return c.querySelector('.space-toggle-btn'); });
+  var allPanels= cards.map(function(c){ return c.querySelector('.space-panel-outer'); });
+  var allLabels= cards.map(function(c){ return c.querySelector('.space-toggle-label'); });
+
+  function isDesktop() { return window.innerWidth > 768; }
+
+  // Apply open/close state to ALL cards (desktop synchronized mode)
+  function setAllState(opening) {
+    allBtns.forEach(function(b)  { if (b) b.setAttribute('aria-expanded', String(opening)); });
+    allPanels.forEach(function(p){ if (p) p.classList.toggle('is-open', opening); });
+    allLabels.forEach(function(l){ if (l) l.textContent = opening ? 'Close' : 'View More'; });
+  }
+
+  cards.forEach(function (card, i) {
+    var btn   = allBtns[i];
+    var panel = allPanels[i];
     if (!btn || !panel) return;
+
     btn.addEventListener('click', function () {
       var isOpen = btn.getAttribute('aria-expanded') === 'true';
-      // Close all other cards
-      cards.forEach(function (other) {
-        if (other === card) return;
-        var ob = other.querySelector('.space-toggle-btn');
-        var op = other.querySelector('.space-panel-outer');
-        var ol = other.querySelector('.space-toggle-label');
-        if (ob) ob.setAttribute('aria-expanded', 'false');
-        if (op) op.classList.remove('is-open');
-        if (ol) ol.textContent = 'View More';
-      });
-      // Toggle this card
-      var opening = !isOpen;
-      btn.setAttribute('aria-expanded', String(opening));
-      panel.classList.toggle('is-open', opening);
-      var label = btn.querySelector('.space-toggle-label');
-      if (label) label.textContent = opening ? 'Close' : 'View More';
-      // Mobile: scroll panel into view after animation
-      if (opening && window.innerWidth <= 768) {
-        setTimeout(function () {
-          panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }, 380);
+
+      if (isDesktop()) {
+        // Desktop: one click opens/closes all three together
+        setAllState(!isOpen);
+      } else {
+        // Mobile: individual accordion — close others, toggle this one
+        var opening = !isOpen;
+        cards.forEach(function (other, j) {
+          if (j === i) return;
+          if (allBtns[j])   allBtns[j].setAttribute('aria-expanded', 'false');
+          if (allPanels[j]) allPanels[j].classList.remove('is-open');
+          if (allLabels[j]) allLabels[j].textContent = 'View More';
+        });
+        btn.setAttribute('aria-expanded', String(opening));
+        panel.classList.toggle('is-open', opening);
+        if (allLabels[i]) allLabels[i].textContent = opening ? 'Close' : 'View More';
+        // Scroll expanded panel into view after animation settles
+        if (opening) {
+          setTimeout(function () {
+            panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }, 400);
+        }
       }
     });
   });
+
+  // On resize from mobile→desktop, collapse any individual open cards cleanly
+  window.addEventListener('resize', function () {
+    if (isDesktop()) {
+      var anyOpen = allBtns.some(function(b){ return b && b.getAttribute('aria-expanded') === 'true'; });
+      if (anyOpen) setAllState(true); // ensure all are consistent if one was open
+    }
+  }, { passive: true });
 })();
 
 // Our Work mobile accordion
