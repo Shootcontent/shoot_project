@@ -32,9 +32,10 @@ const PHOTO_PRICES  = { basic: 1400, standard: 2500, premium: 10000 };
 const ADDON_PRICES  = { sunset: 100, snoot: 80, mic: 100, rgb: 150 };
 const CAMERA_PRICES = { rp: { halfday: 400, fullday: 800 }, r6: { halfday: 600, fullday: 1200 } };
 const LENS_PRICES   = { '2470': { halfday: 350, fullday: 700 }, '50': { halfday: 250, fullday: 500 } };
-const EXTRA_RATE    = 650;   // R650/hr per selected studio (R450 studio rate + R200 overtime surcharge)
-const SURCHARGE_RATE = 200;  // R200/hr for after-hours / weekend / holiday
-const AFTER_HOURS   = 17;    // 17:00
+const EXTRA_RATE    = 450;   // R450/hr base studio rate (surcharge stacks on top when applicable)
+const SURCHARGE_RATE = 200;  // R200/hr for off-hours / weekend / holiday
+const START_HOURS   = 8;     // 08:00 — before this triggers early-hours surcharge
+const AFTER_HOURS   = 17;    // 17:00 — after this triggers after-hours surcharge
 
 // Duration → decimal hours
 const DURATION_HOURS = { '90min': 1.5, '2hrs': 2, '3hrs': 3, halfday: 5, fullday: 10 };
@@ -73,15 +74,16 @@ function getSurchargeHours(date, time, duration, extraHours) {
   const isWeekend = dow === 0 || dow === 6;
   const isHoliday = SA_PUBLIC_HOLIDAYS.has(date);
 
-  const [hh, mm]    = time.split(':').map(Number);
-  const startHour   = hh + mm / 60;
-  const totalHours  = (DURATION_HOURS[duration] || 0) + (extraHours || 0);
-  const endHour     = startHour + totalHours;
+  const [hh, mm]   = time.split(':').map(Number);
+  const startHour  = hh + mm / 60;
+  const totalHours = (DURATION_HOURS[duration] || 0) + (extraHours || 0);
+  const endHour    = startHour + totalHours;
 
   if (isWeekend || isHoliday) return totalHours;
-  if (startHour >= AFTER_HOURS) return totalHours;
-  if (endHour > AFTER_HOURS) return endHour - AFTER_HOURS;
-  return 0;
+
+  const beforeHours = Math.max(0, Math.min(endHour, START_HOURS) - startHour);
+  const afterHours  = Math.max(0, endHour - Math.max(AFTER_HOURS, startHour));
+  return beforeHours + afterHours;
 }
 
 /**
