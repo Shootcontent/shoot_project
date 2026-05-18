@@ -92,10 +92,8 @@ function calcAmount(body) {
     if (!STUDIO_PRICES[s]?.[duration]) return null;
     studio += STUDIO_PRICES[s][duration];
   }
-  const dateObj = date && new Date(date + 'T00:00:00');
-  const isInMay = dateObj && dateObj.getMonth() === 4;
-  const isWeekday = dateObj && dateObj.getDay() >= 1 && dateObj.getDay() <= 5;
-  if (duration === '3hrs' && isInMay && isWeekday) {
+  const isInMay = date && new Date(date + 'T00:00:00').getMonth() === 4;
+  if (duration === '3hrs' && isInMay) {
     studio = studios.reduce((sum, s) => sum + STUDIO_PRICES[s]['2hrs'], 0);
   }
 
