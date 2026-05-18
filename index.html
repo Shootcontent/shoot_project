@@ -2711,7 +2711,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
           <div class="bm-extra-hours" id="bm-extra-hours-row">
             <div>
               <div class="bm-extra-label">Add extra hours</div>
-              <div class="bm-extra-note">+R200 per extra hour (charged at studio rate)</div>
+              <div class="bm-extra-note">+R650 per extra hour (includes overtime surcharge)</div>
             </div>
             <div class="bm-counter">
               <button onclick="changeExtraHours(-1)">−</button>
@@ -3395,12 +3395,12 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
     });
     const promoDiscount = promo.applied ? (studioOriginal - studioTotal) : 0;
 
-    // Extra hours at ~R200/hr per selected studio
+    // Extra hours at R650/hr per selected studio (R450 studio rate + R200 overtime surcharge)
     let extraTotal = 0;
     if (BM.extraHours > 0) {
       const selected = Object.keys(BM.studios).filter(id => BM.studios[id]);
       if (selected.length > 0) {
-        extraTotal = BM.extraHours * 200 * selected.length;
+        extraTotal = BM.extraHours * 650 * selected.length;
       }
     }
 

@@ -30,7 +30,7 @@ const PHOTO_PRICES   = { basic: 1400, standard: 2500, premium: 10000 };
 const ADDON_PRICES   = { sunset: 100, snoot: 80, mic: 100, rgb: 150 };
 const CAMERA_PRICES  = { rp: { halfday: 400, fullday: 800 }, r6: { halfday: 600, fullday: 1200 } };
 const LENS_PRICES    = { '2470': { halfday: 350, fullday: 700 }, '50': { halfday: 250, fullday: 500 } };
-const EXTRA_RATE     = 200;
+const EXTRA_RATE     = 650; // R650/hr per selected studio (R450 studio rate + R200 overtime surcharge)
 const SURCHARGE_RATE = 200;
 const AFTER_HOURS    = 17;
 
