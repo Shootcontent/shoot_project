@@ -2666,6 +2666,9 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
               <div id="bm-min-duration-warning" style="display:none;margin-top:6px;font-size:12px;color:#e07b00;font-weight:600;">
                 ⚠ Minimum 2 hours required for weekends, public holidays &amp; after-hours bookings.
               </div>
+              <div id="bm-may-weekday-warning" style="display:none;margin-top:6px;font-size:12px;color:#888;">
+                May Special is only available on weekends.
+              </div>
             </div>
             <div class="bm-field">
               <label>Date *</label>
@@ -3455,6 +3458,20 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
     // Show/hide the minimum duration warning
     document.getElementById('bm-min-duration-warning').style.display =
       minDurationRequired ? 'block' : 'none';
+
+    // May Special (3hrs) is only available on weekends
+    const opt3hrs = document.querySelector('#bm-duration option[value="3hrs"]');
+    if (opt3hrs) {
+      const _d = BM.date && new Date(BM.date + 'T00:00:00');
+      const mayWeekdayBlock = _d && _d.getMonth() === 4 && _d.getDay() >= 1 && _d.getDay() <= 5;
+      opt3hrs.disabled = !!mayWeekdayBlock;
+      if (mayWeekdayBlock && BM.duration === '3hrs') {
+        BM.duration = '';
+        document.getElementById('bm-duration').value = '';
+      }
+      document.getElementById('bm-may-weekday-warning').style.display =
+        mayWeekdayBlock ? 'block' : 'none';
+    }
 
     const { studioTotal, studioOriginal, promoDiscount, promoApplied,
             photoTotal, addonTotal, extraTotal, cameraTotal, surchargeTotal,
