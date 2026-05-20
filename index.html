@@ -3205,7 +3205,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
     }
 
     // Minimum 2h applies when the booking START triggers a surcharge condition
-    const minDurationRequired = isWeekend || isHoliday || startHour >= AFTER_HOURS || startHour < START_HOURS;
+    const minDurationRequired = false;
 
     return { surchargeHours, isAfterHours, isWeekend, isHoliday, minDurationRequired, surchargeLabel };
   }
