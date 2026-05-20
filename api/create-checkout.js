@@ -37,7 +37,7 @@ const AFTER_HOURS    = 17;  // 17:00 — after this triggers after-hours surchar
 
 const DURATION_MINS  = { '90min': 90, '2hrs': 120, '3hrs': 180, halfday: 300, fullday: 600 };
 const DURATION_HOURS = { '90min': 1.5, '2hrs': 2, '3hrs': 3, halfday: 5, fullday: 10 };
-const DISCOUNT_CODES = { SHOOT10: 10 };
+const DISCOUNT_CODES = { SHOOT10: 10, SHOOT80: 80 };
 
 const SA_HOLIDAYS = new Set([
   '2025-01-01','2025-03-21','2025-04-18','2025-04-21','2025-04-28',

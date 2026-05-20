@@ -1,7 +1,7 @@
 const BREVO_API_KEY          = process.env.BREVO_API_KEY;
 const BREVO_REDEEMED_LIST_ID = parseInt(process.env.BREVO_REDEEMED_LIST_ID || '3', 10);
 
-const CODES = { SHOOT10: 10 }; // code → discount percentage
+const CODES = { SHOOT10: 10, SHOOT80: 80 }; // code → discount percentage
 
 function setCors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');

@@ -1,7 +1,7 @@
 const BREVO_API_KEY          = process.env.BREVO_API_KEY;
 const BREVO_REDEEMED_LIST_ID = parseInt(process.env.BREVO_REDEEMED_LIST_ID || '3', 10);
 
-const VALID_CODES = new Set(['SHOOT10']);
+const VALID_CODES = new Set(['SHOOT10', 'SHOOT80']);
 
 function setCors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
