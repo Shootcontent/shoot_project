@@ -41,7 +41,7 @@ const AFTER_HOURS   = 17;    // 17:00 — after this triggers after-hours surcha
 const DURATION_HOURS = { '90min': 1.5, '2hrs': 2, '3hrs': 3, halfday: 5, fullday: 10 };
 
 // Valid discount codes — mirrors validate-discount.js
-const DISCOUNT_CODES = { SHOOT10: 10, SHOOT80: 80 };
+const DISCOUNT_CODES = { SHOOT10: 10, SHOOT90: 90 };
 
 // SA public holidays (extend yearly)
 const SA_PUBLIC_HOLIDAYS = new Set([
