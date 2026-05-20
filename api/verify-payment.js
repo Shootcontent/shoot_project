@@ -171,7 +171,7 @@ export default async function handler(req, res) {
 
     const checkout = await yocoRes.json();
 
-    if (checkout.status !== 'complete') {
+    if (checkout.status !== 'completed') {
       console.warn(`[verify-payment] bookingId=${bookingId} Yoco status=${checkout.status} — not confirming`);
       return res.status(402).json({ error: `Payment not confirmed (status: ${checkout.status}). Please contact us if you were charged.` });
     }
