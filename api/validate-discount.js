@@ -3,6 +3,9 @@ const BREVO_REDEEMED_LIST_ID = parseInt(process.env.BREVO_REDEEMED_LIST_ID || '3
 
 const CODES = { SHOOT10: 10, SHOOT80: 80 }; // code → discount percentage
 
+// Codes that require the email to be on the newsletter list before redeeming
+const NEWSLETTER_REQUIRED = new Set(['SHOOT10']);
+
 function setCors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -37,20 +40,26 @@ export default async function handler(req, res) {
   try {
     const { status, data } = await getContact(addr);
 
-    // Contact must exist (i.e. they signed up for the newsletter)
-    if (status === 404) {
-      return res.status(200).json({
-        valid: false,
-        message: 'This code is linked to newsletter sign-ups. Join the list to receive your code.',
-      });
+    if (NEWSLETTER_REQUIRED.has(normalCode)) {
+      // Contact must be on the newsletter list to redeem
+      if (status === 404) {
+        return res.status(200).json({
+          valid: false,
+          message: 'This code is linked to newsletter sign-ups. Join the list to receive your code.',
+        });
+      }
+      if (status !== 200) throw new Error(`Brevo returned ${status}`);
+    } else {
+      // No newsletter required — only block if already redeemed (contact exists in redeemed list)
+      if (status !== 200 && status !== 404) throw new Error(`Brevo returned ${status}`);
     }
 
-    if (status !== 200) throw new Error(`Brevo returned ${status}`);
-
-    // Check if already in the redeemed list
-    const alreadyRedeemed = Array.isArray(data.listIds) && data.listIds.includes(BREVO_REDEEMED_LIST_ID);
-    if (alreadyRedeemed) {
-      return res.status(200).json({ valid: false, message: 'This discount has already been redeemed.' });
+    // Check if already redeemed (skip check if contact doesn't exist yet — first-time user)
+    if (status === 200) {
+      const alreadyRedeemed = Array.isArray(data.listIds) && data.listIds.includes(BREVO_REDEEMED_LIST_ID);
+      if (alreadyRedeemed) {
+        return res.status(200).json({ valid: false, message: 'This discount has already been redeemed.' });
+      }
     }
 
     return res.status(200).json({
