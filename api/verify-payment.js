@@ -8,7 +8,8 @@
 
 import { kv } from './_kv.js';
 
-const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
+const BREVO_API_URL   = 'https://api.brevo.com/v3/smtp/email';
+const YOCO_CHECKOUT_URL = 'https://payments.yoco.com/api/checkouts';
 
 const STUDIO_NAMES = { curve: 'The Curve', studio1: 'Studio One', pool: 'The Pool' };
 const DUR_LABELS   = { '90min': '90 min', '2hrs': '2 hrs', '3hrs': '3 hrs', halfday: 'Half day (5hrs)', fullday: 'Full day (10hrs)' };
@@ -21,8 +22,12 @@ function setCors(res) {
 
 async function sendEmails(booking) {
   const apiKey = process.env.BREVO_API_KEY;
-  if (!apiKey) return;
-  const from     = process.env.FROM_EMAIL || 'hello@shootstudios.co.za';
+  if (!apiKey) {
+    console.error('[verify-payment] BREVO_API_KEY is not set — confirmation emails skipped');
+    return;
+  }
+  const from      = process.env.FROM_EMAIL   || 'hello@shootstudios.co.za';
+  const adminEmail = process.env.ADMIN_EMAIL || 'hello@shootstudios.co.za';
   const studios  = booking.studios.map(s => STUDIO_NAMES[s] || s).join(' + ');
   const durLabel = DUR_LABELS[booking.duration] || booking.duration;
   const extraLbl = booking.extraHours > 0 ? ` + ${booking.extraHours} extra hr(s)` : '';
@@ -112,7 +117,7 @@ async function sendEmails(booking) {
   });
   await post({
     sender:      { name: 'SHOOT. Bookings', email: from },
-    to:          [{ email: 'hello@shootstudios.co.za' }],
+    to:          [{ email: adminEmail }],
     subject:     `[CONFIRMED] ${booking.bookingId} — ${studios} — ${booking.date} ${booking.time}`,
     textContent: studioNote,
   });
@@ -147,16 +152,37 @@ export default async function handler(req, res) {
     }
     const pending = JSON.parse(pendingJson);
 
-    // ── Verify payment with Yoco ───────────────────────────────────────────────
-    // Find the checkoutId that maps to this bookingId by looking up Yoco checkout
-    // (Yoco appends checkoutId to successUrl but we stored booking_id there)
-    // We use the Yoco List Checkouts or rely on metadata match.
-    // Simplest: trust the successUrl redirect since Yoco only calls it on success,
-    // but we still verify via the checkouts list for security.
-    //
-    // Alternative: use webhook. For now, we do a lightweight trust-but-verify:
-    // the successUrl is only triggered by Yoco on successful payment.
-    // We mark the booking as confirmed and store it.
+    // ── Verify payment with Yoco server-side ──────────────────────────────────
+    const checkoutId = pending.checkoutId;
+    if (!checkoutId) {
+      console.error(`[verify-payment] bookingId=${bookingId} has no checkoutId in pending record — cannot verify with Yoco`);
+      return res.status(502).json({ error: 'Payment verification failed. Please contact us if you were charged.' });
+    }
+
+    const yocoRes = await fetch(`${YOCO_CHECKOUT_URL}/${checkoutId}`, {
+      headers: { 'Authorization': `Bearer ${process.env.YOCO_SECRET_KEY}` },
+    });
+
+    if (!yocoRes.ok) {
+      const body = await yocoRes.text();
+      console.error(`[verify-payment] Yoco lookup failed status=${yocoRes.status} body=${body}`);
+      return res.status(502).json({ error: 'Could not verify payment status. Please contact us if you were charged.' });
+    }
+
+    const checkout = await yocoRes.json();
+
+    if (checkout.status !== 'successful') {
+      console.warn(`[verify-payment] bookingId=${bookingId} Yoco status=${checkout.status} — not confirming`);
+      return res.status(402).json({ error: `Payment not confirmed (status: ${checkout.status}). Please contact us if you were charged.` });
+    }
+
+    // Sanity-check: Yoco metadata must reference the same bookingId
+    if (checkout.metadata?.bookingId && checkout.metadata.bookingId !== bookingId) {
+      console.error(`[verify-payment] metadata mismatch: expected ${bookingId} got ${checkout.metadata.bookingId}`);
+      return res.status(400).json({ error: 'Booking reference mismatch. Please contact us.' });
+    }
+
+    console.log(`[verify-payment] Yoco confirmed bookingId=${bookingId} checkoutId=${checkoutId} amount=${checkout.amount}`);
 
     const confirmed = {
       ...pending,
@@ -165,8 +191,9 @@ export default async function handler(req, res) {
       confirmedAt:   new Date().toISOString(),
     };
 
-    // Save permanent booking record
+    // Save permanent booking record (2-year TTL)
     await kv('SET', `booking:record:${bookingId}`, JSON.stringify(confirmed), 'EX', String(60 * 60 * 24 * 730));
+    console.log(`[verify-payment] booking record saved bookingId=${bookingId}`);
 
     // Upgrade slot keys: remove TTL (make permanent)
     for (const studio of pending.studios) {
@@ -189,6 +216,7 @@ export default async function handler(req, res) {
 
     // Send confirmation emails — must be awaited before returning or Vercel kills the function
     await sendEmails(confirmed);
+    console.log(`[verify-payment] emails dispatched bookingId=${bookingId}`);
 
     return res.status(200).json({ success: true, bookingId });
 

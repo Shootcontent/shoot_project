@@ -23,7 +23,13 @@ async function getClient() {
 
   client.on('error', err => console.error('[kv] Redis error:', err.message));
 
-  _clientPromise = client.connect().then(() => client);
+  _clientPromise = client.connect()
+    .then(() => client)
+    .catch(err => {
+      _clientPromise = null; // Reset so next call retries instead of re-using rejected promise
+      console.error('[kv] Redis connect failed:', err.message);
+      throw err;
+    });
   return _clientPromise;
 }
 

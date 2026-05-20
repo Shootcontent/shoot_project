@@ -293,6 +293,12 @@ export default async function handler(req, res) {
 
     await kv('SET', `checkout:${checkout.id}`, bookingId, 'EX', '1800');
 
+    // Update pending booking with checkoutId so verify-payment can verify with Yoco
+    pendingBooking.checkoutId = checkout.id;
+    await kv('SET', `booking:pending:${bookingId}`, JSON.stringify(pendingBooking), 'EX', '1800');
+
+    console.log(`[create-checkout] checkout created bookingId=${bookingId} checkoutId=${checkout.id} amount=${amountCents}`);
+
     succeeded = true;
     return res.status(200).json({ redirectUrl: checkout.redirectUrl, bookingId });
 
