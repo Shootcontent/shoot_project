@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SHOOT. — Complete Your Booking</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: #080808;
+      color: #fff;
+      min-height: 100svh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      width: 100%;
+      max-width: 480px;
+      background: #111;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 4px;
+      padding: 48px 40px;
+    }
+    .brand {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.28);
+      margin-bottom: 32px;
+    }
+    h1 {
+      font-size: 32px;
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: -1px;
+      margin-bottom: 28px;
+      line-height: 1;
+    }
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 13px;
+    }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-row .label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+    }
+    .detail-row .value { font-weight: 600; text-align: right; max-width: 60%; }
+    .amount-row { margin-top: 8px; }
+    .amount-row .value { font-size: 28px; font-weight: 900; font-style: italic; letter-spacing: -1px; }
+    .btn-pay {
+      display: block;
+      width: 100%;
+      margin-top: 32px;
+      padding: 15px;
+      background: #fff;
+      color: #000;
+      border: none;
+      border-radius: 2px;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-pay:hover { opacity: 0.88; }
+    .btn-pay:disabled { opacity: 0.35; cursor: not-allowed; }
+    .expires-note {
+      margin-top: 16px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.25);
+      text-align: center;
+      line-height: 1.6;
+    }
+    .state-msg {
+      text-align: center;
+      padding: 16px 0;
+    }
+    .state-msg.success h2 { color: #60d890; font-size: 24px; font-weight:900; font-style:italic; margin-bottom:12px; }
+    .state-msg.error h2 { color: #ff7070; font-size: 20px; font-weight:900; font-style:italic; margin-bottom:12px; }
+    .state-msg p { font-size: 13px; color: rgba(255,255,255,0.45); line-height: 1.7; }
+    .spinner {
+      display: inline-block;
+      width: 20px; height: 20px;
+      border: 2px solid rgba(255,255,255,0.15);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (max-width: 480px) {
+      .card { padding: 32px 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">SHOOT. Photographic Studios</div>
+
+    <!-- Loading state -->
+    <div id="stateLoading">
+      <div class="spinner"></div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.3);text-align:center">Loading payment details...</div>
+    </div>
+
+    <!-- Payment state -->
+    <div id="statePayment" style="display:none">
+      <h1 id="payHeading">Complete<br>Payment.</h1>
+      <div id="bookingDetails"></div>
+      <button class="btn-pay" id="payBtn">Pay Now</button>
+      <div class="expires-note" id="expiresNote"></div>
+    </div>
+
+    <!-- Success state -->
+    <div id="stateSuccess" style="display:none">
+      <div class="state-msg success">
+        <h2>Booking Confirmed.</h2>
+        <p>Your payment was received and your session is locked in.<br>You'll receive a confirmation email shortly.</p>
+        <p style="margin-top:20px;font-size:11px;color:rgba(255,255,255,0.2)">Questions? <a href="mailto:hello@shootstudios.co.za" style="color:rgba(255,255,255,0.35)">hello@shootstudios.co.za</a></p>
+      </div>
+    </div>
+
+    <!-- Error state -->
+    <div id="stateError" style="display:none">
+      <div class="state-msg error">
+        <h2 id="errHeading">Oops.</h2>
+        <p id="errMessage"></p>
+        <p style="margin-top:20px;font-size:11px;color:rgba(255,255,255,0.2)">
+          Contact us: <a href="mailto:hello@shootstudios.co.za" style="color:rgba(255,255,255,0.35)">hello@shootstudios.co.za</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const params  = new URLSearchParams(window.location.search);
+    const token   = params.get('token');
+    const status  = params.get('status');
+    const quoteId = params.get('quoteId');
+
+    function show(id) {
+      ['stateLoading','statePayment','stateSuccess','stateError'].forEach(s => {
+        document.getElementById(s).style.display = s === id ? '' : 'none';
+      });
+    }
+
+    function showError(heading, message) {
+      document.getElementById('errHeading').textContent  = heading;
+      document.getElementById('errMessage').textContent  = message;
+      show('stateError');
+    }
+
+    function fmtDate(s) {
+      if (!s) return '—';
+      return new Date(s + 'T12:00:00').toLocaleDateString('en-ZA', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    }
+    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    async function verifyAndConfirm() {
+      show('stateLoading');
+      try {
+        const r = await fetch(`/api/verify-admin-payment?token=${encodeURIComponent(token)}&quoteId=${encodeURIComponent(quoteId)}`);
+        const d = await r.json();
+        if (r.ok && d.success) {
+          show('stateSuccess');
+          // Clean up URL
+          window.history.replaceState({}, '', '/pay.html');
+        } else {
+          showError('Payment Issue', d.error || 'Could not confirm payment. Please contact us.');
+        }
+      } catch {
+        showError('Error', 'Could not verify payment. If you were charged, please contact us immediately.');
+      }
+    }
+
+    async function loadPaymentDetails() {
+      if (!token) { showError('Invalid Link', 'This payment link is invalid or missing.'); return; }
+
+      // If returning from Yoco with success status
+      if (status === 'paid' && quoteId) { verifyAndConfirm(); return; }
+      if (status === 'cancelled') { showError('Payment Cancelled', 'You cancelled the payment. Your slot is still reserved — contact us to try again.'); return; }
+      if (status === 'failed')    { showError('Payment Failed', 'Your payment was declined. Please contact us to try again.'); return; }
+
+      try {
+        const r = await fetch(`/api/pay-info?token=${encodeURIComponent(token)}`);
+        const d = await r.json();
+
+        if (!r.ok) { showError('Link Unavailable', d.error || 'This payment link is no longer available.'); return; }
+        if (d.status === 'paid') { show('stateSuccess'); return; }
+
+        // Render payment details
+        const details = document.getElementById('bookingDetails');
+        details.innerHTML = `
+          <div style="border:1px solid rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;margin-bottom:4px">
+            <div class="detail-row" style="padding:14px 18px"><span class="label">Studio</span><span class="value">${esc(d.studios)}</span></div>
+            <div class="detail-row" style="padding:14px 18px"><span class="label">Date</span><span class="value">${esc(fmtDate(d.date))}</span></div>
+            <div class="detail-row" style="padding:14px 18px"><span class="label">Time</span><span class="value">${esc(d.time)}</span></div>
+            <div class="detail-row" style="padding:14px 18px"><span class="label">Duration</span><span class="value">${esc(d.duration)}</span></div>
+            <div class="detail-row amount-row" style="padding:14px 18px"><span class="label">Amount Due</span><span class="value">R ${Math.round(d.amountRands).toLocaleString('en-ZA')}</span></div>
+          </div>`;
+
+        const exp = new Date(d.expiresAt);
+        document.getElementById('expiresNote').textContent =
+          `Payment link expires ${exp.toLocaleDateString('en-ZA', { day:'numeric', month:'long' })} at ${exp.toLocaleTimeString('en-ZA', { hour:'2-digit', minute:'2-digit' })}`;
+
+        show('statePayment');
+      } catch {
+        showError('Error', 'Could not load payment details. Please try again or contact us.');
+      }
+    }
+
+    document.getElementById('payBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('payBtn');
+      btn.disabled = true;
+      btn.textContent = 'Redirecting to payment...';
+      try {
+        const r = await fetch('/api/pay-initiate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token }),
+        });
+        const d = await r.json();
+        if (!r.ok) { showError('Payment Error', d.error); return; }
+        window.location.href = d.redirectUrl;
+      } catch {
+        showError('Error', 'Could not initiate payment. Please try again.');
+        btn.disabled = false;
+        btn.textContent = 'Pay Now';
+      }
+    });
+
+    loadPaymentDetails();
+  </script>
+</body>
+</html>

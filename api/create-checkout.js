@@ -36,6 +36,7 @@ const START_HOURS    = 8;   // 08:00 — before this triggers early-hours surcha
 const AFTER_HOURS    = 17;  // 17:00 — after this triggers after-hours surcharge
 
 const DURATION_MINS  = { '90min': 90, '2hrs': 120, '3hrs': 180, halfday: 300, fullday: 600 };
+const BUFFER_MINS    = 30; // mandatory gap between bookings
 const DURATION_HOURS = { '90min': 1.5, '2hrs': 2, '3hrs': 3, halfday: 5, fullday: 10 };
 const DISCOUNT_CODES = { SHOOT10: 10, SHOOT90: 90 };
 
@@ -65,9 +66,9 @@ function timeToMins(t) {
   return h * 60 + m;
 }
 
-/** True if interval [s1,e1) overlaps [s2,e2) */
+/** True if interval [s1,e1) overlaps [s2,e2) including the mandatory buffer */
 function overlaps(s1, e1, s2, e2) {
-  return s1 < e2 && e1 > s2;
+  return s1 < e2 + BUFFER_MINS && e1 + BUFFER_MINS > s2;
 }
 
 function getSurchargeHours(date, time, duration, extra) {

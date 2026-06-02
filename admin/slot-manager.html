@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>SHOOT. Admin — Slot Manager</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/assets/admin.css" />
+</head>
+<body>
+
+  <nav>
+    <div class="nav-left">
+      <a class="nav-brand" href="/admin/dashboard.html">SHOOT. <span>Admin</span></a>
+      <div class="nav-links">
+        <a class="nav-link" href="/admin/dashboard.html">Dashboard</a>
+        <a class="nav-link" href="/admin/bookings.html">Bookings</a>
+        <a class="nav-link" href="/admin/calendar.html">Calendar</a>
+        <a class="nav-link" href="/admin/coupons.html">Coupons</a>
+        <a class="nav-link active" href="/admin/slot-manager.html">Slots</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div class="nav-user" id="navUser">—</div>
+      <button class="btn btn-ghost btn-sm" id="logoutBtn">Sign Out</button>
+    </div>
+  </nav>
+
+  <main>
+    <div class="page-header">
+      <div>
+        <div class="page-title">Slot Manager.</div>
+        <div class="page-sub">Block and unblock studio availability. Blocks immediately prevent public bookings.</div>
+      </div>
+      <button class="btn btn-primary" id="newBlockBtn">+ Block Slot</button>
+    </div>
+
+    <!-- Active blocks -->
+    <div class="stat-label" style="margin-bottom:12px">Active Blocks</div>
+    <div class="table-wrap" style="margin-bottom:32px">
+      <table>
+        <thead><tr>
+          <th>Studio</th><th>Date</th><th>Scope</th><th>Time</th><th>Reason</th><th>Blocked By</th><th>Blocked At</th><th></th>
+        </tr></thead>
+        <tbody id="blocksBody"><tr><td colspan="8"><div class="skeleton"></div></td></tr></tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Create Block Modal -->
+  <div class="modal-overlay hidden" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-title">Block Slot.</div>
+      <div id="modalAlert" class="alert alert-error hidden"></div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>Studio *</label>
+          <select id="bStudio">
+            <option value="">Select studio</option>
+            <option value="curve">The Curve</option>
+            <option value="studio1">Studio One</option>
+            <option value="pool">The Pool</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Date *</label>
+          <input id="bDate" type="date" />
+        </div>
+        <div class="field">
+          <label>Scope *</label>
+          <select id="bScope">
+            <option value="full_day">Full Day (blocks entire day)</option>
+            <option value="time_slot">Specific Time Slot</option>
+          </select>
+        </div>
+        <div class="field" id="timeFields" style="display:none">
+          <label>Start Time</label>
+          <input id="bTime" type="time" step="1800" value="08:00" />
+        </div>
+      </div>
+
+      <div class="field" id="durationField" style="display:none">
+        <label>Duration to block</label>
+        <select id="bDuration">
+          <option value="90min">90 minutes</option>
+          <option value="2hrs">2 hours</option>
+          <option value="3hrs">3 hours</option>
+          <option value="halfday">Half day (5 hrs)</option>
+          <option value="fullday">Full day (10 hrs)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Reason</label>
+        <select id="bReasonPreset">
+          <option value="">Select reason or type below</option>
+          <option value="Maintenance">Maintenance</option>
+          <option value="Private event">Private event</option>
+          <option value="Internal shoot">Internal shoot</option>
+          <option value="Holiday">Holiday</option>
+          <option value="Equipment issue">Equipment issue</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <input id="bReason" type="text" placeholder="Custom reason or additional notes..." />
+      </div>
+
+      <div id="conflictWarning" class="hidden" style="background:rgba(255,180,50,0.1);border:1px solid rgba(255,180,50,0.25);border-radius:2px;padding:12px 14px;font-size:12px;color:#ffb432;margin-bottom:16px">
+        ⚠ This block overlaps with existing confirmed bookings. The block will be created but won't affect those bookings.
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="cancelBlockBtn">Cancel</button>
+        <button class="btn btn-primary" id="saveBlockBtn">Create Block</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STUDIO_NAMES = { curve: 'The Curve', studio1: 'Studio One', pool: 'The Pool' };
+
+    async function init() {
+      try {
+        const r = await fetch('/api/admin/me', { credentials: 'same-origin' });
+        if (!r.ok) { window.location.replace('/admin/index.html'); return; }
+        const { username } = await r.json();
+        document.getElementById('navUser').textContent = username;
+      } catch { window.location.replace('/admin/index.html'); return; }
+      loadBlocks();
+    }
+
+    async function loadBlocks() {
+      try {
+        const r = await fetch('/api/admin/slots?all=1', { credentials: 'same-origin' });
+        if (!r.ok) throw new Error(await r.text());
+        const { blocks } = await r.json();
+        const tbody = document.getElementById('blocksBody');
+
+        if (!blocks.length) {
+          tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">No active blocks. Use "+ Block Slot" to restrict availability.</div></td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = blocks.map(b => `
+          <tr>
+            <td>${esc(STUDIO_NAMES[b.studio] || b.studio)}</td>
+            <td>${fmtDate(b.date)}</td>
+            <td><span class="badge ${b.scope === 'full_day' ? 'badge-red' : 'badge-yellow'}">${b.scope === 'full_day' ? 'Full Day' : 'Time Slot'}</span></td>
+            <td>${b.scope === 'full_day' ? '<span class="muted">All day</span>' : `${b.startTime} – ${b.endTime}`}</td>
+            <td>${esc(b.reason || '—')}</td>
+            <td class="muted">${esc(b.blockedBy)}</td>
+            <td class="muted" style="font-size:11px">${fmtDateTime(b.blockedAt)}</td>
+            <td>
+              <button class="btn btn-danger btn-sm" onclick="removeBlock('${esc(b.blockId)}', '${esc(STUDIO_NAMES[b.studio]||b.studio)}', '${esc(b.date)}')">
+                Unblock
+              </button>
+            </td>
+          </tr>`).join('');
+      } catch (err) {
+        document.getElementById('blocksBody').innerHTML =
+          `<tr><td colspan="8" style="padding:16px;color:#ff8080;font-size:12px">Error: ${esc(err.message)}</td></tr>`;
+      }
+    }
+
+    async function removeBlock(blockId, studio, date) {
+      if (!confirm(`Remove block for ${studio} on ${date}? Public availability will be restored immediately.`)) return;
+      try {
+        const r = await fetch(`/api/admin/slots?blockId=${encodeURIComponent(blockId)}`, {
+          method: 'DELETE', credentials: 'same-origin',
+        });
+        if (!r.ok) throw new Error((await r.json()).error);
+        loadBlocks();
+      } catch (err) { alert('Error: ' + err.message); }
+    }
+
+    // Modal
+    document.getElementById('newBlockBtn').addEventListener('click', () => {
+      document.getElementById('bDate').min = new Date().toLocaleDateString('en-CA');
+      document.getElementById('modalAlert').classList.add('hidden');
+      document.getElementById('conflictWarning').classList.add('hidden');
+      document.getElementById('modalOverlay').classList.remove('hidden');
+    });
+
+    document.getElementById('bScope').addEventListener('change', function() {
+      const isSlot = this.value === 'time_slot';
+      document.getElementById('timeFields').style.display   = isSlot ? '' : 'none';
+      document.getElementById('durationField').style.display = isSlot ? '' : 'none';
+    });
+
+    document.getElementById('bReasonPreset').addEventListener('change', function() {
+      if (this.value) document.getElementById('bReason').value = this.value;
+    });
+
+    document.getElementById('cancelBlockBtn').addEventListener('click', () => {
+      document.getElementById('modalOverlay').classList.add('hidden');
+    });
+    document.getElementById('modalOverlay').addEventListener('click', e => {
+      if (e.target === document.getElementById('modalOverlay'))
+        document.getElementById('modalOverlay').classList.add('hidden');
+    });
+
+    document.getElementById('saveBlockBtn').addEventListener('click', async () => {
+      const btn     = document.getElementById('saveBlockBtn');
+      const alertEl = document.getElementById('modalAlert');
+      alertEl.classList.add('hidden');
+      btn.disabled = true;
+
+      const scope    = document.getElementById('bScope').value;
+      const reason   = document.getElementById('bReason').value.trim() || document.getElementById('bReasonPreset').value;
+
+      const body = {
+        studio:   document.getElementById('bStudio').value,
+        date:     document.getElementById('bDate').value,
+        scope,
+        reason,
+        time:     scope === 'time_slot' ? document.getElementById('bTime').value : undefined,
+        duration: scope === 'time_slot' ? document.getElementById('bDuration').value : undefined,
+      };
+
+      try {
+        const r = await fetch('/api/admin/slots', {
+          method: 'POST', credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error);
+
+        if (d.block.confirmedConflicts?.length > 0) {
+          document.getElementById('conflictWarning').classList.remove('hidden');
+          await new Promise(resolve => setTimeout(resolve, 1500));
+        }
+
+        document.getElementById('modalOverlay').classList.add('hidden');
+        loadBlocks();
+      } catch (err) {
+        alertEl.textContent = err.message;
+        alertEl.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await fetch('/api/admin/logout', { method:'POST', credentials:'same-origin' });
+      window.location.replace('/admin/index.html');
+    });
+
+    function fmtDate(s) { if (!s) return '—'; const [y,m,d] = s.split('-'); return `${d}/${m}/${y}`; }
+    function fmtDateTime(s) { return s ? new Date(s).toLocaleString('en-ZA', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : '—'; }
+    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>SHOOT. Admin — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/assets/admin.css" />
+  <style>
+    .date-presets {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .preset-btn {
+      font-family: inherit;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 5px 11px;
+      border-radius: 2px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: none;
+      color: rgba(255,255,255,0.4);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .preset-btn:hover { border-color: rgba(255,255,255,0.35); color: #fff; }
+    .preset-btn.active { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.4); color: #fff; }
+    .custom-range {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 4px;
+    }
+    .custom-range input {
+      font-family: inherit;
+      font-size: 11px;
+      background: #111;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 2px;
+      color: #fff;
+      padding: 5px 10px;
+      outline: none;
+    }
+    .custom-range input:focus { border-color: rgba(255,255,255,0.35); }
+    .range-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,0.25);
+      margin-bottom: 6px;
+    }
+    .stats-section { margin-bottom: 12px; }
+    .stats-section-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.2);
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-left">
+      <a class="nav-brand" href="/admin/dashboard.html">SHOOT. <span>Admin</span></a>
+      <div class="nav-links">
+        <a class="nav-link active" href="/admin/dashboard.html">Dashboard</a>
+        <a class="nav-link" href="/admin/bookings.html">Bookings</a>
+        <a class="nav-link" href="/admin/calendar.html">Calendar</a>
+        <a class="nav-link" href="/admin/coupons.html">Coupons</a>
+        <a class="nav-link" href="/admin/create-booking.html">Create Booking</a>
+        <a class="nav-link" href="/admin/pending-payments.html">Payments</a>
+        <a class="nav-link" href="/admin/slot-manager.html">Slots</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div class="nav-user" id="navUser">—</div>
+      <button class="btn btn-ghost btn-sm" id="logoutBtn">Sign Out</button>
+    </div>
+  </nav>
+
+  <main>
+    <div class="page-header">
+      <div>
+        <div class="page-title">Dashboard.</div>
+        <div class="page-sub" id="pageDate"></div>
+      </div>
+    </div>
+
+    <!-- Date Range Filter -->
+    <div style="background:#111;border:1px solid rgba(255,255,255,0.07);border-radius:4px;padding:18px 20px;margin-bottom:24px">
+      <div class="range-label">Date Range</div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <div class="date-presets" id="presets">
+          <button class="preset-btn" data-preset="today">Today</button>
+          <button class="preset-btn" data-preset="yesterday">Yesterday</button>
+          <button class="preset-btn" data-preset="this_week">This Week</button>
+          <button class="preset-btn" data-preset="last_week">Last Week</button>
+          <button class="preset-btn active" data-preset="this_month">This Month</button>
+          <button class="preset-btn" data-preset="last_month">Last Month</button>
+          <button class="preset-btn" data-preset="all_time">All Time</button>
+          <button class="preset-btn" data-preset="custom">Custom</button>
+        </div>
+        <div class="custom-range hidden" id="customRange">
+          <input type="date" id="fromDate" />
+          <span style="color:rgba(255,255,255,0.2);font-size:11px">to</span>
+          <input type="date" id="toDate" />
+          <button class="btn btn-ghost btn-sm" id="applyCustom">Apply</button>
+        </div>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.25);margin-top:10px;letter-spacing:0.5px" id="rangeDisplay"></div>
+    </div>
+
+    <!-- Range stats -->
+    <div class="stats-section-label" id="statsLabel">This Month</div>
+    <div class="stats" id="rangeStats">
+      <div class="stat-card">
+        <div class="stat-label">Bookings</div>
+        <div class="stat-value" id="statTotal">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Revenue</div>
+        <div class="stat-value sm" id="statRevenue">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg Booking Value</div>
+        <div class="stat-value sm" id="statAvg">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Confirmed</div>
+        <div class="stat-value" id="statConfirmed">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label" style="color:#ffb432">Pending Payment</div>
+        <div class="stat-value" id="statPending" style="color:#ffb432">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label" style="color:rgba(255,100,100,0.7)">Cancelled</div>
+        <div class="stat-value" id="statCancelled" style="color:rgba(255,100,100,0.7)">—</div>
+      </div>
+    </div>
+
+    <!-- All-time totals -->
+    <div class="stats-section-label" style="margin-top:8px">All Time</div>
+    <div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(190px,1fr));margin-bottom:36px" id="allTimeStats">
+      <div class="stat-card">
+        <div class="stat-label">Total Bookings</div>
+        <div class="stat-value" id="statAllTotal">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Revenue</div>
+        <div class="stat-value sm" id="statAllRevenue">—</div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div class="stat-label" style="margin:0" id="recentLabel">Recent Bookings</div>
+      <a class="btn btn-ghost btn-sm" href="/admin/bookings.html">View All</a>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Ref</th>
+            <th>Date</th>
+            <th class="hide-mobile">Time</th>
+            <th>Studio</th>
+            <th class="hide-mobile">Client</th>
+            <th>Amount</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="bookingsBody">
+          <tr><td colspan="7"><div class="skeleton"></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    const STATUS_BADGE = {
+      confirmed:  'badge-green',
+      cancelled:  'badge-red',
+      pending:    'badge-yellow',
+      completed:  'badge-green',
+    };
+
+    let activePreset = 'this_month';
+    let customFrom = '', customTo = '';
+
+    // ── Date range helpers ──────────────────────────────────────────────────
+    function getMonday(d) {
+      const date = new Date(d);
+      const day = date.getDay();
+      date.setDate(date.getDate() - (day === 0 ? 6 : day - 1));
+      date.setHours(0, 0, 0, 0);
+      return date;
+    }
+
+    function toCA(d) {
+      return d.toLocaleDateString('en-CA', { timeZone: 'Africa/Johannesburg' });
+    }
+
+    function getRange(preset) {
+      const now = new Date();
+      const today = toCA(now);
+      switch (preset) {
+        case 'today':
+          return { from: today, to: today, label: 'Today' };
+        case 'yesterday': {
+          const y = new Date(now); y.setDate(y.getDate() - 1);
+          const yd = toCA(y);
+          return { from: yd, to: yd, label: 'Yesterday' };
+        }
+        case 'this_week': {
+          const mon = getMonday(now);
+          const sun = new Date(mon); sun.setDate(sun.getDate() + 6);
+          return { from: toCA(mon), to: toCA(sun), label: 'This Week' };
+        }
+        case 'last_week': {
+          const mon = getMonday(new Date(now.getTime() - 7 * 86400000));
+          const sun = new Date(mon); sun.setDate(sun.getDate() + 6);
+          return { from: toCA(mon), to: toCA(sun), label: 'Last Week' };
+        }
+        case 'this_month': {
+          const y = now.getFullYear(), m = String(now.getMonth() + 1).padStart(2, '0');
+          const last = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+          return { from: `${y}-${m}-01`, to: `${y}-${m}-${String(last).padStart(2,'0')}`, label: 'This Month' };
+        }
+        case 'last_month': {
+          const d = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+          const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0');
+          const last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+          return { from: `${y}-${m}-01`, to: `${y}-${m}-${String(last).padStart(2,'0')}`, label: 'Last Month' };
+        }
+        case 'all_time':
+          return { from: '2020-01-01', to: '2099-12-31', label: 'All Time' };
+        case 'custom':
+          return { from: customFrom, to: customTo, label: 'Custom Range' };
+        default:
+          return { from: today.slice(0, 8) + '01', to: today, label: 'This Month' };
+      }
+    }
+
+    // ── Load dashboard ──────────────────────────────────────────────────────
+    async function loadDashboard() {
+      const { from, to, label } = getRange(activePreset);
+      if (!from || !to) return;
+
+      // Update label
+      document.getElementById('statsLabel').textContent = label;
+      document.getElementById('recentLabel').textContent = `Recent Bookings — ${label}`;
+      const fmtDisplay = s => { if (!s || s === '2020-01-01' || s === '2099-12-31') return '—'; const [y,m,d] = s.split('-'); return `${d}/${m}/${y}`; };
+      document.getElementById('rangeDisplay').textContent = label === 'All Time' ? 'Showing all bookings' : `${fmtDisplay(from)} – ${fmtDisplay(to)}`;
+
+      // Loading state
+      ['statTotal','statRevenue','statAvg','statConfirmed','statPending','statCancelled','statAllTotal','statAllRevenue'].forEach(id => {
+        document.getElementById(id).textContent = '—';
+      });
+      document.getElementById('bookingsBody').innerHTML = `<tr><td colspan="7"><div class="skeleton"></div></td></tr>`;
+
+      try {
+        const params = new URLSearchParams({ from, to });
+        const r = await fetch('/api/admin/dashboard?' + params, { credentials: 'same-origin' });
+        if (!r.ok) throw new Error(await r.text());
+        const d = await r.json();
+
+        document.getElementById('statTotal').textContent     = d.totalBookings;
+        document.getElementById('statRevenue').textContent   = 'R ' + fmt(d.totalRevenue);
+        document.getElementById('statAvg').textContent       = d.totalBookings > 0 ? 'R ' + fmt(d.avgBookingValue) : '—';
+        document.getElementById('statConfirmed').textContent = d.confirmedCount;
+        document.getElementById('statPending').textContent   = d.pendingPaymentCount;
+        document.getElementById('statCancelled').textContent = d.cancelledCount;
+        document.getElementById('statAllTotal').textContent  = d.allTotal;
+        document.getElementById('statAllRevenue').textContent = 'R ' + fmt(d.allRevenue);
+
+        const tbody = document.getElementById('bookingsBody');
+        if (!d.recent || d.recent.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">No bookings in this period.</div></td></tr>`;
+          return;
+        }
+        tbody.innerHTML = d.recent.map(b => `
+          <tr onclick="window.location='/admin/booking-detail.html?id=${esc(b.bookingId)}'">
+            <td><span class="mono muted">${esc(b.bookingId)}</span></td>
+            <td>${fmtDate(b.date)}</td>
+            <td class="hide-mobile">${b.time || '—'}</td>
+            <td>${esc(b.studios)}</td>
+            <td class="hide-mobile">${esc(b.name)}</td>
+            <td>R ${fmt(b.amountRands)}</td>
+            <td><span class="badge ${STATUS_BADGE[b.status] || 'badge-grey'}">${esc(b.status)}</span></td>
+          </tr>`).join('');
+      } catch (err) {
+        document.getElementById('bookingsBody').innerHTML =
+          `<tr><td colspan="7" style="padding:16px;color:#ff8080;font-size:12px">Error: ${esc(err.message)}</td></tr>`;
+      }
+    }
+
+    // ── Preset buttons ──────────────────────────────────────────────────────
+    document.getElementById('presets').addEventListener('click', e => {
+      const btn = e.target.closest('.preset-btn');
+      if (!btn) return;
+      const preset = btn.dataset.preset;
+
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activePreset = preset;
+
+      const customRange = document.getElementById('customRange');
+      if (preset === 'custom') {
+        customRange.classList.remove('hidden');
+      } else {
+        customRange.classList.add('hidden');
+        loadDashboard();
+      }
+    });
+
+    document.getElementById('applyCustom').addEventListener('click', () => {
+      customFrom = document.getElementById('fromDate').value;
+      customTo   = document.getElementById('toDate').value;
+      if (customFrom && customTo) loadDashboard();
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await fetch('/api/admin/logout', { method: 'POST', credentials: 'same-origin' });
+      window.location.replace('/admin/index.html');
+    });
+
+    async function init() {
+      try {
+        const r = await fetch('/api/admin/me', { credentials: 'same-origin' });
+        if (!r.ok) { window.location.replace('/admin/index.html'); return; }
+        const { username } = await r.json();
+        document.getElementById('navUser').textContent = username;
+      } catch { window.location.replace('/admin/index.html'); return; }
+
+      document.getElementById('pageDate').textContent =
+        new Date().toLocaleDateString('en-ZA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      loadDashboard();
+    }
+
+    function fmt(n) { return Number(n || 0).toLocaleString('en-ZA', { minimumFractionDigits: 0, maximumFractionDigits: 0 }); }
+    function fmtDate(s) { if (!s) return '—'; const [y, m, d] = s.split('-'); return `${d}/${m}/${y}`; }
+    function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+    init();
+  </script>
+</body>
+</html>

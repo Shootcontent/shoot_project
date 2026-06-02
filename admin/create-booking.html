@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>SHOOT. Admin — Create Booking</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/assets/admin.css" />
+</head>
+<body>
+
+  <nav>
+    <div class="nav-left">
+      <a class="nav-brand" href="/admin/dashboard.html">SHOOT. <span>Admin</span></a>
+      <div class="nav-links">
+        <a class="nav-link" href="/admin/dashboard.html">Dashboard</a>
+        <a class="nav-link" href="/admin/bookings.html">Bookings</a>
+        <a class="nav-link" href="/admin/calendar.html">Calendar</a>
+        <a class="nav-link" href="/admin/coupons.html">Coupons</a>
+        <a class="nav-link active" href="/admin/create-booking.html">Create Booking</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div class="nav-user" id="navUser">—</div>
+      <button class="btn btn-ghost btn-sm" id="logoutBtn">Sign Out</button>
+    </div>
+  </nav>
+
+  <main style="max-width:800px">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Create Booking.</div>
+        <div class="page-sub">Admin quote — generate a custom booking and send a payment link to the customer.</div>
+      </div>
+    </div>
+
+    <div id="alertMsg" class="alert hidden"></div>
+    <div id="successMsg" class="hidden" style="background:#111;border:1px solid rgba(80,200,120,0.25);border-radius:4px;padding:32px;text-align:center">
+      <div style="font-size:20px;font-weight:900;font-style:italic;margin-bottom:12px;color:#60d890">Quote Created.</div>
+      <div id="successDetails" style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:24px"></div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-primary" id="sendPaymentBtn">Send Payment Link Now</button>
+        <a class="btn btn-ghost" href="/admin/pending-payments.html">View Pending Payments</a>
+        <button class="btn btn-ghost" id="createAnotherBtn">Create Another</button>
+      </div>
+    </div>
+
+    <form id="quoteForm" class="hidden">
+
+      <!-- Studio & Date -->
+      <div class="card card-pad" style="margin-bottom:16px">
+        <div class="stat-label" style="margin-bottom:16px">Booking Details</div>
+
+        <div class="field">
+          <label>Studios *</label>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;text-transform:none;letter-spacing:0;color:#fff">
+              <input type="checkbox" name="studios" value="curve" style="width:16px;height:16px;accent-color:#fff" /> The Curve
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;text-transform:none;letter-spacing:0;color:#fff">
+              <input type="checkbox" name="studios" value="studio1" style="width:16px;height:16px;accent-color:#fff" /> Studio One
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;text-transform:none;letter-spacing:0;color:#fff">
+              <input type="checkbox" name="studios" value="pool" style="width:16px;height:16px;accent-color:#fff" /> The Pool
+            </label>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label>Date *</label>
+            <input id="fDate" type="date" />
+          </div>
+          <div class="field">
+            <label>Start Time *</label>
+            <input id="fTime" type="time" step="1800" value="08:00" />
+          </div>
+          <div class="field">
+            <label>Duration *</label>
+            <select id="fDuration">
+              <option value="">Select duration</option>
+              <option value="90min">90 minutes</option>
+              <option value="2hrs">2 hours</option>
+              <option value="3hrs">3 hours</option>
+              <option value="halfday">Half day (5 hrs)</option>
+              <option value="fullday">Full day (10 hrs)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Extra Hours (R450/hr each studio)</label>
+            <input id="fExtraHours" type="number" min="0" max="8" value="0" />
+          </div>
+        </div>
+
+        <!-- Price calculator -->
+        <div id="priceCalc" style="background:#1a1a1a;border-radius:2px;padding:14px;font-size:12px;display:none">
+          <div style="color:rgba(255,255,255,0.4);letter-spacing:1px;font-size:10px;text-transform:uppercase;margin-bottom:8px">Standard Price Calculation</div>
+          <div id="calcBreakdown" style="color:rgba(255,255,255,0.55);line-height:2"></div>
+          <div id="calcTotal" style="font-size:18px;font-weight:900;font-style:italic;color:#fff;margin-top:8px"></div>
+        </div>
+      </div>
+
+      <!-- Customer Details -->
+      <div class="card card-pad" style="margin-bottom:16px">
+        <div class="stat-label" style="margin-bottom:16px">Customer Details</div>
+        <div class="form-grid">
+          <div class="field"><label>First Name *</label><input id="fFirstName" type="text" placeholder="Jane" /></div>
+          <div class="field"><label>Last Name *</label><input id="fLastName" type="text" placeholder="Smith" /></div>
+          <div class="field"><label>Email *</label><input id="fEmail" type="email" placeholder="jane@example.com" /></div>
+          <div class="field"><label>Phone *</label><input id="fPhone" type="tel" placeholder="060 000 0000" /></div>
+        </div>
+      </div>
+
+      <!-- Pricing -->
+      <div class="card card-pad" style="margin-bottom:16px">
+        <div class="stat-label" style="margin-bottom:16px">Custom Pricing</div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Custom Price (R) *</label>
+            <input id="fCustomPrice" type="number" min="1" placeholder="e.g. 900" />
+            <div style="font-size:10px;color:rgba(255,255,255,0.25);margin-top:6px;letter-spacing:0.5px">Enter the amount the customer should pay. This overrides standard pricing.</div>
+          </div>
+          <div class="field">
+            <label>Discount Code (optional)</label>
+            <input id="fDiscountCode" type="text" placeholder="e.g. SHOOT10" style="text-transform:uppercase" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="card card-pad" style="margin-bottom:24px">
+        <div class="stat-label" style="margin-bottom:12px">Internal Notes</div>
+        <textarea id="fNotes" rows="3" style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:2px;color:#fff;font-family:inherit;font-size:13px;padding:10px 14px;resize:vertical;outline:none" placeholder="Notes visible to admin only (not sent to customer)..."></textarea>
+      </div>
+
+      <div style="display:flex;gap:12px">
+        <button class="btn btn-primary" type="submit" id="submitBtn">Create Draft Quote</button>
+        <a class="btn btn-ghost" href="/admin/dashboard.html">Cancel</a>
+      </div>
+    </form>
+  </main>
+
+  <script>
+    let createdQuoteId = null;
+
+    async function init() {
+      try {
+        const r = await fetch('/api/admin/me', { credentials: 'same-origin' });
+        if (!r.ok) { window.location.replace('/admin/index.html'); return; }
+        const { username } = await r.json();
+        document.getElementById('navUser').textContent = username;
+      } catch { window.location.replace('/admin/index.html'); return; }
+
+      document.getElementById('quoteForm').classList.remove('hidden');
+
+      // Set minimum date to today
+      document.getElementById('fDate').min = new Date().toLocaleDateString('en-CA');
+
+      // Attach price calc triggers
+      const calcFields = ['fDate','fTime','fDuration','fExtraHours'];
+      calcFields.forEach(id => document.getElementById(id).addEventListener('change', calcPrice));
+      document.querySelectorAll('input[name="studios"]').forEach(cb => cb.addEventListener('change', calcPrice));
+
+      // Populate custom price when calc runs
+      document.getElementById('fCustomPrice').placeholder = 'e.g. 900';
+    }
+
+    async function calcPrice() {
+      const studios = [...document.querySelectorAll('input[name="studios"]:checked')].map(c => c.value);
+      const date    = document.getElementById('fDate').value;
+      const time    = document.getElementById('fTime').value;
+      const duration = document.getElementById('fDuration').value;
+      const extra   = parseInt(document.getElementById('fExtraHours').value, 10) || 0;
+
+      if (!studios.length || !date || !time || !duration) {
+        document.getElementById('priceCalc').style.display = 'none';
+        return;
+      }
+
+      try {
+        const r = await fetch('/api/admin/calc-price', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ studios, date, time, duration, extraHours: extra }),
+        });
+        if (!r.ok) return;
+        const d = await r.json();
+
+        const pc = document.getElementById('priceCalc');
+        pc.style.display = 'block';
+        document.getElementById('calcBreakdown').innerHTML =
+          `Studios: R ${d.breakdown.studios.toLocaleString()}` +
+          (d.breakdown.extra > 0 ? `<br>Extra hours: R ${d.breakdown.extra.toLocaleString()}` : '') +
+          (d.breakdown.surcharge > 0 ? `<br>Off-hours surcharge: R ${d.breakdown.surcharge.toLocaleString()}` : '');
+        document.getElementById('calcTotal').textContent = `Standard Total: R ${d.subtotal.toLocaleString()}`;
+
+        // Auto-fill custom price if empty
+        const priceField = document.getElementById('fCustomPrice');
+        if (!priceField.value) priceField.value = d.subtotal;
+      } catch {}
+    }
+
+    document.getElementById('quoteForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const alertEl = document.getElementById('alertMsg');
+      alertEl.classList.add('hidden');
+
+      const studios = [...document.querySelectorAll('input[name="studios"]:checked')].map(c => c.value);
+      const body = {
+        studios,
+        duration:        document.getElementById('fDuration').value,
+        extraHours:      parseInt(document.getElementById('fExtraHours').value, 10) || 0,
+        date:            document.getElementById('fDate').value,
+        time:            document.getElementById('fTime').value,
+        firstName:       document.getElementById('fFirstName').value.trim(),
+        lastName:        document.getElementById('fLastName').value.trim(),
+        email:           document.getElementById('fEmail').value.trim(),
+        phone:           document.getElementById('fPhone').value.trim(),
+        customPriceCents: Math.round(parseFloat(document.getElementById('fCustomPrice').value) * 100),
+        discountCode:    document.getElementById('fDiscountCode').value.trim().toUpperCase() || null,
+        notes:           document.getElementById('fNotes').value.trim(),
+      };
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Creating...';
+
+      try {
+        const r = await fetch('/api/admin/quotes', {
+          method: 'POST', credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error);
+
+        createdQuoteId = d.quote.quoteId;
+        const studios_label = (d.quote.studios || []).map(s => ({'curve':'The Curve','studio1':'Studio One','pool':'The Pool'}[s]||s)).join(' + ');
+        document.getElementById('successDetails').textContent =
+          `${d.quote.quoteId} · ${studios_label} · ${d.quote.date} at ${d.quote.time} · R ${(d.quote.customPriceCents/100).toLocaleString()} · ${d.quote.email}`;
+        document.getElementById('quoteForm').classList.add('hidden');
+        document.getElementById('successMsg').classList.remove('hidden');
+      } catch (err) {
+        alertEl.textContent = err.message;
+        alertEl.className = 'alert alert-error';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Create Draft Quote';
+      }
+    });
+
+    document.getElementById('sendPaymentBtn').addEventListener('click', async () => {
+      if (!createdQuoteId) return;
+      const btn = document.getElementById('sendPaymentBtn');
+      btn.disabled = true; btn.textContent = 'Sending...';
+      try {
+        const r = await fetch(`/api/admin/quote?id=${createdQuoteId}&action=send-payment`, {
+          method: 'POST', credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error);
+        btn.textContent = '✓ Email Sent';
+        btn.className = 'btn btn-ghost';
+        document.getElementById('successMsg').querySelector('div:last-child').insertAdjacentHTML('beforeend',
+          '<div style="margin-top:12px;font-size:12px;color:#60d890">Payment link sent to customer.</div>');
+      } catch (err) {
+        alert('Error sending email: ' + err.message);
+        btn.disabled = false;
+        btn.textContent = 'Send Payment Link Now';
+      }
+    });
+
+    document.getElementById('createAnotherBtn').addEventListener('click', () => {
+      createdQuoteId = null;
+      document.getElementById('successMsg').classList.add('hidden');
+      document.getElementById('quoteForm').classList.remove('hidden');
+      document.getElementById('quoteForm').reset();
+      document.getElementById('priceCalc').style.display = 'none';
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await fetch('/api/admin/logout', { method:'POST', credentials:'same-origin' });
+      window.location.replace('/admin/index.html');
+    });
+
+    init();
+  </script>
+</body>
+</html>

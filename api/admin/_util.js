@@ -1,12 +1,12 @@
 /**
  * Admin utility endpoint — protected by ADMIN_SECRET env var.
  *
- * GET  /api/admin?secret=XXX&action=list        — list all confirmed bookings
- * POST /api/admin?secret=XXX&action=flush       — delete ALL booking data (test reset)
- * GET  /api/admin?secret=XXX&action=test-email  — send a test email via Brevo
+ * GET  /api/admin/util?secret=XXX&action=list        — list all confirmed bookings
+ * POST /api/admin/util?secret=XXX&action=flush       — delete ALL booking data (test reset)
+ * GET  /api/admin/util?secret=XXX&action=test-email  — send a test email via Brevo
  */
 
-import { kv } from './_kv.js';
+import { kv } from '../_kv.js';
 
 const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
 

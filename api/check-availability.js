@@ -22,6 +22,7 @@ import { kv, kvHGetAll } from './_kv.js';
 
 const VALID_STUDIOS = new Set(['curve', 'studio1', 'pool']);
 const DATE_RE       = /^\d{4}-\d{2}-\d{2}$/;
+const BUFFER_MINS   = 30; // mandatory gap between bookings
 
 function setCors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -61,7 +62,11 @@ async function getIntervals(studio, date) {
       debugEntries.push({ field, bId, stillPending: !!stillPending, raw: stillPending?.slice?.(0,20) });
       if (!stillPending) { stale.push(field); continue; }
     }
-    valid.push({ start: minsToTime(startMins), end: minsToTime(endMins) });
+    // Expand by buffer on both sides so the booking UI blocks the gap automatically
+    valid.push({
+      start: minsToTime(Math.max(0, startMins - BUFFER_MINS)),
+      end:   minsToTime(Math.min(1440, endMins + BUFFER_MINS)),
+    });
   }
 
   if (stale.length) kv('HDEL', hashKey, ...stale).catch(() => {});

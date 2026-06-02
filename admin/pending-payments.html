@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>SHOOT. Admin — Pending Payments</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/assets/admin.css" />
+</head>
+<body>
+
+  <nav>
+    <div class="nav-left">
+      <a class="nav-brand" href="/admin/dashboard.html">SHOOT. <span>Admin</span></a>
+      <div class="nav-links">
+        <a class="nav-link" href="/admin/dashboard.html">Dashboard</a>
+        <a class="nav-link" href="/admin/bookings.html">Bookings</a>
+        <a class="nav-link" href="/admin/calendar.html">Calendar</a>
+        <a class="nav-link" href="/admin/coupons.html">Coupons</a>
+        <a class="nav-link active" href="/admin/pending-payments.html">Payments</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div class="nav-user" id="navUser">—</div>
+      <button class="btn btn-ghost btn-sm" id="logoutBtn">Sign Out</button>
+    </div>
+  </nav>
+
+  <main>
+    <div class="page-header">
+      <div>
+        <div class="page-title">Payment Requests.</div>
+        <div class="page-sub" id="pageStats">Loading...</div>
+      </div>
+      <a class="btn btn-primary" href="/admin/create-booking.html">+ New Quote</a>
+    </div>
+
+    <!-- Pending -->
+    <div class="stat-label" style="margin-bottom:12px">Awaiting Payment</div>
+    <div class="table-wrap" style="margin-bottom:32px">
+      <table>
+        <thead><tr>
+          <th>Quote ID</th><th>Customer</th><th>Studio</th>
+          <th>Date</th><th>Amount</th><th>Expires</th><th>Payment Link</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="pendingBody"><tr><td colspan="8"><div class="skeleton"></div></td></tr></tbody>
+      </table>
+    </div>
+
+    <!-- All quotes (draft + other statuses) -->
+    <div class="stat-label" style="margin-bottom:12px">All Quotes</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Quote ID</th><th>Customer</th><th>Studio</th>
+          <th>Date</th><th>Amount</th><th>Status</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="quotesBody"><tr><td colspan="7"><div class="skeleton"></div></td></tr></tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    async function init() {
+      try {
+        const r = await fetch('/api/admin/me', { credentials: 'same-origin' });
+        if (!r.ok) { window.location.replace('/admin/index.html'); return; }
+        const { username } = await r.json();
+        document.getElementById('navUser').textContent = username;
+      } catch { window.location.replace('/admin/index.html'); return; }
+      await Promise.all([loadPending(), loadQuotes()]);
+    }
+
+    async function loadPending() {
+      try {
+        const r = await fetch('/api/admin/pending-payments', { credentials: 'same-origin' });
+        if (!r.ok) throw new Error(await r.text());
+        const d = await r.json();
+
+        document.getElementById('pageStats').textContent =
+          `${d.pending.length} awaiting payment · ${d.paid.length} paid · ${d.expired.length} expired`;
+
+        const tbody = document.getElementById('pendingBody');
+        if (!d.pending.length) {
+          tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">No pending payment requests.</div></td></tr>`;
+          return;
+        }
+        tbody.innerHTML = d.pending.map(r => {
+          const payLink = `${window.location.origin}/pay.html?token=${esc(r.token)}`;
+          return `<tr>
+            <td><span class="mono muted">${esc(r.quoteId)}</span></td>
+            <td>${r.quote ? esc(r.quote.name) : '<span class="muted">—</span>'}</td>
+            <td>${r.quote ? esc(r.quote.studios) : '—'}</td>
+            <td>${r.quote ? fmtDate(r.quote.date) : '—'}</td>
+            <td>R ${fmt(r.amountCents / 100)}</td>
+            <td style="color:${isExpiringSoon(r.expiresAt) ? '#ffb432' : 'rgba(255,255,255,0.5)'}">
+              ${fmtDateTime(r.expiresAt)}
+            </td>
+            <td>
+              <button class="btn btn-ghost btn-sm" onclick="copyLink('${esc(r.token)}', this)" title="${payLink}">Copy Link</button>
+            </td>
+            <td>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-ghost btn-sm" onclick="resend('${esc(r.quoteId)}')">Resend</button>
+                <button class="btn btn-danger btn-sm" onclick="cancelPayment('${esc(r.quoteId)}')">Cancel</button>
+              </div>
+            </td>
+          </tr>`;
+        }).join('');
+      } catch (err) {
+        document.getElementById('pendingBody').innerHTML =
+          `<tr><td colspan="8" style="padding:16px;color:#ff8080;font-size:12px">Error: ${esc(err.message)}</td></tr>`;
+      }
+    }
+
+    async function loadQuotes() {
+      try {
+        const r = await fetch('/api/admin/quotes', { credentials: 'same-origin' });
+        if (!r.ok) throw new Error(await r.text());
+        const { quotes } = await r.json();
+        const NAMES = { curve:'The Curve', studio1:'Studio One', pool:'The Pool' };
+
+        const tbody = document.getElementById('quotesBody');
+        if (!quotes.length) {
+          tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">No quotes yet. <a href="/admin/create-booking.html" style="color:rgba(255,255,255,0.6)">Create one.</a></div></td></tr>`;
+          return;
+        }
+        tbody.innerHTML = quotes.map(q => {
+          const statusClass = { draft:'badge-grey', pending_payment:'badge-yellow', confirmed:'badge-green', cancelled:'badge-red', expired:'badge-grey' }[q.status] || 'badge-grey';
+          const studios = (q.studios||[]).map(s=>NAMES[s]||s).join(' + ');
+          return `<tr>
+            <td><span class="mono muted">${esc(q.quoteId)}</span></td>
+            <td>${esc(q.firstName)} ${esc(q.lastName)}<br><span class="muted" style="font-size:11px">${esc(q.email)}</span></td>
+            <td>${esc(studios)}</td>
+            <td>${fmtDate(q.date)}</td>
+            <td>R ${fmt(q.customPriceCents / 100)}</td>
+            <td><span class="badge ${statusClass}">${q.status}</span></td>
+            <td>
+              <div style="display:flex;gap:8px">
+                ${q.status === 'draft' ? `<button class="btn btn-primary btn-sm" onclick="sendPayment('${esc(q.quoteId)}')">Send Payment</button>` : ''}
+                ${q.status === 'pending_payment' ? `<button class="btn btn-ghost btn-sm" onclick="resend('${esc(q.quoteId)}')">Resend</button>` : ''}
+                ${['draft','pending_payment'].includes(q.status) ? `<button class="btn btn-danger btn-sm" onclick="cancelQuote('${esc(q.quoteId)}')">Cancel</button>` : ''}
+              </div>
+            </td>
+          </tr>`;
+        }).join('');
+      } catch (err) {
+        document.getElementById('quotesBody').innerHTML =
+          `<tr><td colspan="7" style="padding:16px;color:#ff8080;font-size:12px">Error: ${esc(err.message)}</td></tr>`;
+      }
+    }
+
+    function copyLink(token, btn) {
+      const link = `${window.location.origin}/pay.html?token=${token}`;
+      navigator.clipboard.writeText(link).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = '✓ Copied';
+        btn.disabled = true;
+        setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2000);
+      }).catch(() => {
+        prompt('Copy this payment link:', link);
+      });
+    }
+
+    async function sendPayment(quoteId) {
+      if (!confirm(`Send payment link to customer?`)) return;
+      try {
+        const r = await fetch(`/api/admin/quote?id=${quoteId}&action=send-payment`, {
+          method: 'POST', credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error);
+        await Promise.all([loadPending(), loadQuotes()]);
+      } catch (err) { alert('Error: ' + err.message); }
+    }
+
+    async function resend(quoteId) {
+      if (!confirm('Resend payment link?')) return;
+      try {
+        const r = await fetch(`/api/admin/quote?id=${quoteId}&action=resend-payment`, {
+          method: 'POST', credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error);
+        alert('Payment link resent successfully.');
+      } catch (err) { alert('Error: ' + err.message); }
+    }
+
+    async function cancelPayment(quoteId) {
+      if (!confirm('Cancel this payment request? Slots will be released.')) return;
+      try {
+        const r = await fetch(`/api/admin/quote?id=${quoteId}&action=cancel-payment`, {
+          method: 'POST', credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error);
+        await Promise.all([loadPending(), loadQuotes()]);
+      } catch (err) { alert('Error: ' + err.message); }
+    }
+
+    async function cancelQuote(quoteId) {
+      if (!confirm('Cancel and delete this quote? This cannot be undone.')) return;
+      try {
+        const r = await fetch(`/api/admin/quote?id=${quoteId}`, {
+          method: 'DELETE', credentials: 'same-origin',
+        });
+        if (!r.ok) throw new Error((await r.json()).error);
+        await Promise.all([loadPending(), loadQuotes()]);
+      } catch (err) { alert('Error: ' + err.message); }
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await fetch('/api/admin/logout', { method:'POST', credentials:'same-origin' });
+      window.location.replace('/admin/index.html');
+    });
+
+    function isExpiringSoon(iso) {
+      return new Date(iso) - new Date() < 12 * 3600 * 1000;
+    }
+    function fmt(n) { return Number(n||0).toLocaleString('en-ZA', { minimumFractionDigits: 0 }); }
+    function fmtDate(s) { if (!s) return '—'; const [y,m,d] = s.split('-'); return `${d}/${m}/${y}`; }
+    function fmtDateTime(s) { if (!s) return '—'; return new Date(s).toLocaleString('en-ZA', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }); }
+    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    init();
+  </script>
+</body>
+</html>

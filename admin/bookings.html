@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>SHOOT. Admin — Bookings</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/assets/admin.css" />
+  <style>
+    .preset-btn {
+      font-family: inherit;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 5px 11px;
+      border-radius: 2px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: none;
+      color: rgba(255,255,255,0.4);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .preset-btn:hover { border-color: rgba(255,255,255,0.35); color: #fff; }
+    .preset-btn.active { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.4); color: #fff; }
+    .filter-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-left">
+      <a class="nav-brand" href="/admin/dashboard.html">SHOOT. <span>Admin</span></a>
+      <div class="nav-links">
+        <a class="nav-link" href="/admin/dashboard.html">Dashboard</a>
+        <a class="nav-link active" href="/admin/bookings.html">Bookings</a>
+        <a class="nav-link" href="/admin/calendar.html">Calendar</a>
+        <a class="nav-link" href="/admin/coupons.html">Coupons</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div class="nav-user" id="navUser">—</div>
+      <button class="btn btn-ghost btn-sm" id="logoutBtn">Sign Out</button>
+    </div>
+  </nav>
+
+  <main>
+    <div class="page-header">
+      <div>
+        <div class="page-title">Bookings.</div>
+        <div class="page-sub" id="resultCount">Loading...</div>
+      </div>
+    </div>
+
+    <!-- Filter row 1: search + dropdowns -->
+    <div class="filter-row">
+      <input class="search-input" id="search" type="text" placeholder="Search name, email, ref, phone..." />
+      <select class="filter-select" id="studioFilter">
+        <option value="">All Studios</option>
+        <option value="curve">The Curve</option>
+        <option value="studio1">Studio One</option>
+        <option value="pool">The Pool</option>
+      </select>
+      <select class="filter-select" id="statusFilter">
+        <option value="">All Statuses</option>
+        <option value="confirmed">Confirmed</option>
+        <option value="pending">Pending</option>
+        <option value="cancelled">Cancelled</option>
+        <option value="completed">Completed</option>
+      </select>
+      <button class="btn btn-ghost btn-sm" id="clearBtn">Clear</button>
+    </div>
+
+    <!-- Filter row 2: date presets -->
+    <div class="filter-row" id="presets" style="margin-bottom:20px">
+      <button class="preset-btn active" data-preset="">All Dates</button>
+      <button class="preset-btn" data-preset="today">Today</button>
+      <button class="preset-btn" data-preset="yesterday">Yesterday</button>
+      <button class="preset-btn" data-preset="this_week">This Week</button>
+      <button class="preset-btn" data-preset="last_week">Last Week</button>
+      <button class="preset-btn" data-preset="this_month">This Month</button>
+      <button class="preset-btn" data-preset="last_month">Last Month</button>
+      <button class="preset-btn" data-preset="custom">Custom</button>
+      <span id="customDateRow" class="hidden" style="display:none;align-items:center;gap:6px">
+        <input class="filter-select" id="fromDate" type="date" style="padding:5px 10px;font-size:11px" />
+        <span style="color:rgba(255,255,255,0.2);font-size:11px">to</span>
+        <input class="filter-select" id="toDate" type="date" style="padding:5px 10px;font-size:11px" />
+        <button class="btn btn-ghost btn-sm" id="applyCustom">Apply</button>
+      </span>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Ref</th>
+            <th>Date</th>
+            <th class="hide-mobile">Time</th>
+            <th>Studio</th>
+            <th>Client</th>
+            <th class="hide-mobile">Email</th>
+            <th>Amount</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="bookingsBody">
+          <tr><td colspan="8"><div class="skeleton"></div></td></tr>
+        </tbody>
+      </table>
+      <div class="pagination" id="pagination" style="display:none">
+        <span id="pageInfo"></span>
+        <div class="pagination-btns">
+          <button class="btn btn-ghost btn-sm" id="prevBtn">← Prev</button>
+          <button class="btn btn-ghost btn-sm" id="nextBtn">Next →</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let page = 1, totalPages = 1, debounceTimer;
+    let activePreset = '', customFrom = '', customTo = '';
+
+    const STATUS_BADGE = {
+      confirmed: 'badge-green',
+      cancelled: 'badge-red',
+      pending:   'badge-yellow',
+      completed: 'badge-green',
+    };
+
+    function getMonday(d) {
+      const date = new Date(d);
+      const day = date.getDay();
+      date.setDate(date.getDate() - (day === 0 ? 6 : day - 1));
+      date.setHours(0, 0, 0, 0);
+      return date;
+    }
+    function toCA(d) { return d.toLocaleDateString('en-CA', { timeZone: 'Africa/Johannesburg' }); }
+
+    function getRange(preset) {
+      const now = new Date();
+      const today = toCA(now);
+      switch (preset) {
+        case 'today':     return { from: today, to: today };
+        case 'yesterday': {
+          const y = new Date(now); y.setDate(y.getDate() - 1); const yd = toCA(y);
+          return { from: yd, to: yd };
+        }
+        case 'this_week': {
+          const mon = getMonday(now); const sun = new Date(mon); sun.setDate(sun.getDate() + 6);
+          return { from: toCA(mon), to: toCA(sun) };
+        }
+        case 'last_week': {
+          const mon = getMonday(new Date(now.getTime() - 7 * 86400000)); const sun = new Date(mon); sun.setDate(sun.getDate() + 6);
+          return { from: toCA(mon), to: toCA(sun) };
+        }
+        case 'this_month': {
+          const y = now.getFullYear(), m = String(now.getMonth() + 1).padStart(2, '0');
+          const last = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+          return { from: `${y}-${m}-01`, to: `${y}-${m}-${String(last).padStart(2,'0')}` };
+        }
+        case 'last_month': {
+          const d = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+          const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0');
+          const last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+          return { from: `${y}-${m}-01`, to: `${y}-${m}-${String(last).padStart(2,'0')}` };
+        }
+        case 'custom':    return { from: customFrom, to: customTo };
+        default:          return { from: '', to: '' };
+      }
+    }
+
+    async function load() {
+      const { from, to } = getRange(activePreset);
+      const params = new URLSearchParams({
+        page,
+        search: document.getElementById('search').value.trim(),
+        studio: document.getElementById('studioFilter').value,
+        status: document.getElementById('statusFilter').value,
+        from:   from || '',
+        to:     to   || '',
+      });
+
+      const tbody = document.getElementById('bookingsBody');
+      tbody.innerHTML = `<tr><td colspan="8"><div class="skeleton"></div></td></tr>`;
+
+      try {
+        const r = await fetch('/api/admin/bookings?' + params, { credentials: 'same-origin' });
+        if (!r.ok) throw new Error(await r.text());
+        const d = await r.json();
+        totalPages = d.pages || 1;
+
+        document.getElementById('resultCount').textContent =
+          `${d.total} booking${d.total !== 1 ? 's' : ''} found`;
+
+        if (!d.bookings || d.bookings.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">No bookings found.</div></td></tr>`;
+          document.getElementById('pagination').style.display = 'none';
+          return;
+        }
+
+        tbody.innerHTML = d.bookings.map(b => `
+          <tr onclick="window.location='/admin/booking-detail.html?id=${esc(b.bookingId)}'">
+            <td><span class="mono muted">${esc(b.bookingId)}</span></td>
+            <td style="white-space:nowrap">${fmtDate(b.date)}</td>
+            <td class="hide-mobile">${b.time || '—'}</td>
+            <td>${esc(b.studiosLabel)}</td>
+            <td>${esc(b.name)}</td>
+            <td class="hide-mobile muted">${esc(b.email)}</td>
+            <td style="white-space:nowrap">R ${fmt(b.amountRands)}</td>
+            <td><span class="badge ${STATUS_BADGE[b.status] || 'badge-grey'}">${esc(b.status)}</span></td>
+          </tr>`).join('');
+
+        const pg = document.getElementById('pagination');
+        pg.style.display = 'flex';
+        document.getElementById('pageInfo').textContent = `Page ${d.page} of ${d.pages}`;
+        document.getElementById('prevBtn').disabled = d.page <= 1;
+        document.getElementById('nextBtn').disabled = d.page >= d.pages;
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="8" style="padding:20px 16px;color:#ff8080;font-size:12px">Error: ${esc(err.message)}</td></tr>`;
+      }
+    }
+
+    // Search debounce
+    document.getElementById('search').addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => { page = 1; load(); }, 350);
+    });
+    ['studioFilter', 'statusFilter'].forEach(id =>
+      document.getElementById(id).addEventListener('change', () => { page = 1; load(); })
+    );
+
+    // Preset buttons
+    document.getElementById('presets').addEventListener('click', e => {
+      const btn = e.target.closest('.preset-btn');
+      if (!btn) return;
+      const preset = btn.dataset.preset;
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activePreset = preset;
+      const cdr = document.getElementById('customDateRow');
+      if (preset === 'custom') {
+        cdr.style.display = 'flex'; cdr.classList.remove('hidden');
+      } else {
+        cdr.style.display = 'none'; cdr.classList.add('hidden');
+        page = 1; load();
+      }
+    });
+
+    document.getElementById('applyCustom').addEventListener('click', () => {
+      customFrom = document.getElementById('fromDate').value;
+      customTo   = document.getElementById('toDate').value;
+      if (customFrom && customTo) { page = 1; load(); }
+    });
+
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      document.getElementById('search').value = '';
+      document.getElementById('studioFilter').value = '';
+      document.getElementById('statusFilter').value = '';
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector('.preset-btn[data-preset=""]').classList.add('active');
+      const cdr = document.getElementById('customDateRow');
+      cdr.style.display = 'none'; cdr.classList.add('hidden');
+      activePreset = ''; customFrom = ''; customTo = '';
+      page = 1; load();
+    });
+
+    document.getElementById('prevBtn').addEventListener('click', () => { if (page > 1) { page--; load(); } });
+    document.getElementById('nextBtn').addEventListener('click', () => { if (page < totalPages) { page++; load(); } });
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await fetch('/api/admin/logout', { method: 'POST', credentials: 'same-origin' });
+      window.location.replace('/admin/index.html');
+    });
+
+    async function init() {
+      try {
+        const r = await fetch('/api/admin/me', { credentials: 'same-origin' });
+        if (!r.ok) { window.location.replace('/admin/index.html'); return; }
+        const { username } = await r.json();
+        document.getElementById('navUser').textContent = username;
+      } catch { window.location.replace('/admin/index.html'); return; }
+      load();
+    }
+
+    function fmt(n) { return Number(n || 0).toLocaleString('en-ZA', { minimumFractionDigits: 0, maximumFractionDigits: 0 }); }
+    function fmtDate(s) { if (!s) return '—'; const [y, m, d] = s.split('-'); return `${d}/${m}/${y}`; }
+    function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>SHOOT. Admin — Booking</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/assets/admin.css" />
+</head>
+<body>
+
+  <nav>
+    <div class="nav-left">
+      <a class="nav-brand" href="/admin/dashboard.html">SHOOT. <span>Admin</span></a>
+      <div class="nav-links">
+        <a class="nav-link" href="/admin/dashboard.html">Dashboard</a>
+        <a class="nav-link active" href="/admin/bookings.html">Bookings</a>
+        <a class="nav-link" href="/admin/calendar.html">Calendar</a>
+        <a class="nav-link" href="/admin/coupons.html">Coupons</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div class="nav-user" id="navUser">—</div>
+      <button class="btn btn-ghost btn-sm" id="logoutBtn">Sign Out</button>
+    </div>
+  </nav>
+
+  <main>
+    <div style="margin-bottom:24px">
+      <a href="/admin/bookings.html" class="btn btn-ghost btn-sm">← Back to Bookings</a>
+    </div>
+
+    <div class="page-header">
+      <div>
+        <div class="page-title" id="pageTitle">Loading...</div>
+        <div class="page-sub" id="pageSub"></div>
+      </div>
+      <span class="badge badge-green" id="statusBadge" style="font-size:11px;padding:6px 14px"></span>
+    </div>
+
+    <div id="content" style="display:none">
+
+      <!-- Key details -->
+      <div class="detail-grid" style="margin-bottom:20px" id="detailGrid"></div>
+
+      <!-- Notes -->
+      <div class="card card-pad" style="margin-bottom:20px">
+        <div class="stat-label" style="margin-bottom:12px">Internal Notes</div>
+        <textarea id="notesField" rows="4"
+          style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:2px;color:#fff;font-family:inherit;font-size:13px;padding:10px 14px;resize:vertical;outline:none"
+          placeholder="Add internal notes about this booking..."></textarea>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:12px">
+          <button class="btn btn-primary btn-sm" id="saveNotesBtn">Save Notes</button>
+          <span id="notesSaved" class="hidden" style="font-size:11px;color:#60d890;letter-spacing:1px">Saved.</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div id="errorMsg" class="alert alert-error hidden"></div>
+  </main>
+
+  <script>
+    let bookingId = null;
+
+    async function init() {
+      try {
+        const r = await fetch('/api/admin/me', { credentials: 'same-origin' });
+        if (!r.ok) { window.location.replace('/admin/index.html'); return; }
+        const { username } = await r.json();
+        document.getElementById('navUser').textContent = username;
+      } catch { window.location.replace('/admin/index.html'); return; }
+
+      const params = new URLSearchParams(window.location.search);
+      bookingId = params.get('id');
+      if (!bookingId) { showError('No booking ID specified.'); return; }
+      loadBooking();
+    }
+
+    async function loadBooking() {
+      try {
+        const r = await fetch(`/api/admin/booking?id=${encodeURIComponent(bookingId)}`, { credentials: 'same-origin' });
+        if (!r.ok) { const d = await r.json(); throw new Error(d.error || r.statusText); }
+        const b = await r.json();
+
+        document.getElementById('pageTitle').textContent = b.bookingId;
+        document.getElementById('pageSub').textContent   =
+          `${fmtDate(b.date)} at ${b.time || '—'} · ${b.studiosLabel}`;
+
+        const badge = document.getElementById('statusBadge');
+        badge.textContent  = b.bookingStatus || 'confirmed';
+        badge.className    = `badge ${b.bookingStatus === 'confirmed' ? 'badge-green' : 'badge-yellow'}`;
+        badge.style.cssText = 'font-size:11px;padding:6px 14px';
+
+        document.getElementById('notesField').value = b.notes || '';
+
+        const grid = document.getElementById('detailGrid');
+        grid.innerHTML = [
+          { label: 'Booking Ref',   value: `<span class="mono">${esc(b.bookingId)}</span>`,    span: false },
+          { label: 'Amount Paid',   value: `<strong>R ${fmt(b.amountRands)}</strong>`,          span: false },
+          { label: 'Studio',        value: esc(b.studiosLabel),                                 span: false },
+          { label: 'Duration',      value: esc(b.durationLabel) + (b.extraHours > 0 ? ` + ${b.extraHours} extra hr(s)` : ''), span: false },
+          { label: 'Date',          value: fmtDate(b.date),                                     span: false },
+          { label: 'Start Time',    value: b.time || '—',                                       span: false },
+          { label: 'Client Name',   value: esc(`${b.firstName || ''} ${b.lastName || ''}`.trim()), span: false },
+          { label: 'Email',         value: `<a href="mailto:${esc(b.email)}" style="color:rgba(255,255,255,0.7)">${esc(b.email)}</a>`, span: false },
+          { label: 'Phone',         value: `<a href="tel:${esc(b.phone)}" style="color:rgba(255,255,255,0.7)">${esc(b.phone)}</a>`, span: false },
+          { label: 'Transaction ID', value: `<span class="mono muted">${esc(b.transactionId || '—')}</span>`, span: false },
+          { label: 'Photography',   value: b.photo && b.photo !== 'none' ? esc(b.photo) : '<span class="muted">None</span>', span: false },
+          { label: 'Add-ons',       value: b.addons && b.addons.length ? esc(b.addons.join(', ')) : '<span class="muted">None</span>', span: false },
+          { label: 'Camera Rental', value: b.cameraBody ? `${esc(b.cameraBody)} — ${esc(b.rentalDuration)}` : '<span class="muted">None</span>', span: false },
+          { label: 'Discount Code', value: b.discountCode ? `<span class="badge badge-yellow">${esc(b.discountCode)}</span>` : '<span class="muted">None</span>', span: false },
+          { label: 'Booked At',     value: b.createdAt ? new Date(b.createdAt).toLocaleString('en-ZA') : '—', span: false },
+        ].map(({ label, value, span }) => `
+          <div class="detail-item${span ? ' span2' : ''}">
+            <div class="detail-label">${label}</div>
+            <div class="detail-value">${value}</div>
+          </div>`).join('');
+
+        document.getElementById('content').style.display = 'block';
+      } catch (err) {
+        showError(err.message);
+      }
+    }
+
+    document.getElementById('saveNotesBtn').addEventListener('click', async () => {
+      const notes = document.getElementById('notesField').value;
+      const btn   = document.getElementById('saveNotesBtn');
+      btn.disabled = true;
+      try {
+        const r = await fetch(`/api/admin/booking?id=${encodeURIComponent(bookingId)}`, {
+          method: 'PATCH',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ notes }),
+        });
+        if (!r.ok) throw new Error((await r.json()).error);
+        const saved = document.getElementById('notesSaved');
+        saved.classList.remove('hidden');
+        setTimeout(() => saved.classList.add('hidden'), 2500);
+      } catch (err) {
+        alert('Error saving notes: ' + err.message);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await fetch('/api/admin/logout', { method:'POST', credentials:'same-origin' });
+      window.location.replace('/admin/index.html');
+    });
+
+    function showError(msg) {
+      const el = document.getElementById('errorMsg');
+      el.textContent = msg;
+      el.classList.remove('hidden');
+      document.getElementById('pageTitle').textContent = 'Error';
+    }
+    function fmt(n) { return Number(n||0).toLocaleString('en-ZA', { minimumFractionDigits: 0, maximumFractionDigits: 0 }); }
+    function fmtDate(s) { if (!s) return '—'; const [y,m,d] = s.split('-'); return `${d}/${m}/${y}`; }
+    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    init();
+  </script>
+</body>
+</html>

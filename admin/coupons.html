@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>SHOOT. Admin — Coupons</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/assets/admin.css" />
+</head>
+<body>
+
+  <nav>
+    <div class="nav-left">
+      <a class="nav-brand" href="/admin/dashboard.html">SHOOT. <span>Admin</span></a>
+      <div class="nav-links">
+        <a class="nav-link" href="/admin/dashboard.html">Dashboard</a>
+        <a class="nav-link" href="/admin/bookings.html">Bookings</a>
+        <a class="nav-link" href="/admin/calendar.html">Calendar</a>
+        <a class="nav-link active" href="/admin/coupons.html">Coupons</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div class="nav-user" id="navUser">—</div>
+      <button class="btn btn-ghost btn-sm" id="logoutBtn">Sign Out</button>
+    </div>
+  </nav>
+
+  <main>
+    <div class="page-header">
+      <div>
+        <div class="page-title">Coupons.</div>
+        <div class="page-sub" id="couponCount">Loading...</div>
+      </div>
+      <button class="btn btn-primary" id="newCouponBtn">+ New Coupon</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Type</th>
+            <th>Value</th>
+            <th>Uses</th>
+            <th class="hide-mobile">Expires</th>
+            <th class="hide-mobile">Description</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="couponsBody">
+          <tr><td colspan="8"><div class="skeleton"></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Create / Edit Modal -->
+  <div class="modal-overlay hidden" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-title" id="modalTitle">New Coupon.</div>
+      <div id="modalAlert" class="alert alert-error hidden"></div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>Code *</label>
+          <input id="fCode" type="text" placeholder="e.g. SHOOT20" style="text-transform:uppercase" />
+        </div>
+        <div class="field">
+          <label>Type *</label>
+          <select id="fType">
+            <option value="percent">Percent (%)</option>
+            <option value="fixed">Fixed Amount (R)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Value *</label>
+          <input id="fValue" type="number" min="1" placeholder="e.g. 10" />
+        </div>
+        <div class="field">
+          <label>Max Uses (0 = unlimited)</label>
+          <input id="fMaxUses" type="number" min="0" value="0" />
+        </div>
+        <div class="field">
+          <label>Expires At (leave blank = never)</label>
+          <input id="fExpiresAt" type="date" />
+        </div>
+        <div class="field">
+          <label>Restrict to Email (optional)</label>
+          <input id="fEmail" type="email" placeholder="customer@email.com" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Description</label>
+        <input id="fDescription" type="text" placeholder="Internal note..." />
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="cancelBtn">Cancel</button>
+        <button class="btn btn-primary" id="saveBtn">Create Coupon</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let editingCode = null;
+
+    async function init() {
+      try {
+        const r = await fetch('/api/admin/me', { credentials: 'same-origin' });
+        if (!r.ok) { window.location.replace('/admin/index.html'); return; }
+        const { username } = await r.json();
+        document.getElementById('navUser').textContent = username;
+      } catch { window.location.replace('/admin/index.html'); return; }
+      load();
+    }
+
+    async function load() {
+      const tbody = document.getElementById('couponsBody');
+      tbody.innerHTML = `<tr><td colspan="8"><div class="skeleton"></div></td></tr>`;
+      try {
+        const r = await fetch('/api/admin/coupons', { credentials: 'same-origin' });
+        if (!r.ok) throw new Error(await r.text());
+        const { coupons } = await r.json();
+
+        document.getElementById('couponCount').textContent = `${coupons.length} coupon${coupons.length !== 1 ? 's' : ''}`;
+
+        if (!coupons.length) {
+          tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">No coupons yet. Create one above.</div></td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = coupons.map(c => `
+          <tr>
+            <td><span class="mono" style="font-weight:700;letter-spacing:1px">${esc(c.code)}</span></td>
+            <td>${c.type === 'percent' ? '%' : 'R'}</td>
+            <td>${c.type === 'percent' ? c.value + '%' : 'R ' + c.value}</td>
+            <td>${c.currentUses}${c.maxUses > 0 ? ' / ' + c.maxUses : ' / ∞'}</td>
+            <td class="hide-mobile">${c.expiresAt ? fmtDate(c.expiresAt.slice(0,10)) : '<span class="muted">Never</span>'}</td>
+            <td class="hide-mobile muted" style="font-size:12px">${esc(c.description || '—')}</td>
+            <td>
+              <span class="badge ${c.active ? 'badge-green' : 'badge-grey'}">${c.active ? 'Active' : 'Inactive'}</span>
+            </td>
+            <td>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-ghost btn-sm" onclick="openEdit(${JSON.stringify(c).replace(/"/g,'&quot;')})">Edit</button>
+                <button class="btn btn-ghost btn-sm" onclick="toggleActive('${esc(c.code)}', ${c.active})">${c.active ? 'Deactivate' : 'Activate'}</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteCoupon('${esc(c.code)}')">Delete</button>
+              </div>
+            </td>
+          </tr>`).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="8" style="padding:20px 16px;color:#ff8080;font-size:12px;">Error: ${esc(err.message)}</td></tr>`;
+      }
+    }
+
+    function openCreate() {
+      editingCode = null;
+      document.getElementById('modalTitle').textContent = 'New Coupon.';
+      document.getElementById('saveBtn').textContent    = 'Create Coupon';
+      document.getElementById('fCode').value        = '';
+      document.getElementById('fCode').disabled     = false;
+      document.getElementById('fType').value        = 'percent';
+      document.getElementById('fValue').value       = '';
+      document.getElementById('fMaxUses').value     = '0';
+      document.getElementById('fExpiresAt').value   = '';
+      document.getElementById('fEmail').value       = '';
+      document.getElementById('fDescription').value = '';
+      document.getElementById('modalAlert').classList.add('hidden');
+      document.getElementById('modalOverlay').classList.remove('hidden');
+    }
+
+    function openEdit(c) {
+      editingCode = c.code;
+      document.getElementById('modalTitle').textContent = `Edit ${c.code}.`;
+      document.getElementById('saveBtn').textContent    = 'Save Changes';
+      document.getElementById('fCode').value        = c.code;
+      document.getElementById('fCode').disabled     = true;
+      document.getElementById('fType').value        = c.type;
+      document.getElementById('fValue').value       = c.value;
+      document.getElementById('fMaxUses').value     = c.maxUses;
+      document.getElementById('fExpiresAt').value   = c.expiresAt ? c.expiresAt.slice(0, 10) : '';
+      document.getElementById('fEmail').value       = c.customerEmail || '';
+      document.getElementById('fDescription').value = c.description || '';
+      document.getElementById('modalAlert').classList.add('hidden');
+      document.getElementById('modalOverlay').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.add('hidden');
+    }
+
+    document.getElementById('newCouponBtn').addEventListener('click', openCreate);
+    document.getElementById('cancelBtn').addEventListener('click', closeModal);
+    document.getElementById('modalOverlay').addEventListener('click', e => {
+      if (e.target === document.getElementById('modalOverlay')) closeModal();
+    });
+
+    document.getElementById('saveBtn').addEventListener('click', async () => {
+      const btn       = document.getElementById('saveBtn');
+      const alertEl   = document.getElementById('modalAlert');
+      const expiresAt = document.getElementById('fExpiresAt').value;
+
+      btn.disabled = true;
+      alertEl.classList.add('hidden');
+
+      const body = {
+        code:          document.getElementById('fCode').value.trim().toUpperCase(),
+        type:          document.getElementById('fType').value,
+        value:         document.getElementById('fValue').value,
+        maxUses:       document.getElementById('fMaxUses').value,
+        expiresAt:     expiresAt ? new Date(expiresAt).toISOString() : '',
+        customerEmail: document.getElementById('fEmail').value.trim(),
+        description:   document.getElementById('fDescription').value.trim(),
+      };
+
+      try {
+        let r;
+        if (editingCode) {
+          r = await fetch(`/api/admin/coupon?code=${encodeURIComponent(editingCode)}`, {
+            method: 'PATCH', credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          });
+        } else {
+          r = await fetch('/api/admin/coupons', {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          });
+        }
+        if (!r.ok) { const d = await r.json(); throw new Error(d.error); }
+        closeModal();
+        load();
+      } catch (err) {
+        alertEl.textContent = err.message;
+        alertEl.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    async function toggleActive(code, currentlyActive) {
+      if (!confirm(`${currentlyActive ? 'Deactivate' : 'Activate'} coupon ${code}?`)) return;
+      try {
+        const r = await fetch(`/api/admin/coupon?code=${encodeURIComponent(code)}`, {
+          method: 'PATCH', credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ active: currentlyActive ? '0' : '1' }),
+        });
+        if (!r.ok) throw new Error((await r.json()).error);
+        load();
+      } catch (err) { alert('Error: ' + err.message); }
+    }
+
+    async function deleteCoupon(code) {
+      if (!confirm(`Permanently delete coupon ${code}? This cannot be undone.`)) return;
+      try {
+        const r = await fetch(`/api/admin/coupon?code=${encodeURIComponent(code)}`, {
+          method: 'DELETE', credentials: 'same-origin',
+        });
+        if (!r.ok) throw new Error((await r.json()).error);
+        load();
+      } catch (err) { alert('Error: ' + err.message); }
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await fetch('/api/admin/logout', { method:'POST', credentials:'same-origin' });
+      window.location.replace('/admin/index.html');
+    });
+
+    function fmtDate(s) { if (!s) return '—'; const [y,m,d] = s.split('-'); return `${d}/${m}/${y}`; }
+    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    init();
+  </script>
+</body>
+</html>
