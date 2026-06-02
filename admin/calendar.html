@@ -140,14 +140,15 @@
 
     /* ── Delete button ────────────────────────────────── */
     .del-btn {
-      position: absolute; top: 6px; right: 6px;
-      background: rgba(255,60,60,0.15); border: 1px solid rgba(255,60,60,0.25);
-      color: rgba(255,100,100,0.8); border-radius: 2px;
-      font-size: 9px; font-weight: 700; line-height: 1;
-      padding: 3px 5px; cursor: pointer; opacity: 0;
-      transition: opacity 0.15s;
+      display: inline-flex; align-items: center; gap: 4px;
+      margin-top: 6px;
+      background: rgba(255,60,60,0.18); border: 1px solid rgba(255,80,80,0.35);
+      color: #ff7070; border-radius: 2px;
+      font-size: 9px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+      padding: 4px 8px; cursor: pointer;
+      transition: background 0.15s, color 0.15s;
     }
-    .cal-event:hover .del-btn { opacity: 1; }
+    .del-btn:hover { background: rgba(255,60,60,0.35); color: #fff; }
     .cal-event { position: relative; }
 
     @media (max-width: 768px) {
@@ -446,7 +447,7 @@
               <div class="cal-event-time">${b.time || '—'} · ${esc(b.duration)}</div>
               <div>${esc(b.name)}</div>
               <div style="margin-top:3px"><span class="badge ${sc}" style="font-size:8px;padding:2px 5px">${b.status}</span></div>
-              ${b.status !== 'cancelled' ? `<button class="del-btn" data-id="${esc(b.bookingId)}" title="Cancel booking">✕</button>` : ''}
+              ${b.status !== 'cancelled' ? `<button class="del-btn" data-id="${esc(b.bookingId)}">✕ Cancel</button>` : ''}
             </a>`;
           });
           blocks.forEach(blk => {
@@ -488,7 +489,7 @@
             <div class="day-event-time">${b.time || '—'} · ${esc(b.duration)}</div>
             <div class="day-event-name">${esc(b.name)}</div>
             <div><span class="badge ${sc}" style="font-size:8px">${b.status}</span></div>
-            ${b.status !== 'cancelled' ? `<button class="del-btn" data-id="${esc(b.bookingId)}" title="Cancel booking">✕</button>` : ''}
+            ${b.status !== 'cancelled' ? `<button class="del-btn" data-id="${esc(b.bookingId)}">✕ Cancel</button>` : ''}
           </a>`;
         });
         blocks.forEach(blk => {

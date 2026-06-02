@@ -137,6 +137,7 @@
           { label: 'Camera Rental', value: b.cameraBody ? `${esc(b.cameraBody)} — ${esc(b.rentalDuration)}` : '<span class="muted">None</span>', span: false },
           { label: 'Discount Code', value: b.discountCode ? `<span class="badge badge-yellow">${esc(b.discountCode)}</span>` : '<span class="muted">None</span>', span: false },
           { label: 'Booked At',     value: b.createdAt ? new Date(b.createdAt).toLocaleString('en-ZA') : '—', span: false },
+          ...(b.clientNotes ? [{ label: 'Client Notes', value: `<span style="white-space:pre-wrap;line-height:1.6">${esc(b.clientNotes)}</span>`, span: true }] : []),
         ].map(({ label, value, span }) => `
           <div class="detail-item${span ? ' span2' : ''}">
             <div class="detail-label">${label}</div>
