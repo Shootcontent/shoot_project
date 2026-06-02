@@ -12,6 +12,7 @@
  */
 
 import { kv, kvHGetAll } from './_kv.js';
+import { getCoupon } from './_coupon.js';
 
 const YOCO_CHECKOUT_URL = 'https://payments.yoco.com/api/checkouts';
 
@@ -38,7 +39,6 @@ const AFTER_HOURS    = 17;  // 17:00 — after this triggers after-hours surchar
 const DURATION_MINS  = { '90min': 90, '2hrs': 120, '3hrs': 180, halfday: 300, fullday: 600 };
 const BUFFER_MINS    = 30; // mandatory gap between bookings
 const DURATION_HOURS = { '90min': 1.5, '2hrs': 2, '3hrs': 3, halfday: 5, fullday: 10 };
-const DISCOUNT_CODES = { SHOOT10: 10, SHOOT90: 90 };
 
 const SA_HOLIDAYS = new Set([
   '2025-01-01','2025-03-21','2025-04-18','2025-04-21','2025-04-28',
@@ -86,7 +86,7 @@ function getSurchargeHours(date, time, duration, extra) {
   return beforeHours + afterHours;
 }
 
-function calcAmount(body) {
+async function calcAmount(body) {
   const { studios, duration, extraHours = 0, date, time,
           photo, addons = [], cameraBody, rentalDuration, lensChoice, discountCode } = body;
 
@@ -108,9 +108,19 @@ function calcAmount(body) {
   if (lensChoice && rentalDuration) camera += LENS_PRICES[lensChoice]?.[rentalDuration] || 0;
   const surcharge  = time ? Math.round(getSurchargeHours(date, time, duration, extraHours) * SURCHARGE_RATE) : 0;
 
-  const subtotal   = studio + extra + photoAmt + addonAmt + camera + surcharge;
-  const discPct    = DISCOUNT_CODES[(discountCode || '').toUpperCase().trim()] || 0;
-  const discAmt    = discPct ? Math.round(subtotal * discPct / 100) : 0;
+  const subtotal = studio + extra + photoAmt + addonAmt + camera + surcharge;
+  const normalCode = (discountCode || '').toUpperCase().trim();
+  let discAmt = 0;
+  if (normalCode) {
+    const coupon = await getCoupon(normalCode);
+    if (coupon && coupon.active) {
+      if (coupon.type === 'percent') {
+        discAmt = Math.round(subtotal * coupon.value / 100);
+      } else if (coupon.type === 'fixed') {
+        discAmt = Math.min(coupon.value, subtotal);
+      }
+    }
+  }
   return subtotal - discAmt;
 }
 
@@ -178,7 +188,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Phone number required.' });
 
   const extraHours  = Math.max(0, Math.min(8, parseInt(body.extraHours, 10) || 0));
-  const amountRands = calcAmount({ ...body, extraHours });
+  const amountRands = await calcAmount({ ...body, extraHours });
   if (!amountRands) return res.status(400).json({ error: 'Invalid booking configuration.' });
   const amountCents = amountRands * 100;
 
