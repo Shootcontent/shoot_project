@@ -451,8 +451,7 @@
           }
           events.forEach(b => {
             const sc = STATUS_CLASS[b.status] || 'badge-grey';
-            const args = [b.bookingId, b.name, b.studiosLabel, b.time||'', b.duration, b.status].map(v => JSON.stringify(String(v||''))).join(',');
-            html += `<div class="cal-event" onclick="openBkModal(${args})">
+            html += `<div class="cal-event" onclick="openBkModal('${esc(b.bookingId)}')">
               <div class="cal-event-time">${b.time || '—'} · ${esc(b.duration)}</div>
               <div>${esc(b.name)}</div>
               <div style="margin-top:3px"><span class="badge ${sc}" style="font-size:8px;padding:2px 5px">${b.status}</span></div>
@@ -493,8 +492,7 @@
 
         events.forEach(b => {
           const sc = STATUS_CLASS[b.status] || 'badge-grey';
-          const args = [b.bookingId, b.name, b.studiosLabel, b.time||'', b.duration, b.status].map(v => JSON.stringify(String(v||''))).join(',');
-          html += `<div class="cal-event day-event" onclick="openBkModal(${args})">
+          html += `<div class="cal-event day-event" onclick="openBkModal('${esc(b.bookingId)}')">
             <div class="day-event-time">${b.time || '—'} · ${esc(b.duration)}</div>
             <div class="day-event-name">${esc(b.name)}</div>
             <div><span class="badge ${sc}" style="font-size:8px">${b.status}</span></div>
@@ -516,17 +514,19 @@
     // ── Booking modal (global functions, inline style, no CSS class deps) ────
     let activeBookingId = null;
 
-    window.openBkModal = function(id, name, studio, time, duration, status) {
+    window.openBkModal = function(id) {
+      const b = allBookings.find(x => x.bookingId === id);
+      if (!b) return;
       activeBookingId = id;
       document.getElementById('bkRef').textContent    = id;
-      document.getElementById('bkName').textContent   = name;
-      document.getElementById('bkStudio').textContent = studio + (time ? ' · ' + time : '') + (duration ? ' · ' + duration : '');
-      document.getElementById('bkStatus').textContent = status;
+      document.getElementById('bkName').textContent   = b.name || (b.firstName + ' ' + b.lastName);
+      document.getElementById('bkStudio').textContent = (b.studiosLabel || '') + (b.time ? ' · ' + b.time : '') + (b.duration ? ' · ' + b.duration : '');
+      document.getElementById('bkStatus').textContent = b.status || b.bookingStatus || '';
       document.getElementById('bkViewLink').href      = '/admin/booking-detail.html?id=' + encodeURIComponent(id);
       const btn = document.getElementById('bkCancelBtn');
       btn.textContent = 'Cancel Booking';
-      btn.disabled    = status === 'cancelled';
-      btn.style.background = status === 'cancelled' ? '#444' : '#c0392b';
+      btn.disabled    = (b.status || b.bookingStatus) === 'cancelled';
+      btn.style.background = (b.status || b.bookingStatus) === 'cancelled' ? '#444' : '#c0392b';
       document.getElementById('bkOverlay').style.display = 'flex';
     };
 
