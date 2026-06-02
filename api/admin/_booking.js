@@ -1,6 +1,7 @@
 /**
- * GET  /api/admin/booking?id=BK-xxx  — fetch single booking
- * PATCH /api/admin/booking?id=BK-xxx — update notes field only
+ * GET    /api/admin/booking?id=BK-xxx  — fetch single booking
+ * PATCH  /api/admin/booking?id=BK-xxx — update notes/clientNotes
+ * DELETE /api/admin/booking?id=BK-xxx — cancel booking + clear slot keys
  */
 
 import { requireSession } from '../_admin-auth.js';
@@ -34,6 +35,7 @@ function normalize(b) {
     rentalDuration: b.rentalDuration || null,
     lensChoice:     b.lensChoice || null,
     discountCode:   b.discountCode || null,
+    clientNotes:    b.clientNotes || '',
     amountCents:    cents,
     amountRands:    Math.round(cents) / 100,
     transactionId:  b.transactionId || null,
@@ -76,12 +78,46 @@ export default async function handler(req, res) {
       if (!raw) return res.status(404).json({ error: 'Booking not found.' });
       const booking = JSON.parse(raw);
 
-      const { notes } = req.body || {};
+      const { notes, clientNotes } = req.body || {};
       if (typeof notes === 'string') booking.notes = notes.slice(0, 1000);
+      if (typeof clientNotes === 'string') booking.clientNotes = clientNotes.slice(0, 2000);
 
       const ttl = await kv('TTL', key);
       const ex  = ttl > 0 ? ttl : 60 * 60 * 24 * 730;
       await kv('SET', key, JSON.stringify(booking), 'EX', String(ex));
+      return res.status(200).json({ ok: true });
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+
+  // ── DELETE — cancel booking ────────────────────────────────────────────────
+  if (req.method === 'DELETE') {
+    try {
+      const raw = await kv('GET', key);
+      if (!raw) return res.status(404).json({ error: 'Booking not found.' });
+      const booking = JSON.parse(raw);
+
+      if (booking.bookingStatus === 'cancelled') {
+        return res.status(200).json({ ok: true, alreadyCancelled: true });
+      }
+
+      // Clear slot keys for each studio
+      for (const studio of (booking.studios || [])) {
+        await kv('HDEL', `booking:intervals:${studio}:${booking.date}`, `c:${id}`).catch(() => {});
+        const slotVal = await kv('GET', `booking:slot:${studio}:${booking.date}:${booking.time}`);
+        if (slotVal === id) {
+          await kv('DEL', `booking:slot:${studio}:${booking.date}:${booking.time}`).catch(() => {});
+        }
+      }
+
+      // Mark as cancelled
+      booking.bookingStatus = 'cancelled';
+      booking.cancelledAt = new Date().toISOString();
+      const ttl = await kv('TTL', key);
+      const ex  = ttl > 0 ? ttl : 60 * 60 * 24 * 730;
+      await kv('SET', key, JSON.stringify(booking), 'EX', String(ex));
+
       return res.status(200).json({ ok: true });
     } catch (err) {
       return res.status(500).json({ error: err.message });

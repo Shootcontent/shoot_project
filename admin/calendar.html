@@ -138,6 +138,18 @@
     .day-event-block:hover { background: rgba(255,255,255,0.04); }
     .day-empty { padding: 32px 16px; color: rgba(255,255,255,0.18); font-size: 12px; text-align: center; }
 
+    /* ── Delete button ────────────────────────────────── */
+    .del-btn {
+      position: absolute; top: 6px; right: 6px;
+      background: rgba(255,60,60,0.15); border: 1px solid rgba(255,60,60,0.25);
+      color: rgba(255,100,100,0.8); border-radius: 2px;
+      font-size: 9px; font-weight: 700; line-height: 1;
+      padding: 3px 5px; cursor: pointer; opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .cal-event:hover .del-btn { opacity: 1; }
+    .cal-event { position: relative; }
+
     @media (max-width: 768px) {
       .day-grid { grid-template-columns: 1fr; }
       .week-grid { grid-template-columns: 60px repeat(7, 1fr); }
@@ -434,6 +446,7 @@
               <div class="cal-event-time">${b.time || '—'} · ${esc(b.duration)}</div>
               <div>${esc(b.name)}</div>
               <div style="margin-top:3px"><span class="badge ${sc}" style="font-size:8px;padding:2px 5px">${b.status}</span></div>
+              ${b.status !== 'cancelled' ? `<button class="del-btn" data-id="${esc(b.bookingId)}" title="Cancel booking">✕</button>` : ''}
             </a>`;
           });
           blocks.forEach(blk => {
@@ -471,10 +484,11 @@
 
         events.forEach(b => {
           const sc = STATUS_CLASS[b.status] || 'badge-grey';
-          html += `<a class="day-event" href="/admin/booking-detail.html?id=${esc(b.bookingId)}">
+          html += `<a class="cal-event day-event" href="/admin/booking-detail.html?id=${esc(b.bookingId)}">
             <div class="day-event-time">${b.time || '—'} · ${esc(b.duration)}</div>
             <div class="day-event-name">${esc(b.name)}</div>
             <div><span class="badge ${sc}" style="font-size:8px">${b.status}</span></div>
+            ${b.status !== 'cancelled' ? `<button class="del-btn" data-id="${esc(b.bookingId)}" title="Cancel booking">✕</button>` : ''}
           </a>`;
         });
         blocks.forEach(blk => {
@@ -489,6 +503,29 @@
       html += '</div>';
       document.getElementById('calContainer').innerHTML = html;
     }
+
+    // ── Delete booking via ✕ button ─────────────────────────────────────────
+    document.getElementById('calContainer').addEventListener('click', async e => {
+      const btn = e.target.closest('.del-btn');
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const id = btn.dataset.id;
+      if (!confirm(`Cancel booking ${id}?\n\nThis will free up the slot so it can be rebooked.`)) return;
+      btn.textContent = '…';
+      btn.disabled = true;
+      try {
+        const r = await fetch(`/api/admin/booking?id=${encodeURIComponent(id)}`, {
+          method: 'DELETE', credentials: 'same-origin',
+        });
+        if (!r.ok) { const d = await r.json(); throw new Error(d.error || r.statusText); }
+        refresh();
+      } catch (err) {
+        alert('Error: ' + err.message);
+        btn.textContent = '✕';
+        btn.disabled = false;
+      }
+    });
 
     document.getElementById('logoutBtn').addEventListener('click', async () => {
       await fetch('/api/admin/logout', { method: 'POST', credentials: 'same-origin' });
