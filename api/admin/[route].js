@@ -56,16 +56,15 @@ const ROUTES = {
 };
 
 export default function handler(req, res) {
-  const segments = req.query.path || [];
-  const route    = segments[0];
-  const fn       = ROUTES[route];
+  const route = req.query.route;
+  const fn    = ROUTES[route];
 
   if (!fn) {
     return res.status(404).json({ error: `Unknown admin route: ${route}` });
   }
 
   // Strip the routing segment so handlers see clean query params
-  delete req.query.path;
+  delete req.query.route;
 
   return fn(req, res);
 }
