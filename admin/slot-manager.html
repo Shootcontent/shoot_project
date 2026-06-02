@@ -36,6 +36,17 @@
       <button class="btn btn-primary" id="newBlockBtn">+ Block Slot</button>
     </div>
 
+    <!-- Clear Date -->
+    <div style="background:#111;border:1px solid #222;border-radius:4px;padding:20px 24px;margin-bottom:32px;display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;">
+      <div>
+        <div class="stat-label" style="margin-bottom:8px">Clear All Slots for a Date</div>
+        <div style="font-size:12px;color:#555;margin-bottom:12px">Removes all blocks and booking slots for every studio on the selected date.</div>
+        <input type="date" id="clearDateInput" style="background:#1a1a1a;border:1px solid #333;color:#fff;padding:8px 12px;border-radius:2px;font-size:13px;" />
+      </div>
+      <button class="btn btn-danger" id="clearDateBtn">Clear Date</button>
+      <div id="clearDateMsg" style="font-size:12px;min-width:160px;"></div>
+    </div>
+
     <!-- Active blocks -->
     <div class="stat-label" style="margin-bottom:12px">Active Blocks</div>
     <div class="table-wrap" style="margin-bottom:32px">
@@ -239,6 +250,34 @@
       } catch (err) {
         alertEl.textContent = err.message;
         alertEl.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById('clearDateBtn').addEventListener('click', async () => {
+      const date = document.getElementById('clearDateInput').value;
+      if (!date) { alert('Please select a date.'); return; }
+      const msg = document.getElementById('clearDateMsg');
+      const [y, m, d] = date.split('-');
+      if (!confirm(`Clear ALL slots for ${d}/${m}/${y}?\n\nThis removes all admin blocks and booking slots for The Curve, Studio One and The Pool on this date. This cannot be undone.`)) return;
+      const btn = document.getElementById('clearDateBtn');
+      btn.disabled = true;
+      msg.style.color = '#888';
+      msg.textContent = 'Clearing…';
+      try {
+        const r = await fetch(`/api/admin/slots?clearDate=${encodeURIComponent(date)}`, {
+          method: 'DELETE', credentials: 'same-origin',
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error);
+        msg.style.color = '#4ade80';
+        msg.textContent = `Done — ${data.cleared} entries cleared.`;
+        document.getElementById('clearDateInput').value = '';
+        loadBlocks();
+      } catch (err) {
+        msg.style.color = '#ff8080';
+        msg.textContent = 'Error: ' + err.message;
       } finally {
         btn.disabled = false;
       }

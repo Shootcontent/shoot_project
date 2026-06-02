@@ -3,11 +3,13 @@
  * GET    /api/admin/slots?all=1                          — list all blocks
  * POST   /api/admin/slots                               — create block
  * DELETE /api/admin/slots?blockId=BLK-xxx               — remove block
+ * DELETE /api/admin/slots?clearDate=YYYY-MM-DD          — clear ALL slot data for a date
  */
 
 import { requireSession } from '../_admin-auth.js';
 import { createBlock, removeBlock, listBlocksForDate, listAllBlocks } from '../_slot-block.js';
 import { auditLog } from '../_audit.js';
+import { kv } from '../_kv.js';
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
@@ -47,8 +49,46 @@ export default async function handler(req, res) {
 
   // ── DELETE — remove block ────────────────────────────────────────────────────
   if (req.method === 'DELETE') {
-    const { blockId } = req.query;
-    if (!blockId) return res.status(400).json({ error: 'blockId required.' });
+    const { blockId, clearDate } = req.query;
+
+    // ── Clear all slot data for a date ──────────────────────────────────────
+    if (clearDate) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(clearDate)) {
+        return res.status(400).json({ error: 'Invalid date format.' });
+      }
+      const STUDIOS = ['curve', 'studio1', 'pool'];
+      let cleared = 0;
+      try {
+        for (const studio of STUDIOS) {
+          // Remove admin blocks for this studio+date
+          const blockIds = await kv('SMEMBERS', `slot:idx:blocks:${studio}:${clearDate}`);
+          if (blockIds && blockIds.length) {
+            for (const bid of blockIds) {
+              await kv('HDEL', `booking:intervals:${studio}:${clearDate}`, `b:${bid}`);
+              await kv('SREM', 'slot:idx:all-blocks', bid);
+              await kv('DEL', `slot:block:${bid}`);
+              cleared++;
+            }
+            await kv('DEL', `slot:idx:blocks:${studio}:${clearDate}`);
+          }
+          // Clear full intervals hash (pending + confirmed entries)
+          await kv('DEL', `booking:intervals:${studio}:${clearDate}`);
+          // Clear individual slot keys
+          const slotKeys = await kv('KEYS', `booking:slot:${studio}:${clearDate}:*`);
+          if (slotKeys && slotKeys.length) {
+            for (const k of slotKeys) { await kv('DEL', k); cleared++; }
+          }
+          // Release any stale locks
+          await kv('DEL', `booking:lock:${studio}:${clearDate}`);
+        }
+        auditLog(session.username, 'slot.clear-date', 'slot', clearDate, { cleared });
+        return res.status(200).json({ ok: true, cleared });
+      } catch (err) {
+        return res.status(500).json({ error: err.message });
+      }
+    }
+
+    if (!blockId) return res.status(400).json({ error: 'blockId or clearDate required.' });
     try {
       const result = await removeBlock(blockId, session.username);
       auditLog(session.username, 'slot.unblock', 'slot', blockId, result);
