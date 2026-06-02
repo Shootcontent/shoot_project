@@ -13,6 +13,9 @@
 
 import { kv } from './_kv.js';
 import { getCoupon } from './_coupon.js';
+import { icsAttachment } from './_ics.js';
+
+const OWNER_EMAILS = ['hello@shootstudios.co.za', 'elad@asapsolutions.co.za'];
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const YOCO_CHARGE_URL = 'https://online.yoco.com/v1/charges/';
@@ -246,20 +249,24 @@ async function sendEmails(booking) {
     body:    JSON.stringify(payload),
   }).catch(e => console.error('[create-booking] email error:', e));
 
+  const attachment = icsAttachment(booking);
+
   // Client confirmation
   await post({
     sender:      { name: 'SHOOT. Studios', email: from },
     to:          [{ email: booking.email, name: `${booking.firstName} ${booking.lastName}` }],
     subject:     `Booking Confirmed — ${booking.bookingId}`,
     htmlContent: clientHtml,
+    attachment,
   });
 
   // Studio notification
   await post({
     sender:      { name: 'SHOOT. Bookings', email: from },
-    to:          [{ email: 'hello@shootstudios.co.za' }],
+    to:          OWNER_EMAILS.map(email => ({ email })),
     subject:     `[CONFIRMED] ${booking.bookingId} — ${studios} — ${booking.date} ${booking.time}`,
     textContent: studioText,
+    attachment,
   });
 }
 

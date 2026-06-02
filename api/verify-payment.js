@@ -7,6 +7,9 @@
  */
 
 import { kv } from './_kv.js';
+import { icsAttachment } from './_ics.js';
+
+const OWNER_EMAILS = ['hello@shootstudios.co.za', 'elad@asapsolutions.co.za'];
 
 const BREVO_API_URL   = 'https://api.brevo.com/v3/smtp/email';
 const YOCO_CHECKOUT_URL = 'https://payments.yoco.com/api/checkouts';
@@ -109,17 +112,21 @@ async function sendEmails(booking) {
     }
   };
 
+  const attachment = icsAttachment(booking);
+
   await post({
     sender:      { name: 'SHOOT. Studios', email: from },
     to:          [{ email: booking.email, name: `${booking.firstName} ${booking.lastName}` }],
     subject:     `Booking Confirmed — ${booking.bookingId}`,
     htmlContent: clientHtml,
+    attachment,
   });
   await post({
     sender:      { name: 'SHOOT. Bookings', email: from },
-    to:          [{ email: adminEmail }],
+    to:          OWNER_EMAILS.map(email => ({ email })),
     subject:     `[CONFIRMED] ${booking.bookingId} — ${studios} — ${booking.date} ${booking.time}`,
     textContent: studioNote,
+    attachment,
   });
 }
 
