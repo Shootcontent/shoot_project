@@ -163,22 +163,22 @@
     .bk-value { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 16px; }
     .bk-actions { display: flex; gap: 10px; margin-top: 24px; }
     .bk-btn-view {
-      flex: 1; padding: 10px; text-align: center; text-decoration: none;
-      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
-      color: #fff; font-family: inherit; font-size: 10px; font-weight: 700;
+      flex: 1; padding: 11px; text-align: center; text-decoration: none;
+      background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+      color: #fff; font-family: inherit; font-size: 10px; font-weight: 800;
+      letter-spacing: 1.5px; text-transform: uppercase; border-radius: 2px;
+      cursor: pointer; transition: background 0.15s; display: block;
+    }
+    .bk-btn-view:hover { background: rgba(255,255,255,0.2); }
+    .bk-btn-cancel {
+      flex: 1; padding: 11px; text-align: center;
+      background: #c0392b; border: none;
+      color: #fff; font-family: inherit; font-size: 10px; font-weight: 800;
       letter-spacing: 1.5px; text-transform: uppercase; border-radius: 2px;
       cursor: pointer; transition: background 0.15s;
     }
-    .bk-btn-view:hover { background: rgba(255,255,255,0.14); }
-    .bk-btn-cancel {
-      flex: 1; padding: 10px; text-align: center;
-      background: rgba(220,50,50,0.15); border: 1px solid rgba(220,50,50,0.35);
-      color: #ff6b6b; font-family: inherit; font-size: 10px; font-weight: 700;
-      letter-spacing: 1.5px; text-transform: uppercase; border-radius: 2px;
-      cursor: pointer; transition: background 0.15s, color 0.15s;
-    }
-    .bk-btn-cancel:hover { background: rgba(220,50,50,0.3); color: #fff; }
-    .bk-btn-cancel:disabled { opacity: 0.5; cursor: not-allowed; }
+    .bk-btn-cancel:hover { background: #e74c3c; }
+    .bk-btn-cancel:disabled { background: #555; color: rgba(255,255,255,0.4); cursor: not-allowed; }
     .cal-event { cursor: pointer; }
 
     @media (max-width: 768px) {
