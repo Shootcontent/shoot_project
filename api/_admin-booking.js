@@ -60,7 +60,7 @@ function overlapsWithBuffer(s1, e1, s2, e2) {
 export async function createQuote({
   studios, duration, extraHours = 0, date, time,
   firstName, lastName, email, phone,
-  customPriceCents, discountCode, notes,
+  customPriceCents, discountCode, clientNotes, notes,
   createdBy,
 }) {
   const quoteId    = genQuoteId();
@@ -83,6 +83,7 @@ export async function createQuote({
     phone,
     customPriceCents: customPriceCents || 0,
     discountCode:     discountCode || null,
+    clientNotes:      clientNotes || '',
     notes:            notes || '',
     createdBy,
     createdAt:        new Date().toISOString(),
@@ -286,6 +287,7 @@ export async function promoteQuoteToBooking(quote, { transactionId, paidAmountCe
     bookingStatus:  'confirmed',
     source:         'admin',
     createdBy:      quote.createdBy,
+    clientNotes:    quote.clientNotes || '',
     notes:          quote.notes || '',
     discountCode:   quote.discountCode || null,
     createdAt:      quote.createdAt,
@@ -353,6 +355,12 @@ export async function sendPaymentRequestEmail({ quote, token, amountCents, expir
       <p style="margin:0;font-size:24px;font-weight:900;color:#fff;">${amountStr}</p>
     </td></tr>
   </table>
+  ${quote.clientNotes ? `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);margin-bottom:32px;">
+    <tr><td style="padding:18px 24px;">
+      <p style="margin:0 0 8px;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.3);">What's Included</p>
+      <p style="margin:0;font-size:14px;line-height:1.7;color:rgba(255,255,255,0.75);">${quote.clientNotes.replace(/\n/g, '<br>')}</p>
+    </td></tr>
+  </table>` : ''}
   <a href="${payLink}" style="display:block;background:#fff;color:#000;text-align:center;padding:16px;font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;text-decoration:none;margin-bottom:28px;">Pay Now</a>
   <p style="margin:0 0 12px;font-size:12px;color:rgba(255,255,255,0.3);">Or copy this link: <span style="color:rgba(255,255,255,0.5)">${payLink}</span></p>
   <p style="margin:0;font-size:12px;color:rgba(255,255,255,0.25);">This payment link expires on ${expStr}. Questions? <a href="mailto:hello@shootstudios.co.za" style="color:rgba(255,255,255,0.4)">hello@shootstudios.co.za</a></p>

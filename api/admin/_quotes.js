@@ -33,7 +33,7 @@ export default async function handler(req, res) {
   // ── POST — create quote ───────────────────────────────────────────────────────
   if (req.method === 'POST') {
     const body = req.body || {};
-    const { studios, duration, extraHours, date, time, firstName, lastName, email, phone, customPriceCents, discountCode, notes } = body;
+    const { studios, duration, extraHours, date, time, firstName, lastName, email, phone, customPriceCents, discountCode, clientNotes, notes } = body;
 
     if (!Array.isArray(studios) || !studios.length || studios.some(s => !VALID_STUDIOS.has(s)))
       return res.status(400).json({ error: 'Invalid studio selection.' });
@@ -65,6 +65,7 @@ export default async function handler(req, res) {
         phone:     phone.trim(),
         customPriceCents: parseInt(customPriceCents, 10),
         discountCode: discountCode || null,
+        clientNotes: clientNotes || '',
         notes:     notes || '',
         createdBy: session.username,
       });

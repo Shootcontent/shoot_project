@@ -41,7 +41,7 @@ export default async function handler(req, res) {
     if (['confirmed','cancelled'].includes(quote.status))
       return res.status(400).json({ error: `Cannot edit a ${quote.status} quote.` });
 
-    const allowed = ['notes', 'customPriceCents'];
+    const allowed = ['notes', 'clientNotes', 'customPriceCents'];
     const updates = {};
     for (const k of allowed) {
       if (req.body[k] !== undefined) updates[k] = req.body[k];

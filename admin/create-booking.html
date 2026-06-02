@@ -129,9 +129,16 @@
       </div>
 
       <!-- Notes -->
+      <div class="card card-pad" style="margin-bottom:16px">
+        <div class="stat-label" style="margin-bottom:4px">Client Notes</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:12px;letter-spacing:0.3px">Visible to the customer — appears in the payment request email and booking confirmation. Use this to explain what they're paying for.</div>
+        <textarea id="fClientNotes" rows="4" style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:2px;color:#fff;font-family:inherit;font-size:13px;padding:10px 14px;resize:vertical;outline:none" placeholder="e.g. Full day studio hire — The Curve. Includes lighting setup, 2x backdrops, and personal assistant on set for the duration of the shoot."></textarea>
+      </div>
+
       <div class="card card-pad" style="margin-bottom:24px">
-        <div class="stat-label" style="margin-bottom:12px">Internal Notes</div>
-        <textarea id="fNotes" rows="3" style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:2px;color:#fff;font-family:inherit;font-size:13px;padding:10px 14px;resize:vertical;outline:none" placeholder="Notes visible to admin only (not sent to customer)..."></textarea>
+        <div class="stat-label" style="margin-bottom:4px">Internal Notes</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:12px;letter-spacing:0.3px">Admin only — never sent to the customer.</div>
+        <textarea id="fNotes" rows="3" style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:2px;color:#fff;font-family:inherit;font-size:13px;padding:10px 14px;resize:vertical;outline:none" placeholder="Internal notes, reminders, context..."></textarea>
       </div>
 
       <div style="display:flex;gap:12px">
@@ -220,6 +227,7 @@
         phone:           document.getElementById('fPhone').value.trim(),
         customPriceCents: Math.round(parseFloat(document.getElementById('fCustomPrice').value) * 100),
         discountCode:    document.getElementById('fDiscountCode').value.trim().toUpperCase() || null,
+        clientNotes:     document.getElementById('fClientNotes').value.trim(),
         notes:           document.getElementById('fNotes').value.trim(),
       };
 

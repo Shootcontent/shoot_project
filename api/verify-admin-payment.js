@@ -8,6 +8,9 @@
 
 import { getPaymentRequest, getQuote, updatePaymentRequest, promoteQuoteToBooking } from './_admin-booking.js';
 import { auditLog } from './_audit.js';
+import { icsAttachment } from './_ics.js';
+
+const OWNER_EMAILS = ['hello@shootstudios.co.za', 'elad@asapsolutions.co.za'];
 
 const YOCO_CHECKOUT_URL = 'https://payments.yoco.com/api/checkouts';
 const STUDIO_NAMES      = { curve: 'The Curve', studio1: 'Studio One', pool: 'The Pool' };
@@ -59,6 +62,12 @@ async function sendConfirmationEmails(booking) {
     <p style="margin:0;font-size:22px;font-weight:900;color:#fff;">${paidStr}</p>
   </td></tr>
 </table>
+${booking.clientNotes ? `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);margin-bottom:32px;">
+  <tr><td style="padding:18px 24px;">
+    <p style="margin:0 0 8px;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.3);">What's Included</p>
+    <p style="margin:0;font-size:14px;line-height:1.7;color:rgba(255,255,255,0.75);">${booking.clientNotes.replace(/\n/g, '<br>')}</p>
+  </td></tr>
+</table>` : ''}
 <p style="margin:0;font-size:12px;line-height:1.7;color:rgba(255,255,255,0.35);">
   Questions? <a href="mailto:hello@shootstudios.co.za" style="color:rgba(255,255,255,0.6);">hello@shootstudios.co.za</a> or <a href="tel:+27609948107" style="color:rgba(255,255,255,0.6);">060 994 8107</a>.
 </p>
@@ -73,18 +82,22 @@ async function sendConfirmationEmails(booking) {
     body: JSON.stringify(p),
   }).catch(e => console.error('[verify-admin-payment] email error:', e));
 
+  const attachment = icsAttachment(booking);
+
   await post({
     sender:      { name: 'SHOOT. Studios', email: from },
     to:          [{ email: booking.email, name: `${booking.firstName} ${booking.lastName}` }],
     subject:     `Booking Confirmed — ${booking.bookingId}`,
     htmlContent: clientHtml,
+    attachment,
   });
 
   await post({
     sender:      { name: 'SHOOT. Bookings', email: from },
-    to:          [{ email: process.env.ADMIN_EMAIL || from }],
+    to:          OWNER_EMAILS.map(email => ({ email })),
     subject:     `[CONFIRMED] ${booking.bookingId} — ${studios} — ${booking.date} ${booking.time}`,
-    textContent: `ADMIN BOOKING CONFIRMED\n${'='.repeat(40)}\nRef: ${booking.bookingId}\nClient: ${booking.firstName} ${booking.lastName}\nEmail: ${booking.email}\nStudio: ${studios}\nDate: ${booking.date} at ${booking.time}\nAmount: ${paidStr}\nSource: Admin Booking`,
+    textContent: `ADMIN BOOKING CONFIRMED\n${'='.repeat(40)}\nRef: ${booking.bookingId}\nClient: ${booking.firstName} ${booking.lastName}\nEmail: ${booking.email}\nStudio: ${studios}\nDate: ${booking.date} at ${booking.time}\nAmount: ${paidStr}\nSource: Admin Booking${booking.clientNotes ? '\n\nClient Notes:\n' + booking.clientNotes : ''}`,
+    attachment,
   });
 }
 
