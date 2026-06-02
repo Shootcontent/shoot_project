@@ -138,18 +138,48 @@
     .day-event-block:hover { background: rgba(255,255,255,0.04); }
     .day-empty { padding: 32px 16px; color: rgba(255,255,255,0.18); font-size: 12px; text-align: center; }
 
-    /* ── Delete button ────────────────────────────────── */
-    .del-btn {
-      display: inline-flex; align-items: center; gap: 4px;
-      margin-top: 6px;
-      background: rgba(255,60,60,0.18); border: 1px solid rgba(255,80,80,0.35);
-      color: #ff7070; border-radius: 2px;
-      font-size: 9px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
-      padding: 4px 8px; cursor: pointer;
-      transition: background 0.15s, color 0.15s;
+    /* ── Booking popup modal ──────────────────────────── */
+    .bk-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6); z-index: 1000;
+      align-items: center; justify-content: center;
     }
-    .del-btn:hover { background: rgba(255,60,60,0.35); color: #fff; }
-    .cal-event { position: relative; }
+    .bk-overlay.open { display: flex; }
+    .bk-modal {
+      background: #161616; border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 4px; width: 100%; max-width: 380px; padding: 28px;
+      position: relative;
+    }
+    .bk-close {
+      position: absolute; top: 16px; right: 16px;
+      background: none; border: none; color: rgba(255,255,255,0.35);
+      font-size: 18px; cursor: pointer; line-height: 1; padding: 4px;
+    }
+    .bk-close:hover { color: #fff; }
+    .bk-label {
+      font-size: 9px; font-weight: 700; letter-spacing: 2.5px;
+      text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 4px;
+    }
+    .bk-value { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 16px; }
+    .bk-actions { display: flex; gap: 10px; margin-top: 24px; }
+    .bk-btn-view {
+      flex: 1; padding: 10px; text-align: center; text-decoration: none;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+      color: #fff; font-family: inherit; font-size: 10px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase; border-radius: 2px;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .bk-btn-view:hover { background: rgba(255,255,255,0.14); }
+    .bk-btn-cancel {
+      flex: 1; padding: 10px; text-align: center;
+      background: rgba(220,50,50,0.15); border: 1px solid rgba(220,50,50,0.35);
+      color: #ff6b6b; font-family: inherit; font-size: 10px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase; border-radius: 2px;
+      cursor: pointer; transition: background 0.15s, color 0.15s;
+    }
+    .bk-btn-cancel:hover { background: rgba(220,50,50,0.3); color: #fff; }
+    .bk-btn-cancel:disabled { opacity: 0.5; cursor: not-allowed; }
+    .cal-event { cursor: pointer; }
 
     @media (max-width: 768px) {
       .day-grid { grid-template-columns: 1fr; }
@@ -174,6 +204,25 @@
       <button class="btn btn-ghost btn-sm" id="logoutBtn">Sign Out</button>
     </div>
   </nav>
+
+  <!-- Booking popup modal -->
+  <div class="bk-overlay" id="bkOverlay">
+    <div class="bk-modal">
+      <button class="bk-close" id="bkClose">✕</button>
+      <div class="bk-label">Booking Ref</div>
+      <div class="bk-value" id="bkRef" style="font-size:16px;letter-spacing:2px"></div>
+      <div class="bk-label">Client</div>
+      <div class="bk-value" id="bkName"></div>
+      <div class="bk-label">Studio &amp; Time</div>
+      <div class="bk-value" id="bkStudio"></div>
+      <div class="bk-label">Status</div>
+      <div class="bk-value" id="bkStatus"></div>
+      <div class="bk-actions">
+        <a class="bk-btn-view" id="bkViewLink" href="#">View Details</a>
+        <button class="bk-btn-cancel" id="bkCancelBtn">Cancel Booking</button>
+      </div>
+    </div>
+  </div>
 
   <main>
     <!-- Header: title + controls -->
@@ -443,12 +492,11 @@
           }
           events.forEach(b => {
             const sc = STATUS_CLASS[b.status] || 'badge-grey';
-            html += `<a class="cal-event" href="/admin/booking-detail.html?id=${esc(b.bookingId)}">
+            html += `<div class="cal-event" data-id="${esc(b.bookingId)}" data-name="${esc(b.name)}" data-studio="${esc(b.studiosLabel)}" data-time="${esc(b.time||'')}" data-duration="${esc(b.duration)}" data-status="${esc(b.status)}">
               <div class="cal-event-time">${b.time || '—'} · ${esc(b.duration)}</div>
               <div>${esc(b.name)}</div>
               <div style="margin-top:3px"><span class="badge ${sc}" style="font-size:8px;padding:2px 5px">${b.status}</span></div>
-              ${b.status !== 'cancelled' ? `<button class="del-btn" data-id="${esc(b.bookingId)}">✕ Cancel</button>` : ''}
-            </a>`;
+            </div>`;
           });
           blocks.forEach(blk => {
             html += `<div class="cal-event cal-event-block">
@@ -485,12 +533,11 @@
 
         events.forEach(b => {
           const sc = STATUS_CLASS[b.status] || 'badge-grey';
-          html += `<a class="cal-event day-event" href="/admin/booking-detail.html?id=${esc(b.bookingId)}">
+          html += `<div class="cal-event day-event" data-id="${esc(b.bookingId)}" data-name="${esc(b.name)}" data-studio="${esc(b.studiosLabel)}" data-time="${esc(b.time||'')}" data-duration="${esc(b.duration)}" data-status="${esc(b.status)}">
             <div class="day-event-time">${b.time || '—'} · ${esc(b.duration)}</div>
             <div class="day-event-name">${esc(b.name)}</div>
             <div><span class="badge ${sc}" style="font-size:8px">${b.status}</span></div>
-            ${b.status !== 'cancelled' ? `<button class="del-btn" data-id="${esc(b.bookingId)}">✕ Cancel</button>` : ''}
-          </a>`;
+          </div>`;
         });
         blocks.forEach(blk => {
           html += `<div class="day-event day-event-block">
@@ -505,25 +552,53 @@
       document.getElementById('calContainer').innerHTML = html;
     }
 
-    // ── Delete booking via ✕ button ─────────────────────────────────────────
-    document.getElementById('calContainer').addEventListener('click', async e => {
-      const btn = e.target.closest('.del-btn');
-      if (!btn) return;
-      e.preventDefault();
-      e.stopPropagation();
-      const id = btn.dataset.id;
-      if (!confirm(`Cancel booking ${id}?\n\nThis will free up the slot so it can be rebooked.`)) return;
-      btn.textContent = '…';
+    // ── Booking popup modal ──────────────────────────────────────────────────
+    let activeBookingId = null;
+
+    function openModal(el) {
+      activeBookingId = el.dataset.id;
+      document.getElementById('bkRef').textContent    = activeBookingId;
+      document.getElementById('bkName').textContent   = el.dataset.name;
+      document.getElementById('bkStudio').textContent = `${el.dataset.studio} · ${el.dataset.time} · ${el.dataset.duration}`;
+      document.getElementById('bkStatus').textContent = el.dataset.status;
+      document.getElementById('bkViewLink').href      = `/admin/booking-detail.html?id=${encodeURIComponent(activeBookingId)}`;
+      const cancelBtn = document.getElementById('bkCancelBtn');
+      cancelBtn.textContent = 'Cancel Booking';
+      cancelBtn.disabled    = el.dataset.status === 'cancelled';
+      document.getElementById('bkOverlay').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('bkOverlay').classList.remove('open');
+      activeBookingId = null;
+    }
+
+    document.getElementById('calContainer').addEventListener('click', e => {
+      const ev = e.target.closest('.cal-event');
+      if (ev && ev.dataset.id) openModal(ev);
+    });
+
+    document.getElementById('bkClose').addEventListener('click', closeModal);
+    document.getElementById('bkOverlay').addEventListener('click', e => {
+      if (e.target === document.getElementById('bkOverlay')) closeModal();
+    });
+
+    document.getElementById('bkCancelBtn').addEventListener('click', async () => {
+      if (!activeBookingId) return;
+      if (!confirm(`Cancel booking ${activeBookingId}?\n\nThis will free the slot so it can be rebooked.`)) return;
+      const btn = document.getElementById('bkCancelBtn');
+      btn.textContent = 'Cancelling…';
       btn.disabled = true;
       try {
-        const r = await fetch(`/api/admin/booking?id=${encodeURIComponent(id)}`, {
+        const r = await fetch(`/api/admin/booking?id=${encodeURIComponent(activeBookingId)}`, {
           method: 'DELETE', credentials: 'same-origin',
         });
         if (!r.ok) { const d = await r.json(); throw new Error(d.error || r.statusText); }
+        closeModal();
         refresh();
       } catch (err) {
         alert('Error: ' + err.message);
-        btn.textContent = '✕';
+        btn.textContent = 'Cancel Booking';
         btn.disabled = false;
       }
     });
