@@ -1,22 +1,9 @@
-const BREVO_API_KEY          = process.env.BREVO_API_KEY;
-const BREVO_REDEEMED_LIST_ID = parseInt(process.env.BREVO_REDEEMED_LIST_ID || '3', 10);
-
-const CODES = { SHOOT10: 10, SHOOT90: 90 }; // code → discount percentage
-
-// Codes that require the email to be on the newsletter list before redeeming
-const NEWSLETTER_REQUIRED = new Set(['SHOOT10']);
+import { getCoupon } from './_coupon.js';
 
 function setCors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-}
-
-async function getContact(email) {
-  const r = await fetch(`https://api.brevo.com/v3/contacts/${encodeURIComponent(email)}`, {
-    headers: { 'api-key': BREVO_API_KEY },
-  });
-  return { status: r.status, data: r.status === 204 ? null : await r.json() };
 }
 
 export default async function handler(req, res) {
@@ -29,44 +16,39 @@ export default async function handler(req, res) {
     return res.status(400).json({ valid: false, message: 'Email and code are required.' });
   }
 
-  const addr         = email.toLowerCase().trim();
-  const normalCode   = code.toUpperCase().trim();
-  const discount     = CODES[normalCode];
-
-  if (!discount) {
-    return res.status(200).json({ valid: false, message: 'Invalid discount code.' });
-  }
+  const normalCode = code.toUpperCase().trim();
+  const addr       = email.toLowerCase().trim();
 
   try {
-    const { status, data } = await getContact(addr);
+    const coupon = await getCoupon(normalCode);
 
-    if (NEWSLETTER_REQUIRED.has(normalCode)) {
-      // Contact must be on the newsletter list to redeem
-      if (status === 404) {
-        return res.status(200).json({
-          valid: false,
-          message: 'This code is linked to newsletter sign-ups. Join the list to receive your code.',
-        });
-      }
-      if (status !== 200) throw new Error(`Brevo returned ${status}`);
-    } else {
-      // No newsletter required — only block if already redeemed (contact exists in redeemed list)
-      if (status !== 200 && status !== 404) throw new Error(`Brevo returned ${status}`);
+    if (!coupon) {
+      return res.status(200).json({ valid: false, message: 'Invalid discount code.' });
+    }
+    if (!coupon.active) {
+      return res.status(200).json({ valid: false, message: 'This discount code is no longer active.' });
+    }
+    if (coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) {
+      return res.status(200).json({ valid: false, message: 'This discount code has expired.' });
+    }
+    if (coupon.maxUses > 0 && coupon.currentUses >= coupon.maxUses) {
+      return res.status(200).json({ valid: false, message: 'This discount code has been fully redeemed.' });
+    }
+    if (coupon.customerEmail && coupon.customerEmail.toLowerCase() !== addr) {
+      return res.status(200).json({ valid: false, message: 'This discount code is not valid for your email address.' });
     }
 
-    // Check if already redeemed (skip check if contact doesn't exist yet — first-time user)
-    if (status === 200) {
-      const alreadyRedeemed = Array.isArray(data.listIds) && data.listIds.includes(BREVO_REDEEMED_LIST_ID);
-      if (alreadyRedeemed) {
-        return res.status(200).json({ valid: false, message: 'This discount has already been redeemed.' });
-      }
-    }
+    const label = coupon.type === 'percent'
+      ? `${coupon.value}% off`
+      : `R${coupon.value} off`;
 
     return res.status(200).json({
-      valid: true,
-      discount,
-      code: normalCode,
-      message: `${normalCode} — ${discount}% off applied.`,
+      valid:         true,
+      discount:      coupon.type === 'percent' ? coupon.value : 0,
+      discountType:  coupon.type,
+      discountFixed: coupon.type === 'fixed' ? coupon.value : 0,
+      code:          normalCode,
+      message:       `${normalCode} — ${label} applied.`,
     });
 
   } catch (err) {

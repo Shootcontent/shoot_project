@@ -3424,8 +3424,12 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
     const surchargeTotal = Math.round(surchargeHours * SURCHARGE_RATE);
 
     const subtotal      = studioTotal + photoTotal + addonTotal + extraTotal + cameraTotal + surchargeTotal;
-    const discountPct   = (typeof DC !== 'undefined' && DC.applied) ? DC.discount : 0;
-    const discountAmt   = discountPct ? Math.round(subtotal * discountPct / 100) : 0;
+    const discountPct = (typeof DC !== 'undefined' && DC.applied && DC.discountType !== 'fixed') ? DC.discount : 0;
+    const discountAmt = (typeof DC !== 'undefined' && DC.applied)
+      ? (DC.discountType === 'fixed'
+          ? Math.min(DC.discountFixed, subtotal)
+          : (discountPct ? Math.round(subtotal * discountPct / 100) : 0))
+      : 0;
     return { studioTotal, studioOriginal, promoDiscount, promoApplied: promo.applied,
              photoTotal, addonTotal, extraTotal, cameraTotal, surchargeTotal, surchargeLabel,
              discountPct, discountAmt,
@@ -3540,7 +3544,9 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
     // Discount code row
     const discountRow = document.getElementById('sb-discount-row');
     if (discountAmt > 0) {
-      document.getElementById('sb-discount-label').textContent = DC.code + ' (' + discountPct + '% off):';
+      document.getElementById('sb-discount-label').textContent = DC.discountType === 'fixed'
+        ? DC.code + ' (R' + DC.discountFixed + ' off):'
+        : DC.code + ' (' + discountPct + '% off):';
       document.getElementById('sb-discount').textContent = '−' + fmt(discountAmt);
       discountRow.style.display = '';
     } else {
@@ -4225,7 +4231,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
 })();
 
 /* ── Discount Code (booking modal) ── */
-const DC = { code: null, discount: 0, applied: false };
+const DC = { code: null, discount: 0, discountType: 'percent', discountFixed: 0, applied: false };
 
 window.applyDiscountCode = async function () {
   const input  = document.getElementById('bm-discount-input');
@@ -4255,9 +4261,11 @@ window.applyDiscountCode = async function () {
     const data = await res.json();
 
     if (data.valid) {
-      DC.code     = data.code;
-      DC.discount = data.discount;
-      DC.applied  = true;
+      DC.code          = data.code;
+      DC.discount      = data.discount;
+      DC.discountType  = data.discountType || 'percent';
+      DC.discountFixed = data.discountFixed || 0;
+      DC.applied       = true;
       status.textContent = data.message;
       status.className   = 'bm-discount-status bm-discount-status--ok';
       input.disabled     = true;
@@ -4361,7 +4369,7 @@ window.applyDiscountCode = async function () {
 // Reset discount when modal reopens
 const _origOpen = window.openBookingModal;
 window.openBookingModal = function (preStudio) {
-  DC.code = null; DC.discount = 0; DC.applied = false;
+  DC.code = null; DC.discount = 0; DC.discountType = 'percent'; DC.discountFixed = 0; DC.applied = false;
   const inp = document.getElementById('bm-discount-input');
   const sts = document.getElementById('bm-discount-status');
   const btn = document.getElementById('bm-discount-btn');

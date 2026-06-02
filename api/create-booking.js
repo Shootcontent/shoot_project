@@ -12,6 +12,7 @@
  */
 
 import { kv } from './_kv.js';
+import { getCoupon } from './_coupon.js';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const YOCO_CHARGE_URL = 'https://online.yoco.com/v1/charges/';
@@ -39,9 +40,6 @@ const AFTER_HOURS   = 17;    // 17:00 — after this triggers after-hours surcha
 
 // Duration → decimal hours
 const DURATION_HOURS = { '90min': 1.5, '2hrs': 2, '3hrs': 3, halfday: 5, fullday: 10 };
-
-// Valid discount codes — mirrors validate-discount.js
-const DISCOUNT_CODES = { SHOOT10: 10, SHOOT90: 90 };
 
 // SA public holidays (extend yearly)
 const SA_PUBLIC_HOLIDAYS = new Set([
@@ -90,7 +88,7 @@ function getSurchargeHours(date, time, duration, extraHours) {
  * Server-side price calculation — must match calcTotal() in index.html exactly.
  * Returns total in RANDS (integer).
  */
-function calcServerAmount(body) {
+async function calcServerAmount(body) {
   const { studios, duration, extraHours = 0, date, time,
           photo, addons = [], cameraBody, rentalDuration, lensChoice,
           discountCode } = body;
@@ -139,10 +137,19 @@ function calcServerAmount(body) {
 
   const subtotal = studioTotal + extraTotal + photoTotal + addonTotal + cameraTotal + surchargeTotal;
 
-  // --- Discount code
+  // --- Discount code (looked up from Redis)
   const normalCode = (discountCode || '').toUpperCase().trim();
-  const discountPct = DISCOUNT_CODES[normalCode] || 0;
-  const discountAmt = discountPct ? Math.round(subtotal * discountPct / 100) : 0;
+  let discountAmt = 0;
+  if (normalCode) {
+    const coupon = await getCoupon(normalCode);
+    if (coupon && coupon.active) {
+      if (coupon.type === 'percent') {
+        discountAmt = Math.round(subtotal * coupon.value / 100);
+      } else if (coupon.type === 'fixed') {
+        discountAmt = Math.min(coupon.value, subtotal);
+      }
+    }
+  }
 
   return subtotal - discountAmt;
 }
@@ -308,7 +315,7 @@ export default async function handler(req, res) {
   const extraHours = Math.max(0, Math.min(8, parseInt(body.extraHours, 10) || 0));
 
   // ── 2. Server-side price calculation ────────────────────────────────────
-  const serverAmountRands = calcServerAmount({ ...body, extraHours });
+  const serverAmountRands = await calcServerAmount({ ...body, extraHours });
   if (serverAmountRands === null) {
     return res.status(400).json({ error: 'Invalid booking configuration — price calculation failed.' });
   }
