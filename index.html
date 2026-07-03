@@ -3825,6 +3825,13 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
         return;
       }
 
+      // 100% discount — booking confirmed without payment
+      if (data.freeBooking && data.bookingId) {
+        if (typeof fbq !== 'undefined') fbq('track', 'Purchase', { currency: 'ZAR', value: 0 });
+        showReturnSuccess(data.bookingId);
+        return;
+      }
+
       if (!data.redirectUrl) {
         throw new Error(data.error || 'Could not create payment session.');
       }

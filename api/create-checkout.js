@@ -13,6 +13,7 @@
 
 import { kv, kvHGetAll } from './_kv.js';
 import { getCoupon } from './_coupon.js';
+import { icsAttachment } from './_ics.js';
 
 const YOCO_CHECKOUT_URL = 'https://payments.yoco.com/api/checkouts';
 
@@ -189,8 +190,16 @@ export default async function handler(req, res) {
 
   const extraHours  = Math.max(0, Math.min(8, parseInt(body.extraHours, 10) || 0));
   const amountRands = await calcAmount({ ...body, extraHours });
-  if (!amountRands) return res.status(400).json({ error: 'Invalid booking configuration.' });
-  const amountCents = amountRands * 100;
+  if (amountRands === null) {
+    console.error('[create-checkout] Price calculation returned null.', {
+      studios, duration, extraHours, date, time,
+      photo: body.photo, addons: body.addons,
+      discountCode: body.discountCode,
+    });
+    return res.status(400).json({ error: 'Invalid booking configuration — price calculation failed.' });
+  }
+  const finalAmount = Math.max(0, amountRands); // defensive: never negative
+  const amountCents = finalAmount * 100;
 
   // Compute the booking's time interval in minutes-since-midnight
   const durMins   = (DURATION_MINS[duration] || 0) + (extraHours * 60);
@@ -243,8 +252,8 @@ export default async function handler(req, res) {
       await kv('HSET', `booking:intervals:${studio}:${date}`, `p:${bookingId}`, `${startMins}:${endMins}`);
     }
 
-    // ── Store pending booking record ──────────────────────────────────────────
-    const pendingBooking = {
+    // ── Build booking record ─────────────────────────────────────────────────
+    const bookingRecord = {
       bookingId,
       studios,
       duration,
@@ -269,9 +278,50 @@ export default async function handler(req, res) {
       createdAt:      new Date().toISOString(),
     };
 
-    await kv('SET', `booking:pending:${bookingId}`, JSON.stringify(pendingBooking), 'EX', '1800');
+    // ── FREE BOOKING (100% discount) — bypass payment provider ────────────────
+    if (amountCents === 0) {
+      bookingRecord.paymentStatus = 'paid_full_discount';
+      bookingRecord.bookingStatus = 'confirmed';
+      bookingRecord.confirmedAt   = bookingRecord.createdAt;
 
-    // ── Create Yoco hosted checkout ───────────────────────────────────────────
+      // Save permanent booking record (2-year TTL)
+      await kv('SET', `booking:record:${bookingId}`, JSON.stringify(bookingRecord), 'EX', String(60 * 60 * 24 * 730));
+
+      // Upgrade slot keys: remove TTL (make permanent)
+      for (const sk of slotsSet) {
+        await kv('SET', sk, bookingId);
+      }
+
+      // Promote intervals from pending → confirmed
+      for (const studio of studios) {
+        const hashKey = `booking:intervals:${studio}:${date}`;
+        await kv('HDEL', hashKey, `p:${bookingId}`);
+        await kv('HSET', hashKey, `c:${bookingId}`, `${startMins}:${endMins}`);
+      }
+
+      // Send confirmation emails
+      await sendConfirmationEmails(bookingRecord);
+
+      // Redeem discount code
+      if (bookingRecord.discountCode) {
+        const proto = req.headers['x-forwarded-proto'] || 'https';
+        const host  = req.headers.host;
+        fetch(`${proto}://${host}/api/redeem-discount`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: bookingRecord.email, code: bookingRecord.discountCode }),
+        }).catch(() => {});
+      }
+
+      console.log(`[create-checkout] free booking confirmed bookingId=${bookingId} discount=${bookingRecord.discountCode} amount=R0`);
+
+      succeeded = true;
+      return res.status(200).json({ freeBooking: true, bookingId });
+    }
+
+    // ── PAID BOOKING — create Yoco hosted checkout ────────────────────────────
+    await kv('SET', `booking:pending:${bookingId}`, JSON.stringify(bookingRecord), 'EX', '1800');
+
     const proto   = req.headers['x-forwarded-proto'] || 'https';
     const host    = req.headers.host;
     const baseUrl = `${proto}://${host}`;
@@ -305,8 +355,8 @@ export default async function handler(req, res) {
     await kv('SET', `checkout:${checkout.id}`, bookingId, 'EX', '1800');
 
     // Update pending booking with checkoutId so verify-payment can verify with Yoco
-    pendingBooking.checkoutId = checkout.id;
-    await kv('SET', `booking:pending:${bookingId}`, JSON.stringify(pendingBooking), 'EX', '1800');
+    bookingRecord.checkoutId = checkout.id;
+    await kv('SET', `booking:pending:${bookingId}`, JSON.stringify(bookingRecord), 'EX', '1800');
 
     console.log(`[create-checkout] checkout created bookingId=${bookingId} checkoutId=${checkout.id} amount=${amountCents}`);
 
@@ -333,4 +383,118 @@ export default async function handler(req, res) {
 
 async function releaseLock(lockKey) {
   await kv('DEL', lockKey).catch(() => {});
+}
+
+// ── Confirmation emails for free bookings ────────────────────────────────────
+
+const OWNER_EMAILS  = ['hello@shootstudios.co.za', 'elad@asapsolutions.co.za'];
+const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
+const STUDIO_LABELS = { curve: 'The Curve', studio1: 'Studio One', pool: 'The Pool' };
+const DUR_LABELS    = { '90min': '90 min', '2hrs': '2 hrs', '3hrs': '3 hrs', halfday: 'Half day (5hrs)', fullday: 'Full day (10hrs)' };
+
+async function sendConfirmationEmails(booking) {
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) {
+    console.error('[create-checkout] BREVO_API_KEY not set — confirmation emails skipped');
+    return;
+  }
+
+  const from     = process.env.FROM_EMAIL || 'hello@shootstudios.co.za';
+  const studios  = booking.studios.map(s => STUDIO_LABELS[s] || s).join(' + ');
+  const durLabel = DUR_LABELS[booking.duration] || booking.duration;
+  const extraLbl = booking.extraHours > 0 ? ` + ${booking.extraHours} extra hr(s)` : '';
+  const paidStr  = 'R0.00 (100% Discount)';
+  const dateStr  = new Date(booking.date + 'T12:00:00').toLocaleDateString('en-ZA', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+  });
+
+  const clientHtml = `<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#0a0a0a;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr><td align="center" style="padding:48px 24px 64px;">
+<table width="100%" style="max-width:520px;" cellpadding="0" cellspacing="0" border="0">
+<tr><td>
+  <p style="margin:0 0 40px;font-size:10px;font-weight:700;letter-spacing:3.5px;text-transform:uppercase;color:rgba(255,255,255,0.3);">SHOOT. Photographic Studios</p>
+  <h1 style="margin:0 0 16px;font-size:38px;font-weight:900;font-style:italic;color:#fff;line-height:1;letter-spacing:-1.5px;">Booking Confirmed.</h1>
+  <p style="margin:0 0 40px;font-size:15px;line-height:1.75;color:rgba(255,255,255,0.55);">Your discount has been applied and your session is locked in. See you at the studio!</p>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid rgba(255,255,255,0.12);margin-bottom:40px;">
+    <tr><td style="padding:20px 28px;border-bottom:1px solid rgba(255,255,255,0.08);">
+      <p style="margin:0 0 6px;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.3);">Booking Reference</p>
+      <p style="margin:0;font-size:20px;font-weight:900;letter-spacing:3px;color:#fff;">${booking.bookingId}</p>
+    </td></tr>
+    <tr><td style="padding:20px 28px;border-bottom:1px solid rgba(255,255,255,0.08);">
+      <p style="margin:0 0 6px;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.3);">Studio</p>
+      <p style="margin:0;font-size:15px;font-weight:700;color:#fff;">${studios}</p>
+    </td></tr>
+    <tr><td style="padding:20px 28px;border-bottom:1px solid rgba(255,255,255,0.08);">
+      <p style="margin:0 0 6px;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.3);">Date &amp; Time</p>
+      <p style="margin:0;font-size:15px;font-weight:700;color:#fff;">${dateStr} at ${booking.time}</p>
+    </td></tr>
+    <tr><td style="padding:20px 28px;border-bottom:1px solid rgba(255,255,255,0.08);">
+      <p style="margin:0 0 6px;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.3);">Duration</p>
+      <p style="margin:0;font-size:15px;font-weight:700;color:#fff;">${durLabel}${extraLbl}</p>
+    </td></tr>
+    <tr><td style="padding:20px 28px;">
+      <p style="margin:0 0 6px;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.3);">Amount</p>
+      <p style="margin:0;font-size:22px;font-weight:900;color:#fff;">${paidStr}</p>
+    </td></tr>
+  </table>
+  <p style="margin:0;font-size:12px;line-height:1.7;color:rgba(255,255,255,0.35);">
+    Need to make changes? Contact us at
+    <a href="mailto:hello@shootstudios.co.za" style="color:rgba(255,255,255,0.6);">hello@shootstudios.co.za</a>
+    or <a href="tel:+27609948107" style="color:rgba(255,255,255,0.6);">060 994 8107</a>.
+  </p>
+  <p style="margin:48px 0 0;font-size:10px;color:rgba(255,255,255,0.18);">SHOOT. Photographic Studios · 135 Albert Rd, Woodstock, Cape Town</p>
+</td></tr>
+</table>
+</td></tr>
+</table>
+</body></html>`;
+
+  const studioNote =
+    `CONFIRMED BOOKING (100% DISCOUNT)\n${'='.repeat(40)}\n\n` +
+    `Ref:      ${booking.bookingId}\n` +
+    `Client:   ${booking.firstName} ${booking.lastName}\n` +
+    `Email:    ${booking.email}\n` +
+    `Phone:    ${booking.phone}\n\n` +
+    `Studio:   ${studios}\n` +
+    `Date:     ${booking.date} at ${booking.time}\n` +
+    `Duration: ${durLabel}${extraLbl}\n\n` +
+    `Amount:   ${paidStr}\n` +
+    `Discount: ${booking.discountCode}\n` +
+    `Status:   CONFIRMED (fully discounted — no payment collected)`;
+
+  const post = async (payload) => {
+    try {
+      const r = await fetch(BREVO_API_URL, {
+        method:  'POST',
+        headers: { 'api-key': apiKey, 'Content-Type': 'application/json' },
+        body:    JSON.stringify(payload),
+      });
+      if (!r.ok) {
+        const body = await r.text();
+        console.error('[create-checkout] Brevo error', r.status, body);
+      }
+    } catch (e) {
+      console.error('[create-checkout] email fetch failed:', e.message);
+    }
+  };
+
+  const attachment = icsAttachment(booking);
+
+  await post({
+    sender:      { name: 'SHOOT. Studios', email: from },
+    to:          [{ email: booking.email, name: `${booking.firstName} ${booking.lastName}` }],
+    subject:     `Booking Confirmed — ${booking.bookingId}`,
+    htmlContent: clientHtml,
+    attachment,
+  });
+  await post({
+    sender:      { name: 'SHOOT. Bookings', email: from },
+    to:          OWNER_EMAILS.map(email => ({ email })),
+    subject:     `[CONFIRMED] ${booking.bookingId} — ${studios} — ${booking.date} ${booking.time} (100% Discount)`,
+    textContent: studioNote,
+    attachment,
+  });
 }
