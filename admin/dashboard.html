@@ -133,6 +133,56 @@
     body.light .empty-state { color: #8a8a8a; }
     body.light .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e6e6e6 50%, #f0f0f0 75%); background-size: 200% 100%; }
 
+    /* Clickable tiles */
+    .stat-card.is-clickable { cursor: pointer; position: relative; transition: border-color 0.15s, box-shadow 0.15s; }
+    .stat-card.is-clickable::after {
+      content: '→';
+      position: absolute; top: 18px; right: 18px;
+      font-size: 13px; color: #c4c4c4;
+      transition: color 0.15s, transform 0.15s;
+    }
+    body.light .stat-card.is-clickable:hover { border-top-color: #bdbdbd; border-right-color: #bdbdbd; border-bottom-color: #bdbdbd; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+    body.light .stat-card.is-clickable:not([class*="accent-"]):hover { border-left-color: #bdbdbd; }
+    .stat-card.is-clickable:hover::after { color: #000; transform: translateX(2px); }
+    .stat-card.is-clickable:focus-visible { outline: 2px solid #000; outline-offset: 2px; }
+
+    /* Detail pop-up */
+    body.light .modal-overlay { background: rgba(0,0,0,0.35); align-items: flex-start; padding: 48px 24px; overflow-y: auto; }
+    body.light .detail-modal {
+      background: #fff; color: #000;
+      border: 1px solid #e6e6e6; border-radius: 8px;
+      max-width: 960px; max-height: none; overflow: visible;
+      padding: 0; box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+    }
+    .dm-head {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+      padding: 22px 24px 18px; border-bottom: 1px solid #e6e6e6;
+    }
+    .dm-title { font-size: 22px; font-weight: 900; font-style: italic; letter-spacing: -0.5px; line-height: 1.1; }
+    .dm-sub { font-size: 12px; color: #8a8a8a; margin-top: 6px; letter-spacing: 0.3px; }
+    .dm-close {
+      flex-shrink: 0; width: 34px; height: 34px; border-radius: 6px;
+      border: 1px solid #d4d4d4; background: #fff; color: #000;
+      font-size: 18px; line-height: 1; cursor: pointer; font-family: inherit;
+    }
+    .dm-close:hover { border-color: #000; }
+    .dm-body { padding: 20px 24px 24px; }
+    .dm-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 14px; }
+    .dm-sum { background: #f7f7f7; border-radius: 6px; padding: 12px 14px; }
+    .dm-sum-label { font-size: 9px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; color: #8a8a8a; margin-bottom: 6px; }
+    .dm-sum-value { font-size: 20px; font-weight: 900; font-style: italic; letter-spacing: -0.5px; }
+    .dm-note { font-size: 12px; color: #555; margin-bottom: 14px; line-height: 1.5; }
+    .dm-breakdowns { display: flex; flex-wrap: wrap; gap: 8px 24px; margin-bottom: 18px; }
+    .dm-bd-title { font-size: 9px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; color: #8a8a8a; margin-bottom: 6px; }
+    .dm-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .dm-chip { font-size: 11px; font-weight: 600; background: #fff; border: 1px solid #e6e6e6; border-radius: 999px; padding: 4px 10px; white-space: nowrap; }
+    .dm-chip b { font-weight: 800; }
+    .dm-client-sub { display: block; font-size: 11px; color: #8a8a8a; margin-top: 2px; }
+    .dm-footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 14px; font-size: 11px; color: #8a8a8a; flex-wrap: wrap; }
+    .dm-error { padding: 16px; color: #b83232; font-size: 12px; }
+    .dm-skel-2 { margin-top: 8px; }
+    body.dm-open { overflow: hidden; }
+
     @media (max-width: 768px) {
       body.light .page-header { align-items: flex-start; }
       .toolbar { margin-bottom: 24px; }
@@ -148,6 +198,16 @@
       body.light th:first-child, body.light td:first-child { padding-left: 12px; }
       body.light th:last-child, body.light td:last-child { padding-right: 12px; }
       body.light td .mono { font-size: 11px; letter-spacing: 0; white-space: nowrap; }
+      body.light .modal-overlay { padding: 0; }
+      body.light .detail-modal { border-radius: 0; min-height: 100svh; border: none; }
+      .dm-head { padding: 16px; position: sticky; top: 0; background: #fff; z-index: 1; }
+      .dm-title { font-size: 19px; }
+      .dm-body { padding: 16px; }
+      .dm-summary { grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 8px; }
+      .dm-sum { padding: 10px 12px; }
+      .dm-sum-label { font-size: 8px; letter-spacing: 1.2px; }
+      .dm-sum-value { font-size: 16px; }
+      .stat-card.is-clickable::after { top: 14px; right: 14px; }
       body.light .badge { font-size: 8px; letter-spacing: 0.8px; padding: 3px 5px; }
     }
   </style>
@@ -209,27 +269,27 @@
         <div class="section-meta" id="rangeDisplay"></div>
       </div>
       <div class="stats" id="rangeStats">
-        <div class="stat-card">
+        <div role="button" tabindex="0" data-detail="bookings" class="stat-card is-clickable">
           <div class="stat-label">Bookings</div>
           <div class="stat-value" id="statTotal">—</div>
         </div>
-        <div class="stat-card">
+        <div role="button" tabindex="0" data-detail="revenue" class="stat-card is-clickable">
           <div class="stat-label">Revenue</div>
           <div class="stat-value sm" id="statRevenue">—</div>
         </div>
-        <div class="stat-card">
+        <div role="button" tabindex="0" data-detail="avg" class="stat-card is-clickable">
           <div class="stat-label">Avg Booking Value</div>
           <div class="stat-value sm" id="statAvg">—</div>
         </div>
-        <div class="stat-card accent-green">
+        <div role="button" tabindex="0" data-detail="confirmed" class="stat-card is-clickable accent-green">
           <div class="stat-label">Confirmed</div>
           <div class="stat-value" id="statConfirmed">—</div>
         </div>
-        <div class="stat-card accent-amber">
+        <div role="button" tabindex="0" data-detail="pending" class="stat-card is-clickable accent-amber">
           <div class="stat-label">Pending Payment</div>
           <div class="stat-value" id="statPending">—</div>
         </div>
-        <div class="stat-card accent-red">
+        <div role="button" tabindex="0" data-detail="cancelled" class="stat-card is-clickable accent-red">
           <div class="stat-label">Cancelled</div>
           <div class="stat-value" id="statCancelled">—</div>
         </div>
@@ -242,11 +302,11 @@
         <div class="section-title">All Time</div>
       </div>
       <div class="stats" id="allTimeStats">
-        <div class="stat-card">
+        <div role="button" tabindex="0" data-detail="all_bookings" class="stat-card is-clickable">
           <div class="stat-label">Total Bookings</div>
           <div class="stat-value" id="statAllTotal">—</div>
         </div>
-        <div class="stat-card">
+        <div role="button" tabindex="0" data-detail="all_revenue" class="stat-card is-clickable">
           <div class="stat-label">Total Revenue</div>
           <div class="stat-value sm" id="statAllRevenue">—</div>
         </div>
@@ -280,6 +340,20 @@
     </section>
   </main>
 
+  <!-- Tile detail pop-up -->
+  <div class="modal-overlay hidden" id="detailOverlay">
+    <div class="modal detail-modal" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+      <div class="dm-head">
+        <div>
+          <div class="dm-title" id="detailTitle">Details</div>
+          <div class="dm-sub" id="detailSub"></div>
+        </div>
+        <button class="dm-close" id="detailClose" aria-label="Close">×</button>
+      </div>
+      <div class="dm-body" id="detailBody"></div>
+    </div>
+  </div>
+
   <script>
     const STATUS_BADGE = {
       confirmed:  'badge-green',
@@ -290,6 +364,7 @@
 
     let activePreset = 'this_month';
     let customFrom = '', customTo = '';
+    let lastRange = null;
 
     // ── Date range helpers ──────────────────────────────────────────────────
     function getMonday(d) {
@@ -349,6 +424,7 @@
     async function loadDashboard() {
       const { from, to, label } = getRange(activePreset);
       if (!from || !to) return;
+      lastRange = { from, to, label };
 
       // Update label
       document.getElementById('statsLabel').textContent = label;
@@ -446,6 +522,193 @@
     function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
     init();
+  </script>
+
+  <script>
+    // ── Tile detail pop-up ──────────────────────────────────────────────────
+    const DETAIL = {
+      bookings:     { title: 'Bookings',          scope: 'range' },
+      revenue:      { title: 'Revenue',           scope: 'range', sort: 'amount' },
+      avg:          { title: 'Avg Booking Value', scope: 'range', showAvgMath: true },
+      confirmed:    { title: 'Confirmed',         scope: 'range', status: 'confirmed' },
+      cancelled:    { title: 'Cancelled',         scope: 'range', status: 'cancelled' },
+      pending:      { title: 'Pending Payment',   scope: 'quotes' },
+      all_bookings: { title: 'All Bookings',      scope: 'all' },
+      all_revenue:  { title: 'All-Time Revenue',  scope: 'all', sort: 'amount' },
+    };
+
+    const overlay = document.getElementById('detailOverlay');
+    let detailReturnFocus = null;
+    let detailRequest = 0;
+
+    function openDetail(key, tile) {
+      const cfg = DETAIL[key];
+      if (!cfg) return;
+      detailReturnFocus = tile || null;
+      const range = lastRange || getRange(activePreset);
+      const fmtD = s => fmtDate(s);
+      let sub;
+      if (cfg.scope === 'all') sub = 'All time · every booking on record';
+      else if (cfg.scope === 'quotes') sub = 'Live · quotes sent and awaiting payment';
+      else sub = range.label === 'All Time' ? 'All Time' : `${range.label} · ${fmtD(range.from)} – ${fmtD(range.to)}`;
+
+      document.getElementById('detailTitle').textContent = cfg.title + '.';
+      document.getElementById('detailSub').textContent = sub;
+      document.getElementById('detailBody').innerHTML = `<div class="skeleton"></div><div class="skeleton dm-skel-2"></div>`;
+      overlay.classList.remove('hidden');
+      document.body.classList.add('dm-open');
+      document.getElementById('detailClose').focus();
+
+      const reqId = ++detailRequest;
+      const load = cfg.scope === 'quotes' ? loadPendingQuotes() : loadAllBookings(cfg, range);
+      load.then(html => {
+        if (reqId === detailRequest) document.getElementById('detailBody').innerHTML = html;
+      }).catch(err => {
+        if (reqId === detailRequest)
+          document.getElementById('detailBody').innerHTML = `<div class="dm-error">Error: ${esc(err.message)}</div>`;
+      });
+    }
+
+    function closeDetail() {
+      if (overlay.classList.contains('hidden')) return;
+      detailRequest++;
+      overlay.classList.add('hidden');
+      document.body.classList.remove('dm-open');
+      if (detailReturnFocus) detailReturnFocus.focus();
+    }
+
+    async function fetchJSON(url) {
+      const r = await fetch(url, { credentials: 'same-origin' });
+      if (!r.ok) throw new Error(await r.text());
+      return r.json();
+    }
+
+    async function loadAllBookings(cfg, range) {
+      const base = { limit: '100' };
+      if (cfg.scope === 'range') { base.from = range.from; base.to = range.to; }
+      if (cfg.status) base.status = cfg.status;
+
+      let page = 1, pages = 1, list = [];
+      do {
+        const d = await fetchJSON('/api/admin/bookings?' + new URLSearchParams({ ...base, page: String(page) }));
+        list = list.concat(d.bookings || []);
+        pages = d.pages || 1;
+        page++;
+      } while (page <= pages && page <= 50);
+
+      if (cfg.sort === 'amount') list.sort((a, b) => (b.amountRands || 0) - (a.amountRands || 0));
+
+      const count = list.length;
+      const revenue = list.reduce((s, b) => s + (Number(b.amountRands) || 0), 0);
+      const avg = count ? revenue / count : 0;
+
+      const byStudio = {}, byStatus = {};
+      list.forEach(b => {
+        const studios = b.studiosLabel || '—';
+        byStudio[studios] = byStudio[studios] || { n: 0, r: 0 };
+        byStudio[studios].n++; byStudio[studios].r += Number(b.amountRands) || 0;
+        byStatus[b.status] = (byStatus[b.status] || 0) + 1;
+      });
+
+      const summary = `
+        <div class="dm-summary">
+          <div class="dm-sum"><div class="dm-sum-label">Bookings</div><div class="dm-sum-value">${count}</div></div>
+          <div class="dm-sum"><div class="dm-sum-label">Revenue</div><div class="dm-sum-value">R ${fmt(revenue)}</div></div>
+          <div class="dm-sum"><div class="dm-sum-label">Avg Value</div><div class="dm-sum-value">${count ? 'R ' + fmt(avg) : '—'}</div></div>
+        </div>
+        ${cfg.showAvgMath && count ? `<div class="dm-note">R ${fmt(revenue)} total ÷ ${count} booking${count === 1 ? '' : 's'} = <b>R ${fmt(avg)}</b> average per booking.</div>` : ''}
+        ${cfg.sort === 'amount' && count ? `<div class="dm-note">Sorted by amount, highest first.</div>` : ''}`;
+
+      if (!count) return summary + `<div class="empty-state">No bookings in this period.</div>`;
+
+      const studioChips = Object.entries(byStudio).sort((a, b) => b[1].r - a[1].r)
+        .map(([k, v]) => `<span class="dm-chip">${esc(k)} · <b>${v.n}</b> · R ${fmt(v.r)}</span>`).join('');
+      const statusChips = Object.entries(byStatus).sort((a, b) => b[1] - a[1])
+        .map(([k, v]) => `<span class="badge ${STATUS_BADGE[k] || 'badge-grey'}">${esc(k)} · ${v}</span>`).join('');
+
+      const rows = list.map(b => `
+        <tr onclick="window.location='/admin/booking-detail.html?id=${encodeURIComponent(b.bookingId || '')}'">
+          <td><span class="mono muted">${esc(b.bookingId)}</span></td>
+          <td>${fmtDate(b.date)}</td>
+          <td class="hide-mobile">${esc(b.time) || '—'}</td>
+          <td>${esc(b.studiosLabel) || '—'}<span class="dm-client-sub hide-mobile">${esc(b.duration)}</span></td>
+          <td class="hide-mobile">${esc(b.name)}<span class="dm-client-sub">${esc(b.email)}${b.phone ? ' · ' + esc(b.phone) : ''}</span></td>
+          <td>R ${fmt(b.amountRands)}</td>
+          <td><span class="badge ${STATUS_BADGE[b.status] || 'badge-grey'}">${esc(b.status)}</span></td>
+        </tr>`).join('');
+
+      return summary + `
+        <div class="dm-breakdowns">
+          <div><div class="dm-bd-title">By studio</div><div class="dm-chips">${studioChips}</div></div>
+          ${cfg.status ? '' : `<div><div class="dm-bd-title">By status</div><div class="dm-chips">${statusChips}</div></div>`}
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Ref</th><th>Date</th><th class="hide-mobile">Time</th><th>Studio</th>
+              <th class="hide-mobile">Client</th><th>Amount</th><th>Status</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+        <div class="dm-footer">
+          <span>${count} booking${count === 1 ? '' : 's'} · tap a row to open it</span>
+          <a class="btn btn-ghost btn-sm" href="/admin/bookings.html">Open Bookings</a>
+        </div>`;
+    }
+
+    async function loadPendingQuotes() {
+      const NAMES = { curve: 'The Curve', studio1: 'Studio One', pool: 'The Pool' };
+      const d = await fetchJSON('/api/admin/quotes');
+      const list = (d.quotes || []).filter(q => q.status === 'pending_payment')
+        .sort((a, b) => (a.date || '') > (b.date || '') ? 1 : -1);
+      const total = list.reduce((s, q) => s + (Number(q.customPriceCents) || 0) / 100, 0);
+
+      const summary = `
+        <div class="dm-summary">
+          <div class="dm-sum"><div class="dm-sum-label">Awaiting Payment</div><div class="dm-sum-value">${list.length}</div></div>
+          <div class="dm-sum"><div class="dm-sum-label">Amount Outstanding</div><div class="dm-sum-value">R ${fmt(total)}</div></div>
+        </div>
+        <div class="dm-note">This count is live and isn't affected by the date range above.</div>`;
+
+      if (!list.length) return summary + `<div class="empty-state">Nothing awaiting payment.</div>`;
+
+      const rows = list.map(q => `
+        <tr onclick="window.location='/admin/pending-payments.html'">
+          <td><span class="mono muted">${esc(q.quoteId)}</span></td>
+          <td>${fmtDate(q.date)}</td>
+          <td class="hide-mobile">${esc(q.time) || '—'}</td>
+          <td>${esc((q.studios || []).map(s => NAMES[s] || s).join(' + ')) || '—'}</td>
+          <td class="hide-mobile">${esc(q.firstName)} ${esc(q.lastName)}<span class="dm-client-sub">${esc(q.email)}${q.phone ? ' · ' + esc(q.phone) : ''}</span></td>
+          <td>R ${fmt((Number(q.customPriceCents) || 0) / 100)}</td>
+          <td class="hide-mobile">${q.createdAt ? fmtDate(String(q.createdAt).slice(0, 10)) : '—'}</td>
+        </tr>`).join('');
+
+      return summary + `
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Quote</th><th>Session</th><th class="hide-mobile">Time</th><th>Studio</th>
+              <th class="hide-mobile">Client</th><th>Amount</th><th class="hide-mobile">Created</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+        <div class="dm-footer">
+          <span>Tap a row to manage payments</span>
+          <a class="btn btn-ghost btn-sm" href="/admin/pending-payments.html">Open Payments</a>
+        </div>`;
+    }
+
+    document.querySelectorAll('.stat-card[data-detail]').forEach(tile => {
+      tile.addEventListener('click', () => openDetail(tile.dataset.detail, tile));
+      tile.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetail(tile.dataset.detail, tile); }
+      });
+    });
+    document.getElementById('detailClose').addEventListener('click', closeDetail);
+    overlay.addEventListener('click', e => { if (e.target === overlay) closeDetail(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
   </script>
 </body>
 </html>
