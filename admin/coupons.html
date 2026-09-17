@@ -7,6 +7,7 @@
   <title>SHOOT. Admin — Coupons</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/admin/assets/admin.css" />
+  <script src="/admin/assets/nav.js" defer></script>
 </head>
 <body>
 
@@ -18,6 +19,9 @@
         <a class="nav-link" href="/admin/bookings.html">Bookings</a>
         <a class="nav-link" href="/admin/calendar.html">Calendar</a>
         <a class="nav-link active" href="/admin/coupons.html">Coupons</a>
+        <a class="nav-link" href="/admin/create-booking.html">Create Booking</a>
+        <a class="nav-link" href="/admin/pending-payments.html">Payments</a>
+        <a class="nav-link" href="/admin/slot-manager.html">Slots</a>
       </div>
     </div>
     <div class="nav-right">
@@ -65,7 +69,7 @@
       <div class="form-grid">
         <div class="field">
           <label>Code *</label>
-          <input id="fCode" type="text" placeholder="e.g. SHOOT20" style="text-transform:uppercase" />
+          <input id="fCode" class="uppercase" type="text" placeholder="e.g. SHOOT20" />
         </div>
         <div class="field">
           <label>Type *</label>
@@ -133,17 +137,17 @@
 
         tbody.innerHTML = coupons.map(c => `
           <tr>
-            <td><span class="mono" style="font-weight:700;letter-spacing:1px">${esc(c.code)}</span></td>
+            <td><span class="mono cell-strong">${esc(c.code)}</span></td>
             <td>${c.type === 'percent' ? '%' : 'R'}</td>
             <td>${c.type === 'percent' ? c.value + '%' : 'R ' + c.value}</td>
             <td>${c.currentUses}${c.maxUses > 0 ? ' / ' + c.maxUses : ' / ∞'}</td>
             <td class="hide-mobile">${c.expiresAt ? fmtDate(c.expiresAt.slice(0,10)) : '<span class="muted">Never</span>'}</td>
-            <td class="hide-mobile muted" style="font-size:12px">${esc(c.description || '—')}</td>
+            <td class="hide-mobile muted">${esc(c.description || '—')}</td>
             <td>
               <span class="badge ${c.active ? 'badge-green' : 'badge-grey'}">${c.active ? 'Active' : 'Inactive'}</span>
             </td>
             <td>
-              <div style="display:flex;gap:8px">
+              <div class="btn-row">
                 <button class="btn btn-ghost btn-sm" onclick="openEdit(${JSON.stringify(c).replace(/"/g,'&quot;')})">Edit</button>
                 <button class="btn btn-ghost btn-sm" onclick="toggleActive('${esc(c.code)}', ${c.active})">${c.active ? 'Deactivate' : 'Activate'}</button>
                 <button class="btn btn-danger btn-sm" onclick="deleteCoupon('${esc(c.code)}')">Delete</button>
@@ -151,7 +155,7 @@
             </td>
           </tr>`).join('');
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="8" style="padding:20px 16px;color:#ff8080;font-size:12px;">Error: ${esc(err.message)}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="row-error">Error: ${esc(err.message)}</td></tr>`;
       }
     }
 

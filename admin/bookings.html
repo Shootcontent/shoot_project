@@ -7,26 +7,7 @@
   <title>SHOOT. Admin — Bookings</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/admin/assets/admin.css" />
-  <style>
-    .preset-btn {
-      font-family: inherit;
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      padding: 5px 11px;
-      border-radius: 2px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: none;
-      color: rgba(255,255,255,0.4);
-      cursor: pointer;
-      transition: all 0.15s;
-      white-space: nowrap;
-    }
-    .preset-btn:hover { border-color: rgba(255,255,255,0.35); color: #fff; }
-    .preset-btn.active { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.4); color: #fff; }
-    .filter-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
-  </style>
+  <script src="/admin/assets/nav.js" defer></script>
 </head>
 <body>
 
@@ -38,6 +19,9 @@
         <a class="nav-link active" href="/admin/bookings.html">Bookings</a>
         <a class="nav-link" href="/admin/calendar.html">Calendar</a>
         <a class="nav-link" href="/admin/coupons.html">Coupons</a>
+        <a class="nav-link" href="/admin/create-booking.html">Create Booking</a>
+        <a class="nav-link" href="/admin/pending-payments.html">Payments</a>
+        <a class="nav-link" href="/admin/slot-manager.html">Slots</a>
       </div>
     </div>
     <div class="nav-right">
@@ -54,8 +38,9 @@
       </div>
     </div>
 
+    <div class="toolbar stack">
     <!-- Filter row 1: search + dropdowns -->
-    <div class="filter-row">
+    <div class="filters">
       <input class="search-input" id="search" type="text" placeholder="Search name, email, ref, phone..." />
       <select class="filter-select" id="studioFilter">
         <option value="">All Studios</option>
@@ -74,7 +59,7 @@
     </div>
 
     <!-- Filter row 2: date presets -->
-    <div class="filter-row" id="presets" style="margin-bottom:20px">
+    <div class="date-presets" id="presets">
       <button class="preset-btn active" data-preset="">All Dates</button>
       <button class="preset-btn" data-preset="today">Today</button>
       <button class="preset-btn" data-preset="yesterday">Yesterday</button>
@@ -83,12 +68,13 @@
       <button class="preset-btn" data-preset="this_month">This Month</button>
       <button class="preset-btn" data-preset="last_month">Last Month</button>
       <button class="preset-btn" data-preset="custom">Custom</button>
-      <span id="customDateRow" class="hidden" style="display:none;align-items:center;gap:6px">
-        <input class="filter-select" id="fromDate" type="date" style="padding:5px 10px;font-size:11px" />
-        <span style="color:rgba(255,255,255,0.2);font-size:11px">to</span>
-        <input class="filter-select" id="toDate" type="date" style="padding:5px 10px;font-size:11px" />
+      <span id="customDateRow" class="custom-range hidden" style="display:none">
+        <input id="fromDate" type="date" />
+        <span class="range-sep">to</span>
+        <input id="toDate" type="date" />
         <button class="btn btn-ghost btn-sm" id="applyCustom">Apply</button>
       </span>
+    </div>
     </div>
 
     <div class="table-wrap">
@@ -204,12 +190,12 @@
         tbody.innerHTML = d.bookings.map(b => `
           <tr onclick="window.location='/admin/booking-detail.html?id=${esc(b.bookingId)}'">
             <td><span class="mono muted">${esc(b.bookingId)}</span></td>
-            <td style="white-space:nowrap">${fmtDate(b.date)}</td>
+            <td class="nowrap">${fmtDate(b.date)}</td>
             <td class="hide-mobile">${b.time || '—'}</td>
             <td>${esc(b.studiosLabel)}</td>
             <td>${esc(b.name)}</td>
             <td class="hide-mobile muted">${esc(b.email)}</td>
-            <td style="white-space:nowrap">R ${fmt(b.amountRands)}</td>
+            <td class="nowrap">R ${fmt(b.amountRands)}</td>
             <td><span class="badge ${STATUS_BADGE[b.status] || 'badge-grey'}">${esc(b.status)}</span></td>
           </tr>`).join('');
 
@@ -219,7 +205,7 @@
         document.getElementById('prevBtn').disabled = d.page <= 1;
         document.getElementById('nextBtn').disabled = d.page >= d.pages;
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="8" style="padding:20px 16px;color:#ff8080;font-size:12px">Error: ${esc(err.message)}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="row-error">Error: ${esc(err.message)}</td></tr>`;
       }
     }
 

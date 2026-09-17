@@ -7,6 +7,7 @@
   <title>SHOOT. Admin — Pending Payments</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/admin/assets/admin.css" />
+  <script src="/admin/assets/nav.js" defer></script>
 </head>
 <body>
 
@@ -18,7 +19,9 @@
         <a class="nav-link" href="/admin/bookings.html">Bookings</a>
         <a class="nav-link" href="/admin/calendar.html">Calendar</a>
         <a class="nav-link" href="/admin/coupons.html">Coupons</a>
+        <a class="nav-link" href="/admin/create-booking.html">Create Booking</a>
         <a class="nav-link active" href="/admin/pending-payments.html">Payments</a>
+        <a class="nav-link" href="/admin/slot-manager.html">Slots</a>
       </div>
     </div>
     <div class="nav-right">
@@ -37,8 +40,9 @@
     </div>
 
     <!-- Pending -->
-    <div class="stat-label" style="margin-bottom:12px">Awaiting Payment</div>
-    <div class="table-wrap" style="margin-bottom:32px">
+    <section class="section">
+    <div class="section-head"><div class="section-title">Awaiting Payment</div></div>
+    <div class="table-wrap">
       <table>
         <thead><tr>
           <th>Quote ID</th><th>Customer</th><th>Studio</th>
@@ -47,9 +51,11 @@
         <tbody id="pendingBody"><tr><td colspan="8"><div class="skeleton"></div></td></tr></tbody>
       </table>
     </div>
+    </section>
 
     <!-- All quotes (draft + other statuses) -->
-    <div class="stat-label" style="margin-bottom:12px">All Quotes</div>
+    <section class="section">
+    <div class="section-head"><div class="section-title">All Quotes</div></div>
     <div class="table-wrap">
       <table>
         <thead><tr>
@@ -59,6 +65,7 @@
         <tbody id="quotesBody"><tr><td colspan="7"><div class="skeleton"></div></td></tr></tbody>
       </table>
     </div>
+    </section>
   </main>
 
   <script>
@@ -94,14 +101,14 @@
             <td>${r.quote ? esc(r.quote.studios) : '—'}</td>
             <td>${r.quote ? fmtDate(r.quote.date) : '—'}</td>
             <td>R ${fmt(r.amountCents / 100)}</td>
-            <td style="color:${isExpiringSoon(r.expiresAt) ? '#ffb432' : 'rgba(255,255,255,0.5)'}">
+            <td class="nowrap ${isExpiringSoon(r.expiresAt) ? 'cell-warn' : 'muted'}">
               ${fmtDateTime(r.expiresAt)}
             </td>
             <td>
               <button class="btn btn-ghost btn-sm" onclick="copyLink('${esc(r.token)}', this)" title="${payLink}">Copy Link</button>
             </td>
             <td>
-              <div style="display:flex;gap:8px">
+              <div class="btn-row">
                 <button class="btn btn-ghost btn-sm" onclick="resend('${esc(r.quoteId)}')">Resend</button>
                 <button class="btn btn-danger btn-sm" onclick="cancelPayment('${esc(r.quoteId)}')">Cancel</button>
               </div>
@@ -110,7 +117,7 @@
         }).join('');
       } catch (err) {
         document.getElementById('pendingBody').innerHTML =
-          `<tr><td colspan="8" style="padding:16px;color:#ff8080;font-size:12px">Error: ${esc(err.message)}</td></tr>`;
+          `<tr><td colspan="8" class="row-error">Error: ${esc(err.message)}</td></tr>`;
       }
     }
 
@@ -123,7 +130,7 @@
 
         const tbody = document.getElementById('quotesBody');
         if (!quotes.length) {
-          tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">No quotes yet. <a href="/admin/create-booking.html" style="color:rgba(255,255,255,0.6)">Create one.</a></div></td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">No quotes yet. <a href="/admin/create-booking.html">Create one.</a></div></td></tr>`;
           return;
         }
         tbody.innerHTML = quotes.map(q => {
@@ -131,13 +138,13 @@
           const studios = (q.studios||[]).map(s=>NAMES[s]||s).join(' + ');
           return `<tr>
             <td><span class="mono muted">${esc(q.quoteId)}</span></td>
-            <td>${esc(q.firstName)} ${esc(q.lastName)}<br><span class="muted" style="font-size:11px">${esc(q.email)}</span></td>
+            <td>${esc(q.firstName)} ${esc(q.lastName)}<span class="cell-sub">${esc(q.email)}</span></td>
             <td>${esc(studios)}</td>
             <td>${fmtDate(q.date)}</td>
             <td>R ${fmt(q.customPriceCents / 100)}</td>
             <td><span class="badge ${statusClass}">${q.status}</span></td>
             <td>
-              <div style="display:flex;gap:8px">
+              <div class="btn-row">
                 ${q.status === 'draft' ? `<button class="btn btn-primary btn-sm" onclick="sendPayment('${esc(q.quoteId)}')">Send Payment</button>` : ''}
                 ${q.status === 'pending_payment' ? `<button class="btn btn-ghost btn-sm" onclick="resend('${esc(q.quoteId)}')">Resend</button>` : ''}
                 ${['draft','pending_payment'].includes(q.status) ? `<button class="btn btn-danger btn-sm" onclick="cancelQuote('${esc(q.quoteId)}')">Cancel</button>` : ''}
@@ -147,7 +154,7 @@
         }).join('');
       } catch (err) {
         document.getElementById('quotesBody').innerHTML =
-          `<tr><td colspan="7" style="padding:16px;color:#ff8080;font-size:12px">Error: ${esc(err.message)}</td></tr>`;
+          `<tr><td colspan="7" class="row-error">Error: ${esc(err.message)}</td></tr>`;
       }
     }
 

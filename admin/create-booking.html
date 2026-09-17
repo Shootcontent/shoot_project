@@ -7,6 +7,7 @@
   <title>SHOOT. Admin — Create Booking</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/admin/assets/admin.css" />
+  <script src="/admin/assets/nav.js" defer></script>
 </head>
 <body>
 
@@ -19,6 +20,8 @@
         <a class="nav-link" href="/admin/calendar.html">Calendar</a>
         <a class="nav-link" href="/admin/coupons.html">Coupons</a>
         <a class="nav-link active" href="/admin/create-booking.html">Create Booking</a>
+        <a class="nav-link" href="/admin/pending-payments.html">Payments</a>
+        <a class="nav-link" href="/admin/slot-manager.html">Slots</a>
       </div>
     </div>
     <div class="nav-right">
@@ -27,7 +30,7 @@
     </div>
   </nav>
 
-  <main style="max-width:800px">
+  <main class="narrow">
     <div class="page-header">
       <div>
         <div class="page-title">Create Booking.</div>
@@ -36,10 +39,10 @@
     </div>
 
     <div id="alertMsg" class="alert hidden"></div>
-    <div id="successMsg" class="hidden" style="background:#111;border:1px solid rgba(80,200,120,0.25);border-radius:4px;padding:32px;text-align:center">
-      <div style="font-size:20px;font-weight:900;font-style:italic;margin-bottom:12px;color:#60d890">Quote Created.</div>
-      <div id="successDetails" style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:24px"></div>
-      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+    <div id="successMsg" class="card success-panel hidden">
+      <div class="success-title">Quote Created.</div>
+      <div id="successDetails" class="success-details"></div>
+      <div class="btn-row">
         <button class="btn btn-primary" id="sendPaymentBtn">Send Payment Link Now</button>
         <a class="btn btn-ghost" href="/admin/pending-payments.html">View Pending Payments</a>
         <button class="btn btn-ghost" id="createAnotherBtn">Create Another</button>
@@ -49,20 +52,20 @@
     <form id="quoteForm" class="hidden">
 
       <!-- Studio & Date -->
-      <div class="card card-pad" style="margin-bottom:16px">
-        <div class="stat-label" style="margin-bottom:16px">Booking Details</div>
+      <div class="card card-pad">
+        <div class="card-title">Booking Details</div>
 
         <div class="field">
           <label>Studios *</label>
-          <div style="display:flex;gap:12px;flex-wrap:wrap">
-            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;text-transform:none;letter-spacing:0;color:#fff">
-              <input type="checkbox" name="studios" value="curve" style="width:16px;height:16px;accent-color:#fff" /> The Curve
+          <div class="check-row">
+            <label class="check">
+              <input type="checkbox" name="studios" value="curve" /> The Curve
             </label>
-            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;text-transform:none;letter-spacing:0;color:#fff">
-              <input type="checkbox" name="studios" value="studio1" style="width:16px;height:16px;accent-color:#fff" /> Studio One
+            <label class="check">
+              <input type="checkbox" name="studios" value="studio1" /> Studio One
             </label>
-            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;text-transform:none;letter-spacing:0;color:#fff">
-              <input type="checkbox" name="studios" value="pool" style="width:16px;height:16px;accent-color:#fff" /> The Pool
+            <label class="check">
+              <input type="checkbox" name="studios" value="pool" /> The Pool
             </label>
           </div>
         </div>
@@ -94,16 +97,16 @@
         </div>
 
         <!-- Price calculator -->
-        <div id="priceCalc" style="background:#1a1a1a;border-radius:2px;padding:14px;font-size:12px;display:none">
-          <div style="color:rgba(255,255,255,0.4);letter-spacing:1px;font-size:10px;text-transform:uppercase;margin-bottom:8px">Standard Price Calculation</div>
-          <div id="calcBreakdown" style="color:rgba(255,255,255,0.55);line-height:2"></div>
-          <div id="calcTotal" style="font-size:18px;font-weight:900;font-style:italic;color:#fff;margin-top:8px"></div>
+        <div id="priceCalc" class="price-calc" style="display:none">
+          <div class="price-calc-title">Standard Price Calculation</div>
+          <div id="calcBreakdown" class="price-calc-lines"></div>
+          <div id="calcTotal" class="price-calc-total"></div>
         </div>
       </div>
 
       <!-- Customer Details -->
-      <div class="card card-pad" style="margin-bottom:16px">
-        <div class="stat-label" style="margin-bottom:16px">Customer Details</div>
+      <div class="card card-pad">
+        <div class="card-title">Customer Details</div>
         <div class="form-grid">
           <div class="field"><label>First Name *</label><input id="fFirstName" type="text" placeholder="Jane" /></div>
           <div class="field"><label>Last Name *</label><input id="fLastName" type="text" placeholder="Smith" /></div>
@@ -113,35 +116,35 @@
       </div>
 
       <!-- Pricing -->
-      <div class="card card-pad" style="margin-bottom:16px">
-        <div class="stat-label" style="margin-bottom:16px">Custom Pricing</div>
+      <div class="card card-pad">
+        <div class="card-title">Custom Pricing</div>
         <div class="form-grid">
           <div class="field">
             <label>Custom Price (R) *</label>
             <input id="fCustomPrice" type="number" min="1" placeholder="e.g. 900" />
-            <div style="font-size:10px;color:rgba(255,255,255,0.25);margin-top:6px;letter-spacing:0.5px">Enter the amount the customer should pay. This overrides standard pricing.</div>
+            <div class="field-hint">Enter the amount the customer should pay. This overrides standard pricing.</div>
           </div>
           <div class="field">
             <label>Discount Code (optional)</label>
-            <input id="fDiscountCode" type="text" placeholder="e.g. SHOOT10" style="text-transform:uppercase" />
+            <input id="fDiscountCode" class="uppercase" type="text" placeholder="e.g. SHOOT10" />
           </div>
         </div>
       </div>
 
       <!-- Notes -->
-      <div class="card card-pad" style="margin-bottom:16px">
-        <div class="stat-label" style="margin-bottom:4px">Client Notes</div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:12px;letter-spacing:0.3px">Visible to the customer — appears in the payment request email and booking confirmation. Use this to explain what they're paying for.</div>
-        <textarea id="fClientNotes" rows="4" style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:2px;color:#fff;font-family:inherit;font-size:13px;padding:10px 14px;resize:vertical;outline:none" placeholder="e.g. Full day studio hire — The Curve. Includes lighting setup, 2x backdrops, and personal assistant on set for the duration of the shoot."></textarea>
+      <div class="card card-pad">
+        <div class="card-title tight">Client Notes</div>
+        <div class="card-hint">Visible to the customer — appears in the payment request email and booking confirmation. Use this to explain what they're paying for.</div>
+        <textarea id="fClientNotes" class="textarea" rows="4" placeholder="e.g. Full day studio hire — The Curve. Includes lighting setup, 2x backdrops, and personal assistant on set for the duration of the shoot."></textarea>
       </div>
 
-      <div class="card card-pad" style="margin-bottom:24px">
-        <div class="stat-label" style="margin-bottom:4px">Internal Notes</div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:12px;letter-spacing:0.3px">Admin only — never sent to the customer.</div>
-        <textarea id="fNotes" rows="3" style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:2px;color:#fff;font-family:inherit;font-size:13px;padding:10px 14px;resize:vertical;outline:none" placeholder="Internal notes, reminders, context..."></textarea>
+      <div class="card card-pad">
+        <div class="card-title tight">Internal Notes</div>
+        <div class="card-hint">Admin only — never sent to the customer.</div>
+        <textarea id="fNotes" class="textarea" rows="3" placeholder="Internal notes, reminders, context..."></textarea>
       </div>
 
-      <div style="display:flex;gap:12px">
+      <div class="form-actions">
         <button class="btn btn-primary" type="submit" id="submitBtn">Create Draft Quote</button>
         <a class="btn btn-ghost" href="/admin/dashboard.html">Cancel</a>
       </div>
@@ -274,7 +277,7 @@
         btn.textContent = '✓ Email Sent';
         btn.className = 'btn btn-ghost';
         document.getElementById('successMsg').querySelector('div:last-child').insertAdjacentHTML('beforeend',
-          '<div style="margin-top:12px;font-size:12px;color:#60d890">Payment link sent to customer.</div>');
+          '<div class="success-note">Payment link sent to customer.</div>');
       } catch (err) {
         alert('Error sending email: ' + err.message);
         btn.disabled = false;

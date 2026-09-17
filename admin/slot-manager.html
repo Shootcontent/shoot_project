@@ -7,6 +7,7 @@
   <title>SHOOT. Admin — Slot Manager</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/admin/assets/admin.css" />
+  <script src="/admin/assets/nav.js" defer></script>
 </head>
 <body>
 
@@ -18,6 +19,8 @@
         <a class="nav-link" href="/admin/bookings.html">Bookings</a>
         <a class="nav-link" href="/admin/calendar.html">Calendar</a>
         <a class="nav-link" href="/admin/coupons.html">Coupons</a>
+        <a class="nav-link" href="/admin/create-booking.html">Create Booking</a>
+        <a class="nav-link" href="/admin/pending-payments.html">Payments</a>
         <a class="nav-link active" href="/admin/slot-manager.html">Slots</a>
       </div>
     </div>
@@ -36,20 +39,10 @@
       <button class="btn btn-primary" id="newBlockBtn">+ Block Slot</button>
     </div>
 
-    <!-- Clear Date -->
-    <div style="background:#111;border:1px solid #222;border-radius:4px;padding:20px 24px;margin-bottom:32px;display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;">
-      <div>
-        <div class="stat-label" style="margin-bottom:8px">Clear All Slots for a Date</div>
-        <div style="font-size:12px;color:#555;margin-bottom:12px">Removes all blocks and booking slots for every studio on the selected date.</div>
-        <input type="date" id="clearDateInput" style="background:#1a1a1a;border:1px solid #333;color:#fff;padding:8px 12px;border-radius:2px;font-size:13px;" />
-      </div>
-      <button class="btn btn-danger" id="clearDateBtn">Clear Date</button>
-      <div id="clearDateMsg" style="font-size:12px;min-width:160px;"></div>
-    </div>
-
     <!-- Active blocks -->
-    <div class="stat-label" style="margin-bottom:12px">Active Blocks</div>
-    <div class="table-wrap" style="margin-bottom:32px">
+    <section class="section">
+    <div class="section-head"><div class="section-title">Active Blocks</div></div>
+    <div class="table-wrap">
       <table>
         <thead><tr>
           <th>Studio</th><th>Date</th><th>Scope</th><th>Time</th><th>Reason</th><th>Blocked By</th><th>Blocked At</th><th></th>
@@ -57,6 +50,20 @@
         <tbody id="blocksBody"><tr><td colspan="8"><div class="skeleton"></div></td></tr></tbody>
       </table>
     </div>
+    </section>
+
+    <!-- Clear Date -->
+    <section class="section">
+    <div class="section-head"><div class="section-title">Clear All Slots for a Date</div></div>
+    <div class="card card-pad card-danger">
+      <div class="card-hint">Removes all blocks and booking slots for every studio on the selected date. This can't be undone.</div>
+      <div class="card-row">
+        <input type="date" id="clearDateInput" class="input auto" />
+        <button class="btn btn-danger" id="clearDateBtn">Clear Date</button>
+        <div id="clearDateMsg" class="inline-msg"></div>
+      </div>
+    </div>
+    </section>
   </main>
 
   <!-- Create Block Modal -->
@@ -119,7 +126,7 @@
         <input id="bReason" type="text" placeholder="Custom reason or additional notes..." />
       </div>
 
-      <div id="conflictWarning" class="hidden" style="background:rgba(255,180,50,0.1);border:1px solid rgba(255,180,50,0.25);border-radius:2px;padding:12px 14px;font-size:12px;color:#ffb432;margin-bottom:16px">
+      <div id="conflictWarning" class="notice notice-warn hidden">
         ⚠ This block overlaps with existing confirmed bookings. The block will be created but won't affect those bookings.
       </div>
 
@@ -158,12 +165,12 @@
         tbody.innerHTML = blocks.map(b => `
           <tr>
             <td>${esc(STUDIO_NAMES[b.studio] || b.studio)}</td>
-            <td>${fmtDate(b.date)}</td>
+            <td class="nowrap">${fmtDate(b.date)}</td>
             <td><span class="badge ${b.scope === 'full_day' ? 'badge-red' : 'badge-yellow'}">${b.scope === 'full_day' ? 'Full Day' : 'Time Slot'}</span></td>
             <td>${b.scope === 'full_day' ? '<span class="muted">All day</span>' : `${b.startTime} – ${b.endTime}`}</td>
             <td>${esc(b.reason || '—')}</td>
             <td class="muted">${esc(b.blockedBy)}</td>
-            <td class="muted" style="font-size:11px">${fmtDateTime(b.blockedAt)}</td>
+            <td class="muted cell-small nowrap">${fmtDateTime(b.blockedAt)}</td>
             <td>
               <button class="btn btn-danger btn-sm" onclick="removeBlock('${esc(b.blockId)}', '${esc(STUDIO_NAMES[b.studio]||b.studio)}', '${esc(b.date)}')">
                 Unblock
@@ -172,7 +179,7 @@
           </tr>`).join('');
       } catch (err) {
         document.getElementById('blocksBody').innerHTML =
-          `<tr><td colspan="8" style="padding:16px;color:#ff8080;font-size:12px">Error: ${esc(err.message)}</td></tr>`;
+          `<tr><td colspan="8" class="row-error">Error: ${esc(err.message)}</td></tr>`;
       }
     }
 
@@ -263,7 +270,7 @@
       if (!confirm(`Clear ALL slots for ${d}/${m}/${y}?\n\nThis removes all admin blocks and booking slots for The Curve, Studio One and The Pool on this date. This cannot be undone.`)) return;
       const btn = document.getElementById('clearDateBtn');
       btn.disabled = true;
-      msg.style.color = '#888';
+      msg.style.color = '#8a8a8a';
       msg.textContent = 'Clearing…';
       try {
         const r = await fetch(`/api/admin/slots?clearDate=${encodeURIComponent(date)}`, {
@@ -271,12 +278,12 @@
         });
         const data = await r.json();
         if (!r.ok) throw new Error(data.error);
-        msg.style.color = '#4ade80';
+        msg.style.color = '#1a7f45';
         msg.textContent = `Done — ${data.cleared} entries cleared.`;
         document.getElementById('clearDateInput').value = '';
         loadBlocks();
       } catch (err) {
-        msg.style.color = '#ff8080';
+        msg.style.color = '#b83232';
         msg.textContent = 'Error: ' + err.message;
       } finally {
         btn.disabled = false;
