@@ -19,6 +19,7 @@
  */
 
 import { kv, kvHGetAll } from './_kv.js';
+import { isWeekendCutoff } from './_weekend-cutoff.js';
 
 const VALID_STUDIOS = new Set(['curve', 'studio1', 'pool']);
 const DATE_RE       = /^\d{4}-\d{2}-\d{2}$/;
@@ -87,6 +88,9 @@ export default async function handler(req, res) {
   const today = new Date().toISOString().split('T')[0];
   if (date < today) {
     return res.status(400).json({ error: 'Cannot check availability for past dates.' });
+  }
+  if (isWeekendCutoff(date)) {
+    return res.status(403).json({ error: 'Weekend bookings close on Friday at 4:00 PM.', weekendCutoff: true });
   }
 
   const studioList = (studios || '')

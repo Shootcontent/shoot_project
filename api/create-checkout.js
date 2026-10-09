@@ -14,6 +14,7 @@
 import { kv, kvHGetAll } from './_kv.js';
 import { getCoupon } from './_coupon.js';
 import { icsAttachment } from './_ics.js';
+import { isWeekendCutoff } from './_weekend-cutoff.js';
 
 const YOCO_CHECKOUT_URL = 'https://payments.yoco.com/api/checkouts';
 
@@ -179,6 +180,8 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid duration.' });
   if (!date || !DATE_RE.test(date) || date < new Date().toISOString().split('T')[0])
     return res.status(400).json({ error: 'Invalid or past date.' });
+  if (isWeekendCutoff(date))
+    return res.status(403).json({ error: 'Weekend bookings close on Friday at 4:00 PM. Please contact us directly to arrange a weekend session.', weekendCutoff: true });
   if (!time || !TIME_RE.test(time))
     return res.status(400).json({ error: 'Invalid time.' });
   if (!firstName?.trim() || !lastName?.trim())

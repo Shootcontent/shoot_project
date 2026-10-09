@@ -14,6 +14,7 @@
 import { kv } from './_kv.js';
 import { getCoupon } from './_coupon.js';
 import { icsAttachment } from './_ics.js';
+import { isWeekendCutoff } from './_weekend-cutoff.js';
 
 const OWNER_EMAILS = ['hello@shootstudios.co.za', 'elad@asapsolutions.co.za'];
 
@@ -316,6 +317,9 @@ export default async function handler(req, res) {
   const today = new Date().toISOString().split('T')[0];
   if (date < today) {
     return res.status(400).json({ error: 'Cannot book a past date.' });
+  }
+  if (isWeekendCutoff(date)) {
+    return res.status(403).json({ error: 'Weekend bookings close on Friday at 4:00 PM. Please contact us directly to arrange a weekend session.', weekendCutoff: true });
   }
 
   // Extra hours bounds check
