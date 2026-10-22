@@ -15,8 +15,6 @@ import { kv, kvHGetAll } from './_kv.js';
 import { getCoupon } from './_coupon.js';
 import { icsAttachment } from './_ics.js';
 import { isWeekendCutoff } from './_weekend-cutoff.js';
-import { getMemberByEmail, getMemberByCode, getRemainingCap, MEMBERSHIP_PRICE } from './_member.js';
-import { calcMemberDiscount } from './_member-discount.js';
 
 const YOCO_CHECKOUT_URL = 'https://payments.yoco.com/api/checkouts';
 
@@ -92,8 +90,7 @@ function getSurchargeHours(date, time, duration, extra) {
 
 async function calcAmount(body) {
   const { studios, duration, extraHours = 0, date, time,
-          photo, addons = [], cameraBody, rentalDuration, lensChoice,
-          discountCode, memberCode } = body;
+          photo, addons = [], cameraBody, rentalDuration, lensChoice, discountCode } = body;
 
   let studio = 0;
   for (const s of studios) {
@@ -107,67 +104,26 @@ async function calcAmount(body) {
 
   const extra      = (extraHours || 0) * EXTRA_RATE * studios.length;
   const photoAmt   = (photo && photo !== 'none') ? (PHOTO_PRICES[photo] || 0) : 0;
-  let   addonAmt   = (addons || []).reduce((s, a) => s + (ADDON_PRICES[a] || 0), 0);
+  const addonAmt   = (addons || []).reduce((s, a) => s + (ADDON_PRICES[a] || 0), 0);
   let   camera     = 0;
   if (cameraBody && rentalDuration) camera += CAMERA_PRICES[cameraBody]?.[rentalDuration] || 0;
   if (lensChoice && rentalDuration) camera += LENS_PRICES[lensChoice]?.[rentalDuration] || 0;
   const surcharge  = time ? Math.round(getSurchargeHours(date, time, duration, extraHours) * SURCHARGE_RATE) : 0;
 
-  // Member perk: one free add-on per booking
-  let freeAddonAmt = 0;
-  const bookingEmail = (body.email || '').toLowerCase().trim();
-  const normalMemberCode = (memberCode || '').toUpperCase().trim();
-
-  // Validate member if code provided
-  let validMember = null;
-  if (normalMemberCode) {
-    const member = await getMemberByCode(normalMemberCode);
-    if (member && member.email === bookingEmail && member.status === 'active' &&
-        (!member.expiresAt || new Date(member.expiresAt) > new Date())) {
-      validMember = member;
-      // Free add-on: subtract cheapest add-on
-      if (addons && addons.length > 0) {
-        const addonPrices = addons.map(a => ADDON_PRICES[a] || 0).filter(p => p > 0);
-        if (addonPrices.length > 0) {
-          freeAddonAmt = Math.min(...addonPrices);
-          addonAmt -= freeAddonAmt;
-        }
-      }
-    }
-  }
-
-  const discountable = studio + extra + addonAmt + camera; // studio hire + equipment only
-  const subtotal = discountable + photoAmt + surcharge;
+  const subtotal = studio + extra + photoAmt + addonAmt + camera + surcharge;
+  const normalCode = (discountCode || '').toUpperCase().trim();
   let discAmt = 0;
-
-  // Member discount takes priority over coupon codes (mutually exclusive)
-  if (validMember) {
-    const remainingCap = await getRemainingCap(validMember.memberId);
-    const md = calcMemberDiscount({ discountableAmount: discountable, date, time, remainingCapCents: remainingCap });
-    discAmt = md.discountRands;
-  } else {
-    // Coupon code
-    const normalCode = (discountCode || '').toUpperCase().trim();
-    if (normalCode) {
-      const coupon = await getCoupon(normalCode);
-      if (coupon && coupon.active) {
-        if (coupon.customerEmail && coupon.customerEmail.toLowerCase() !== bookingEmail) {
-          discAmt = 0;
-        } else if (coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) {
-          discAmt = 0;
-        } else if (coupon.maxUses > 0 && coupon.currentUses >= coupon.maxUses) {
-          discAmt = 0;
-        } else if (coupon.type === 'percent') {
-          discAmt = Math.round(discountable * coupon.value / 100);
-        } else if (coupon.type === 'fixed') {
-          discAmt = Math.min(coupon.value, discountable);
-        }
+  if (normalCode) {
+    const coupon = await getCoupon(normalCode);
+    if (coupon && coupon.active) {
+      if (coupon.type === 'percent') {
+        discAmt = Math.round(subtotal * coupon.value / 100);
+      } else if (coupon.type === 'fixed') {
+        discAmt = Math.min(coupon.value, subtotal);
       }
     }
   }
-
-  // freeAddonAmt was already subtracted from addonAmt (line 133), so don't subtract again
-  return { total: subtotal - discAmt, memberSavedCents: validMember ? (discAmt + freeAddonAmt) * 100 : 0, memberId: validMember?.memberId || null };
+  return subtotal - discAmt;
 }
 
 function setCors(res) {
@@ -215,12 +171,6 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const body = req.body || {};
-
-  // ── MEMBERSHIP PURCHASE — separate flow ─────────────────────────────────────
-  if (body.purchaseType === 'membership') {
-    return handleMembershipCheckout(req, res, body);
-  }
-
   const { studios, duration, date, time, firstName, lastName, email, phone } = body;
 
   // ── Validate inputs ───────────────────────────────────────────────────────
@@ -242,8 +192,8 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Phone number required.' });
 
   const extraHours  = Math.max(0, Math.min(8, parseInt(body.extraHours, 10) || 0));
-  const calcResult = await calcAmount({ ...body, extraHours });
-  if (calcResult === null) {
+  const amountRands = await calcAmount({ ...body, extraHours });
+  if (amountRands === null) {
     console.error('[create-checkout] Price calculation returned null.', {
       studios, duration, extraHours, date, time,
       photo: body.photo, addons: body.addons,
@@ -251,9 +201,6 @@ export default async function handler(req, res) {
     });
     return res.status(400).json({ error: 'Invalid booking configuration — price calculation failed.' });
   }
-  const amountRands = typeof calcResult === 'object' ? calcResult.total : calcResult;
-  const memberSavedCents = typeof calcResult === 'object' ? calcResult.memberSavedCents : 0;
-  const memberIdForSavings = typeof calcResult === 'object' ? calcResult.memberId : null;
   const finalAmount = Math.max(0, amountRands); // defensive: never negative
   const amountCents = finalAmount * 100;
 
@@ -328,9 +275,6 @@ export default async function handler(req, res) {
       rentalDuration: body.rentalDuration || null,
       lensChoice:     body.lensChoice  || null,
       discountCode:   (body.discountCode || '').toUpperCase().trim() || null,
-      memberCode:     (body.memberCode || '').toUpperCase().trim() || null,
-      memberSavedCents: memberSavedCents || 0,
-      memberId:       memberIdForSavings || null,
       amountCents,
       paymentStatus:  'pending',
       bookingStatus:  'pending',
@@ -442,77 +386,6 @@ export default async function handler(req, res) {
 
 async function releaseLock(lockKey) {
   await kv('DEL', lockKey).catch(() => {});
-}
-
-// ── Membership checkout ──────────────────────────────────────────────────────
-
-async function handleMembershipCheckout(req, res, body) {
-  const { firstName, lastName, email, phone } = body;
-
-  if (!firstName?.trim() || !lastName?.trim())
-    return res.status(400).json({ error: 'Full name required.' });
-  if (!email || !EMAIL_RE.test(email))
-    return res.status(400).json({ error: 'Valid email required.' });
-  if (!phone?.trim())
-    return res.status(400).json({ error: 'Phone number required.' });
-
-  // Check if already a member
-  const existing = await getMemberByEmail(email);
-  if (existing && existing.status === 'active' && existing.expiresAt && new Date(existing.expiresAt) > new Date()) {
-    return res.status(409).json({ error: 'You already have an active SHOOT. Club membership.' });
-  }
-
-  const pendingId = `MEM-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
-
-  const proto   = req.headers['x-forwarded-proto'] || 'https';
-  const host    = req.headers.host;
-  const baseUrl = `${proto}://${host}`;
-
-  try {
-    const yocoRes = await fetch(YOCO_CHECKOUT_URL, {
-      method:  'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.YOCO_SECRET_KEY}`,
-        'Content-Type':  'application/json',
-      },
-      body: JSON.stringify({
-        amount:     MEMBERSHIP_PRICE,
-        currency:   'ZAR',
-        successUrl: `${baseUrl}/membership.html?status=success&id=${pendingId}`,
-        cancelUrl:  `${baseUrl}/membership.html?status=cancel`,
-        failureUrl: `${baseUrl}/membership.html?status=fail`,
-        metadata:   { type: 'membership', pendingId },
-      }),
-    });
-
-    const checkout = await yocoRes.json();
-
-    if (!checkout.redirectUrl) {
-      console.error('[create-checkout] Yoco membership error:', JSON.stringify(checkout));
-      return res.status(502).json({ error: 'Payment provider error. Please try again.' });
-    }
-
-    // Store pending membership data (30-min TTL)
-    const pendingData = {
-      type:        'membership',
-      pendingId,
-      checkoutId:  checkout.id,
-      firstName:   sanitize(firstName),
-      lastName:    sanitize(lastName),
-      email:       email.toLowerCase().trim(),
-      phone:       sanitize(phone),
-      createdAt:   new Date().toISOString(),
-    };
-    await kv('SET', `membership:pending:${pendingId}`, JSON.stringify(pendingData), 'EX', '1800');
-    await kv('SET', `checkout:${checkout.id}`, pendingId, 'EX', '1800');
-
-    console.log(`[create-checkout] membership checkout created pendingId=${pendingId} checkoutId=${checkout.id}`);
-
-    return res.status(200).json({ redirectUrl: checkout.redirectUrl, pendingId });
-  } catch (err) {
-    console.error('[create-checkout] membership error:', err);
-    return res.status(500).json({ error: 'Something went wrong. Please try again.' });
-  }
 }
 
 // ── Confirmation emails for free bookings ────────────────────────────────────

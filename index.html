@@ -2606,74 +2606,8 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
     <!-- MAIN CONTENT -->
     <div class="bm-main" id="bm-main-content">
 
-      <!-- ── STEP 0: MEMBER OR GUEST ── -->
-      <div id="bm-step-0">
-        <div style="max-width:420px;margin:20px auto;text-align:center;">
-          <div style="font-size:22px;font-weight:900;margin-bottom:6px;">Welcome to SHOOT.</div>
-          <div style="font-size:13px;color:#888;margin-bottom:32px;">How would you like to book?</div>
-
-          <!-- Member Login Card -->
-          <div id="bm-entry-member-card" style="background:#111;border-radius:14px;padding:28px;margin-bottom:16px;text-align:left;border:1.5px solid #c6ff00;cursor:pointer;transition:transform 0.15s;" onclick="showEntryMemberLogin()" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform=''">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
-              <div style="background:#c6ff00;width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              </div>
-              <div>
-                <div style="color:#fff;font-size:16px;font-weight:800;">SHOOT. Club Member</div>
-                <div style="color:#999;font-size:11px;">Sign in with your member code</div>
-              </div>
-            </div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-              <span style="background:#1a1a1a;color:#c6ff00;font-size:10px;font-weight:700;padding:5px 10px;border-radius:20px;">Up to 25% off</span>
-              <span style="background:#1a1a1a;color:#c6ff00;font-size:10px;font-weight:700;padding:5px 10px;border-radius:20px;">Free add-on</span>
-              <span style="background:#1a1a1a;color:#c6ff00;font-size:10px;font-weight:700;padding:5px 10px;border-radius:20px;">Faster checkout</span>
-            </div>
-          </div>
-
-          <!-- Member Login Form (hidden initially) -->
-          <div id="bm-entry-member-form" style="display:none;background:#111;border-radius:14px;padding:28px;margin-bottom:16px;text-align:left;border:1.5px solid #c6ff00;">
-            <div style="color:#fff;font-size:16px;font-weight:800;margin-bottom:4px;">Sign in as Member</div>
-            <div style="color:#888;font-size:12px;margin-bottom:18px;">Enter your member code and email to continue.</div>
-            <div style="margin-bottom:10px;">
-              <label style="display:block;color:#999;font-size:11px;font-weight:600;letter-spacing:0.5px;margin-bottom:4px;">MEMBER CODE</label>
-              <input id="bm-entry-code" type="text" placeholder="e.g. SC-001" maxlength="20" autocomplete="off"
-                oninput="this.value=this.value.toUpperCase()"
-                style="width:100%;box-sizing:border-box;padding:12px 14px;border:1.5px solid #333;border-radius:6px;background:#1a1a1a;color:#fff;font-family:inherit;font-size:14px;font-weight:600;letter-spacing:1px;">
-            </div>
-            <div style="margin-bottom:14px;">
-              <label style="display:block;color:#999;font-size:11px;font-weight:600;letter-spacing:0.5px;margin-bottom:4px;">EMAIL</label>
-              <input id="bm-entry-email" type="email" placeholder="you@example.com"
-                style="width:100%;box-sizing:border-box;padding:12px 14px;border:1.5px solid #333;border-radius:6px;background:#1a1a1a;color:#fff;font-family:inherit;font-size:14px;">
-            </div>
-            <div id="bm-entry-status" style="font-size:12px;min-height:18px;margin-bottom:12px;"></div>
-            <div style="display:flex;gap:8px;">
-              <button onclick="cancelEntryMember()" style="flex:1;padding:13px;background:#222;color:#999;border:none;border-radius:6px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">Cancel</button>
-              <button id="bm-entry-submit" onclick="submitEntryMember()" style="flex:2;padding:13px;background:#c6ff00;color:#000;border:none;border-radius:6px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;">Sign In</button>
-            </div>
-          </div>
-
-          <!-- Guest Card -->
-          <div style="background:#f5f5f5;border-radius:14px;padding:24px;text-align:left;cursor:pointer;transition:transform 0.15s;border:1.5px solid transparent;" onclick="startAsGuest()" onmouseover="this.style.transform='scale(1.01)';this.style.borderColor='#ddd'" onmouseout="this.style.transform='';this.style.borderColor='transparent'">
-            <div style="display:flex;align-items:center;gap:12px;">
-              <div style="background:#e5e5e5;width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </div>
-              <div>
-                <div style="font-size:16px;font-weight:800;color:#111;">Continue as Guest</div>
-                <div style="font-size:11px;color:#999;">Book without a membership</div>
-              </div>
-            </div>
-          </div>
-
-          <div style="margin-top:24px;padding-top:18px;border-top:1px solid #eee;">
-            <div style="font-size:11px;color:#bbb;margin-bottom:8px;">Not a member yet?</div>
-            <a href="/membership.html" target="_blank" style="font-size:12px;color:#000;font-weight:700;text-decoration:underline;">Learn about SHOOT. Club →</a>
-          </div>
-        </div>
-      </div>
-
       <!-- ── STEP 1: BUILD YOUR SHOOT ── -->
-      <div id="bm-step-1" style="display:none;">
+      <div id="bm-step-1">
 
         <!-- 1. Studio Space -->
         <div class="bm-section">
@@ -2947,17 +2881,6 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
 
       <!-- ── STEP 2: YOUR DETAILS ── -->
       <div id="bm-step-2" style="display:none;">
-        <div id="bm-member-banner" style="display:none;background:#111;border:1px solid #c6ff00;border-radius:10px;padding:14px 18px;margin-bottom:16px;display:none;">
-          <div style="display:flex;align-items:center;gap:10px;">
-            <div style="background:#c6ff00;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
-            </div>
-            <div>
-              <div style="color:#c6ff00;font-size:12px;font-weight:800;">SHOOT. Club Member</div>
-              <div style="color:#888;font-size:11px;" id="bm-member-banner-detail">Details pre-filled from your membership</div>
-            </div>
-          </div>
-        </div>
         <div class="bm-section">
           <div class="bm-section-title">Your Details</div>
           <div class="bm-contact-form">
@@ -2982,7 +2905,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
               </div>
             </div>
             <div class="bm-form-group" style="margin-top:4px;">
-              <label>Discount / Member Code <span style="color:#bbb;font-weight:400;letter-spacing:0;text-transform:none;font-size:10px;">(optional)</span></label>
+              <label>Discount Code <span style="color:#bbb;font-weight:400;letter-spacing:0;text-transform:none;font-size:10px;">(optional)</span></label>
               <div class="bm-discount-row">
                 <input class="bm-discount-input" id="bm-discount-input" type="text"
                   placeholder="e.g. SHOOT10" maxlength="20" autocomplete="off"
@@ -3009,88 +2932,10 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
           <div class="bm-section-title">Review Your Booking</div>
           <div class="bm-review-grid" id="bm-review-content"></div>
           <div id="bm-form-error" style="background:#fee;border:1px solid #fcc;color:#c00;padding:12px 16px;border-radius:6px;font-size:13px;margin-bottom:16px;display:none;"></div>
-          <button class="bm-submit-btn" id="bm-submit-btn" onclick="showMemberPopupOrPay()">Review &amp; Pay →</button>
+          <button class="bm-submit-btn" id="bm-submit-btn" onclick="goToStep(4)">Review &amp; Pay →</button>
         </div>
         <div style="display:flex;justify-content:flex-start;margin-top:8px;">
           <button onclick="goToStep(2)" style="background:#fff;color:#000;border:1.5px solid #000;border-radius:6px;padding:13px 28px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;">← Back</button>
-        </div>
-      </div>
-
-      <!-- ── MEMBERSHIP POPUP (between step 3 & 4) ── -->
-      <div id="bm-member-popup" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:10000;background:rgba(0,0,0,0.85);backdrop-filter:blur(4px);overflow-y:auto;">
-        <div style="max-width:440px;margin:60px auto;padding:0 16px;">
-          <div style="background:#111;border-radius:16px;overflow:hidden;border:1.5px solid #c6ff00;">
-            <!-- Header -->
-            <div style="background:#c6ff00;padding:28px 28px 22px;text-align:center;">
-              <div style="font-family:'Montserrat',sans-serif;font-size:28px;font-weight:900;letter-spacing:-1px;color:#000;">SHOOT.</div>
-              <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:#000;margin-top:2px;">CLUB</div>
-            </div>
-            <!-- Body -->
-            <div style="padding:28px 28px 0;">
-              <div style="text-align:center;margin-bottom:8px;">
-                <div style="color:#c6ff00;font-size:33px;font-weight:900;margin-bottom:6px;letter-spacing:-0.5px;">JOIN THE CLUB</div>
-                <div style="color:#999;font-size:13px;line-height:1.5;">Save on every booking for just <span style="color:#c6ff00;font-weight:800;">R850/year</span></div>
-              </div>
-
-              <!-- Perks grid -->
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0;">
-                <div style="background:#1a1a1a;border-radius:10px;padding:18px 12px;text-align:center;">
-                  <div style="color:#c6ff00;font-size:32px;font-weight:900;line-height:1;">25%</div>
-                  <div style="color:#888;font-size:10px;font-weight:700;letter-spacing:1px;margin-top:4px;">OFF-PEAK</div>
-                  <div style="color:#666;font-size:10px;margin-top:2px;">Mon–Thu before 1pm</div>
-                </div>
-                <div style="background:#1a1a1a;border-radius:10px;padding:18px 12px;text-align:center;">
-                  <div style="color:#c6ff00;font-size:32px;font-weight:900;line-height:1;">10%</div>
-                  <div style="color:#888;font-size:10px;font-weight:700;letter-spacing:1px;margin-top:4px;">WEEKDAY</div>
-                  <div style="color:#666;font-size:10px;margin-top:2px;">All other weekday hours</div>
-                </div>
-              </div>
-
-              <!-- Perks list -->
-              <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;">
-                <div style="display:flex;align-items:center;gap:10px;">
-                  <div style="background:#c6ff00;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
-                  </div>
-                  <div style="color:#fff;font-size:13px;font-weight:600;">Free add-on every session</div>
-                </div>
-                <div style="display:flex;align-items:center;gap:10px;">
-                  <div style="background:#c6ff00;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
-                  </div>
-                  <div style="color:#fff;font-size:13px;font-weight:600;">Save up to R2,500 per year</div>
-                </div>
-                <div style="display:flex;align-items:center;gap:10px;">
-                  <div style="background:#c6ff00;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
-                  </div>
-                  <div style="color:#fff;font-size:13px;font-weight:600;">Weekend bookings after Friday 4pm cutoff</div>
-                </div>
-              </div>
-
-              <!-- Sign Up CTA -->
-              <a href="/membership.html" target="_blank"
-                style="display:block;text-align:center;padding:18px;background:#c6ff00;color:#000;border:none;border-radius:10px;font-family:inherit;font-size:16px;font-weight:900;text-decoration:none;letter-spacing:0.5px;transition:opacity 0.2s;"
-                onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
-                Sign Up Now
-              </a>
-            </div>
-            <!-- Footer: Skip -->
-            <div style="padding:16px 28px 24px;">
-              <button onclick="closeMemberPopup(true)"
-                style="width:100%;padding:14px;background:#222;color:#666;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:color 0.2s;"
-                onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#666'">
-                Skip — Continue to Payment
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── MEMBER PERKS SUMMARY POPUP ── -->
-      <div id="bm-perks-popup" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:10000;background:rgba(0,0,0,0.85);backdrop-filter:blur(4px);overflow-y:auto;">
-        <div style="max-width:440px;margin:60px auto;padding:0 16px;">
-          <div id="bm-perks-content" style="background:#111;border-radius:16px;overflow:hidden;border:1.5px solid #c6ff00;"></div>
         </div>
       </div>
 
@@ -3182,10 +3027,6 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
       <div class="bm-price-row" id="sb-discount-row" style="display:none;">
         <span class="bm-price-label" id="sb-discount-label">Discount:</span>
         <span class="bm-price-val" id="sb-discount" style="color:#4ade80;">−R0</span>
-      </div>
-      <div class="bm-price-row" id="sb-free-addon-row" style="display:none;">
-        <span class="bm-price-label">Free add-on:</span>
-        <span class="bm-price-val" id="sb-free-addon" style="color:#4ade80;">−R0</span>
       </div>
       <div class="bm-price-divider"></div>
       <div class="bm-total-row">
@@ -3417,8 +3258,10 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
     document.body.style.overflow = 'hidden';
     // Set min date
     document.getElementById('bm-date').min = new Date().toISOString().split('T')[0];
-    window._preStudio = preStudio || null;
-    goToStep(0);
+    if (preStudio) {
+      toggleStudio(preStudio);
+    }
+    goToStep(1);
   }
 
   function closeBookingModal() {
@@ -3606,49 +3449,17 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
     const { surchargeHours, surchargeLabel } = getBookingConditions(BM.date, BM.time, BM.duration, BM.extraHours);
     const surchargeTotal = Math.round(surchargeHours * SURCHARGE_RATE);
 
-    let discountable  = studioTotal + addonTotal + extraTotal + cameraTotal; // studio hire + equipment only
-
-    // Member perk: one free add-on (cheapest)
-    let freeAddonAmt = 0;
-    if (typeof DC !== 'undefined' && DC.applied && DC.isMember) {
-      const addonKeys = Object.keys(BM.addons).filter(id => BM.addons[id]);
-      if (addonKeys.length > 0) {
-        const prices = addonKeys.map(id => BM.addonPrices[id] || (id === 'rgb' ? 150 : 0)).filter(p => p > 0);
-        if (prices.length > 0) {
-          freeAddonAmt = Math.min(...prices);
-          discountable -= freeAddonAmt;
-        }
-      }
-    }
-
-    const subtotal      = discountable + photoTotal + surchargeTotal + freeAddonAmt;
-    let discountPct = 0;
-    let discountAmt = 0;
-    let memberSaving = 0;
-
-    if (typeof DC !== 'undefined' && DC.applied) {
-      if (DC.isMember) {
-        // Member discount: use rate based on date/time
-        const rate = getMemberRateClient(BM.date, BM.time);
-        discountPct = rate;
-        discountAmt = Math.round(discountable * rate / 100);
-        // Cap check
-        if (DC.remainingCapCents > 0 && (discountAmt + freeAddonAmt) * 100 > DC.remainingCapCents) {
-          discountAmt = Math.floor(DC.remainingCapCents / 100);
-        }
-        memberSaving = discountAmt + freeAddonAmt;
-      } else if (DC.discountType === 'fixed') {
-        discountAmt = Math.min(DC.discountFixed, discountable);
-      } else if (DC.discount) {
-        discountPct = DC.discount;
-        discountAmt = Math.round(discountable * discountPct / 100);
-      }
-    }
-
+    const subtotal      = studioTotal + photoTotal + addonTotal + extraTotal + cameraTotal + surchargeTotal;
+    const discountPct = (typeof DC !== 'undefined' && DC.applied && DC.discountType !== 'fixed') ? DC.discount : 0;
+    const discountAmt = (typeof DC !== 'undefined' && DC.applied)
+      ? (DC.discountType === 'fixed'
+          ? Math.min(DC.discountFixed, subtotal)
+          : (discountPct ? Math.round(subtotal * discountPct / 100) : 0))
+      : 0;
     return { studioTotal, studioOriginal, promoDiscount, promoApplied: promo.applied,
              photoTotal, addonTotal, extraTotal, cameraTotal, surchargeTotal, surchargeLabel,
-             discountPct, discountAmt, freeAddonAmt, memberSaving,
-             total: subtotal - discountAmt - freeAddonAmt };
+             discountPct, discountAmt,
+             total: subtotal - discountAmt };
   }
 
   function fmt(n) { return 'R' + n.toLocaleString('en-ZA'); }
@@ -3707,7 +3518,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
 
     const { studioTotal, studioOriginal, promoDiscount, promoApplied,
             photoTotal, addonTotal, extraTotal, cameraTotal, surchargeTotal,
-            discountPct, discountAmt, freeAddonAmt, memberSaving, total } = calcTotal();
+            discountPct, discountAmt, total } = calcTotal();
 
     // Studio price row: show strikethrough original when promo active
     const sbStudio = document.getElementById('sb-studio');
@@ -3759,29 +3570,13 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
     // Discount code row
     const discountRow = document.getElementById('sb-discount-row');
     if (discountAmt > 0) {
-      if (DC.isMember) {
-        const rate = getMemberRateClient(BM.date, BM.time);
-        document.getElementById('sb-discount-label').textContent = rate > 0
-          ? 'SHOOT. Club (' + rate + '% off):'
-          : 'SHOOT. Club:';
-      } else {
-        document.getElementById('sb-discount-label').textContent = DC.discountType === 'fixed'
-          ? DC.code + ' (R' + DC.discountFixed + ' off):'
-          : DC.code + ' (' + discountPct + '% off):';
-      }
+      document.getElementById('sb-discount-label').textContent = DC.discountType === 'fixed'
+        ? DC.code + ' (R' + DC.discountFixed + ' off):'
+        : DC.code + ' (' + discountPct + '% off):';
       document.getElementById('sb-discount').textContent = '−' + fmt(discountAmt);
       discountRow.style.display = '';
     } else {
       discountRow.style.display = 'none';
-    }
-
-    // Free add-on row (members only)
-    const freeAddonRow = document.getElementById('sb-free-addon-row');
-    if (freeAddonAmt > 0) {
-      document.getElementById('sb-free-addon').textContent = '−' + fmt(freeAddonAmt);
-      freeAddonRow.style.display = '';
-    } else {
-      freeAddonRow.style.display = 'none';
     }
 
     document.getElementById('sb-total').textContent = fmt(total);
@@ -3826,10 +3621,6 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
       buildReview();
     }
 
-    // Hide step 0 whenever we go to a real step
-    const step0 = document.getElementById('bm-step-0');
-    if (step0) step0.style.display = n === 0 ? 'block' : 'none';
-
     [1,2,3,4,5].forEach(i => {
       const el = document.getElementById('bm-step-' + i);
       if (el) el.style.display = i === n ? 'block' : 'none';
@@ -3840,16 +3631,6 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
         if (i < n)  ind.classList.add('done');
       }
     });
-
-    // Hide step bar + sidebar on step 0
-    const stepsBar = document.querySelector('.bm-steps');
-    const sidebar  = document.querySelector('.bm-sidebar');
-    if (stepsBar) stepsBar.style.display = n === 0 ? 'none' : '';
-    if (sidebar)  sidebar.style.display  = n === 0 ? 'none' : '';
-
-    // Show member banner on step 2 if member is logged in
-    const memberBanner = document.getElementById('bm-member-banner');
-    if (memberBanner) memberBanner.style.display = (n === 2 && DC.applied && DC.isMember) ? '' : 'none';
 
     // Update sidebar button
     const sideBtn = document.getElementById('sb-next-btn');
@@ -3885,7 +3666,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
     const cameraNames = { rp: 'Canon EOS RP', r6: 'Canon EOS R6 MK II' };
     const lensNames = { '2470': 'Canon 24–70mm f/2.8', '50': 'Canon 50mm f/1.8' };
     const rentalDurLabels = { halfday: 'Half Day', fullday: 'Full Day' };
-    const { studioTotal, studioOriginal, promoDiscount, promoApplied, photoTotal, addonTotal, extraTotal, cameraTotal, freeAddonAmt, memberSaving, discountAmt, total } = calcTotal();
+    const { studioTotal, studioOriginal, promoDiscount, promoApplied, photoTotal, addonTotal, extraTotal, cameraTotal, total } = calcTotal();
 
     const addonList = Object.keys(BM.addons).filter(id => BM.addons[id]).map(id => ({
       sunset: 'Sunset Lamp', snoot: 'Snoot', mic: 'DJI Mic', rgb: 'RGB Light'
@@ -3913,16 +3694,6 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
       <div class="bm-review-item" style="grid-column:1/-1;background:#f0fff4;border-radius:8px;padding:14px;border:1px solid rgba(74,222,128,0.35);">
         <label style="color:#16a34a;">May Special Applied ✦</label>
         <span style="color:#15803d;font-weight:700;">Book 3 hours, pay for 2 — Save ${fmt(promoDiscount)}</span>
-      </div>` : ''}
-      ${DC.applied && DC.isMember && memberSaving > 0 ? `
-      <div class="bm-review-item" style="grid-column:1/-1;background:#1a1a1a;border-radius:8px;padding:14px;border:1px solid #c6ff00;">
-        <label style="color:#c6ff00;font-weight:700;">SHOOT. Club Member</label>
-        <span style="color:#c6ff00;font-weight:700;">Saving ${fmt(memberSaving)}${freeAddonAmt > 0 ? ' (incl. free add-on)' : ''}</span>
-      </div>` : ''}
-      ${!DC.isMember && discountAmt > 0 ? `
-      <div class="bm-review-item" style="grid-column:1/-1;background:#f0fff4;border-radius:8px;padding:14px;border:1px solid rgba(74,222,128,0.35);">
-        <label style="color:#16a34a;">Discount Applied</label>
-        <span style="color:#15803d;font-weight:700;">${DC.code} — Save ${fmt(discountAmt)}</span>
       </div>` : ''}
       <div class="bm-review-item" style="grid-column:1/-1;background:#f9f9f9;border-radius:8px;padding:16px;">
         <label>Estimated Total</label>
@@ -4006,7 +3777,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
   // PAYMENT FLOW
   // ══════════════════════════════════════════
     function buildPaymentSummary() {
-    const { total, promoApplied, promoDiscount, discountAmt, freeAddonAmt, memberSaving } = calcTotal();
+    const { total, promoApplied, promoDiscount, discountAmt } = calcTotal();
     const studioNames = { curve: 'The Curve', studio1: 'Studio One', pool: 'The Pool Area' };
     const durLabels   = { '90min': '90 min', '2hrs': '2 hrs', '3hrs': '3 hrs', halfday: 'Half day', fullday: 'Full day' };
     const selected    = Object.keys(BM.studios).filter(id => BM.studios[id]);
@@ -4028,8 +3799,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
         <span style="font-size:30px;font-weight:900;">${fmt(total)}</span>
       </div>
       ${promoApplied ? `<div style="font-size:12px;color:#16a34a;padding:4px 0;">✦ May Special applied — saved ${fmt(promoDiscount)}</div>` : ''}
-      ${DC.applied && DC.isMember && memberSaving > 0 ? `<div style="font-size:12px;color:#c6ff00;background:#1a1a1a;padding:8px 12px;border-radius:6px;margin-top:4px;">SHOOT. Club — saving ${fmt(memberSaving)}${freeAddonAmt > 0 ? ' (incl. free add-on)' : ''}</div>` : ''}
-      ${!DC.isMember && discountAmt > 0 ? `<div style="font-size:12px;color:#16a34a;padding:2px 0;">${DC.code} discount — saved ${fmt(discountAmt)}</div>` : ''}
+      ${discountAmt > 0 ? `<div style="font-size:12px;color:#16a34a;padding:2px 0;">${DC.code} discount — saved ${fmt(discountAmt)}</div>` : ''}
     `;
     const { total: t } = calcTotal();
     const payBtn = document.getElementById('bm-pay-btn');
@@ -4061,8 +3831,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
       cameraBody:     BM.cameraBody,
       rentalDuration: BM.rentalDuration,
       lensChoice:     BM.lensChoice,
-      discountCode:   (DC.applied && !DC.isMember) ? DC.code : null,
-      memberCode:     (DC.applied && DC.isMember) ? DC.memberCode : null,
+      discountCode:   DC.applied ? DC.code : null,
     };
 
     try {
@@ -4504,24 +4273,7 @@ src="https://www.facebook.com/tr?id=814230861395059&ev=PageView&noscript=1"
 })();
 
 /* ── Discount Code (booking modal) ── */
-const DC = { code: null, discount: 0, discountType: 'percent', discountFixed: 0, applied: false,
-             isMember: false, memberCode: null, memberId: null, memberRate: 0, memberRateLabel: '', memberTier: '', remainingCapCents: 0 };
-
-function getMemberRateClient(date, time) {
-  if (!date) return 0;
-  const d = new Date(date + 'T00:00:00');
-  const dow = d.getDay();
-  // Weekend = no discount
-  if (dow === 0 || dow === 6) return 0;
-  // Mon-Thu off-peak (08:00-13:00) = 25%
-  if (dow >= 1 && dow <= 4 && time) {
-    const [hh, mm] = time.split(':').map(Number);
-    const startHour = hh + mm / 60;
-    if (startHour >= 8 && startHour < 13) return 25;
-  }
-  // Other weekday = 10%
-  return 10;
-}
+const DC = { code: null, discount: 0, discountType: 'percent', discountFixed: 0, applied: false };
 
 window.applyDiscountCode = async function () {
   const input  = document.getElementById('bm-discount-input');
@@ -4546,45 +4298,23 @@ window.applyDiscountCode = async function () {
     const res  = await fetch('/api/validate-discount', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, code, date: BM.date, time: BM.time }),
+      body: JSON.stringify({ email, code }),
     });
     const data = await res.json();
 
     if (data.valid) {
-      if (data.isMember) {
-        // Member code
-        DC.code             = data.code;
-        DC.isMember         = true;
-        DC.memberCode       = data.memberCode;
-        DC.memberId         = data.memberId;
-        DC.memberRate       = data.memberRate;
-        DC.memberRateLabel  = data.memberRateLabel;
-        DC.memberTier       = data.memberTier;
-        DC.remainingCapCents = data.remainingCapCents;
-        DC.discount         = 0;
-        DC.discountType     = 'percent';
-        DC.discountFixed    = 0;
-        DC.applied          = true;
-        status.innerHTML    = '<span style="color:#c6ff00;font-weight:700;">SHOOT. Club</span> — ' + (data.memberRateLabel || 'Member verified');
-        status.className    = 'bm-discount-status bm-discount-status--ok';
-      } else {
-        // Regular coupon
-        DC.code          = data.code;
-        DC.isMember      = false;
-        DC.memberCode    = null;
-        DC.discount      = data.discount;
-        DC.discountType  = data.discountType || 'percent';
-        DC.discountFixed = data.discountFixed || 0;
-        DC.applied       = true;
-        status.textContent = data.message;
-        status.className   = 'bm-discount-status bm-discount-status--ok';
-      }
+      DC.code          = data.code;
+      DC.discount      = data.discount;
+      DC.discountType  = data.discountType || 'percent';
+      DC.discountFixed = data.discountFixed || 0;
+      DC.applied       = true;
+      status.textContent = data.message;
+      status.className   = 'bm-discount-status bm-discount-status--ok';
       input.disabled     = true;
       btn.textContent    = '✓ Applied';
       updateSidebar();
     } else {
       DC.applied  = false;
-      DC.isMember = false;
       DC.discount = 0;
       status.textContent = data.message || 'Invalid code.';
       status.className   = 'bm-discount-status bm-discount-status--err';
@@ -4596,179 +4326,6 @@ window.applyDiscountCode = async function () {
     status.className   = 'bm-discount-status bm-discount-status--err';
     btn.disabled = false; btn.textContent = 'Apply';
   }
-};
-
-// ── Membership popup (between step 3 → 4) ──
-// ── Step 0: Entry splash functions ──
-window.showEntryMemberLogin = function () {
-  document.getElementById('bm-entry-member-card').style.display = 'none';
-  document.getElementById('bm-entry-member-form').style.display = '';
-  document.getElementById('bm-entry-code').focus();
-};
-
-window.cancelEntryMember = function () {
-  document.getElementById('bm-entry-member-card').style.display = '';
-  document.getElementById('bm-entry-member-form').style.display = 'none';
-  document.getElementById('bm-entry-status').textContent = '';
-};
-
-window.submitEntryMember = async function () {
-  const codeInput  = document.getElementById('bm-entry-code');
-  const emailInput = document.getElementById('bm-entry-email');
-  const status     = document.getElementById('bm-entry-status');
-  const btn        = document.getElementById('bm-entry-submit');
-
-  const code  = codeInput.value.trim().toUpperCase();
-  const email = emailInput.value.trim().toLowerCase();
-
-  if (!code) { status.textContent = 'Enter your member code.'; status.style.color = '#f87171'; return; }
-  if (!email) { status.textContent = 'Enter your email address.'; status.style.color = '#f87171'; return; }
-
-  btn.disabled = true; btn.textContent = 'Verifying...';
-  status.textContent = '';
-
-  try {
-    const res = await fetch('/api/validate-discount', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, code }),
-    });
-    const data = await res.json();
-
-    if (data.valid && data.isMember) {
-      // Set member state
-      DC.code             = data.code;
-      DC.isMember         = true;
-      DC.memberCode       = data.memberCode;
-      DC.memberId         = data.memberId;
-      DC.memberRate       = data.memberRate;
-      DC.memberRateLabel  = data.memberRateLabel;
-      DC.memberTier       = data.memberTier;
-      DC.remainingCapCents = data.remainingCapCents;
-      DC.applied          = true;
-
-      // Pre-fill details
-      if (data.firstName) document.getElementById('bm-first').value = data.firstName;
-      if (data.lastName)  document.getElementById('bm-last').value  = data.lastName;
-      if (data.memberEmail) document.getElementById('bm-email').value = data.memberEmail;
-      if (data.phone) document.getElementById('bm-phone').value = data.phone;
-
-      // Lock the discount field to show member applied
-      const dcInput = document.getElementById('bm-discount-input');
-      const dcBtn   = document.getElementById('bm-discount-btn');
-      const dcStat  = document.getElementById('bm-discount-status');
-      dcInput.value    = code;
-      dcInput.disabled = true;
-      dcBtn.textContent = '✓ Member';
-      dcBtn.disabled    = true;
-      dcStat.innerHTML  = '<span style="color:#c6ff00;font-weight:700;">SHOOT. Club</span> — Member verified';
-      dcStat.className  = 'bm-discount-status bm-discount-status--ok';
-
-      // Go to step 1 with preStudio if any
-      if (window._preStudio) {
-        toggleStudio(window._preStudio);
-        window._preStudio = null;
-      }
-      goToStep(1);
-    } else {
-      status.textContent = data.message || 'Invalid member code.';
-      status.style.color = '#f87171';
-      btn.disabled = false; btn.textContent = 'Sign In';
-    }
-  } catch {
-    status.textContent = 'Could not verify. Please try again.';
-    status.style.color = '#f87171';
-    btn.disabled = false; btn.textContent = 'Sign In';
-  }
-};
-
-window.startAsGuest = function () {
-  if (window._preStudio) {
-    toggleStudio(window._preStudio);
-    window._preStudio = null;
-  }
-  goToStep(1);
-};
-
-// ── Step 3→4 popup ──
-window.showMemberPopupOrPay = function () {
-  // If member already signed in, show perks summary then go to payment
-  if (DC.applied && DC.isMember) {
-    showMemberPerksSummary();
-    return;
-  }
-  // If a coupon code is applied, skip popup
-  if (DC.applied) { goToStep(4); return; }
-  // Guest: show join membership popup
-  document.getElementById('bm-member-popup').style.display = '';
-  document.getElementById('bm-member-popup-input').value = '';
-  document.getElementById('bm-member-popup-status').textContent = '';
-  document.getElementById('bm-member-popup-input').focus();
-};
-
-window.closeMemberPopup = function (goPayment) {
-  document.getElementById('bm-member-popup').style.display = 'none';
-  if (goPayment) goToStep(4);
-};
-
-window.showMemberPerksSummary = function () {
-  const { memberSaving, freeAddonAmt, discountAmt } = calcTotal();
-  const rate = getMemberRateClient(BM.date, BM.time);
-  const container = document.getElementById('bm-perks-content');
-
-  container.innerHTML = `
-    <div style="background:#c6ff00;padding:24px 28px 18px;text-align:center;">
-      <div style="font-family:'Montserrat',sans-serif;font-size:24px;font-weight:900;letter-spacing:-1px;color:#000;">SHOOT.</div>
-      <div style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:#000;margin-top:2px;">CLUB MEMBER</div>
-    </div>
-    <div style="padding:28px;">
-      <div style="color:#fff;font-size:18px;font-weight:800;margin-bottom:6px;">Your perks for this booking</div>
-      <div style="color:#888;font-size:12px;margin-bottom:20px;">${DC.memberTier === 'founding' ? 'Founding Member' : 'SHOOT. Club Member'} — ${DC.memberCode}</div>
-
-      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;">
-        ${rate > 0 ? `
-        <div style="display:flex;align-items:center;gap:12px;background:#1a1a1a;border-radius:8px;padding:14px;">
-          <div style="background:#c6ff00;color:#000;font-size:18px;font-weight:900;min-width:50px;text-align:center;padding:6px 0;border-radius:6px;">${rate}%</div>
-          <div>
-            <div style="color:#fff;font-size:13px;font-weight:700;">${rate === 25 ? 'Off-peak discount' : 'Weekday discount'}</div>
-            <div style="color:#888;font-size:11px;">Saving ${fmt(discountAmt)} on this booking</div>
-          </div>
-        </div>` : `
-        <div style="display:flex;align-items:center;gap:12px;background:#1a1a1a;border-radius:8px;padding:14px;">
-          <div style="background:#333;color:#888;font-size:14px;font-weight:700;min-width:50px;text-align:center;padding:6px 0;border-radius:6px;">0%</div>
-          <div>
-            <div style="color:#999;font-size:13px;font-weight:700;">No weekend discount</div>
-            <div style="color:#666;font-size:11px;">Member discounts apply on weekdays only</div>
-          </div>
-        </div>`}
-        ${freeAddonAmt > 0 ? `
-        <div style="display:flex;align-items:center;gap:12px;background:#1a1a1a;border-radius:8px;padding:14px;">
-          <div style="background:#c6ff00;color:#000;font-size:14px;font-weight:900;min-width:50px;text-align:center;padding:6px 0;border-radius:6px;">FREE</div>
-          <div>
-            <div style="color:#fff;font-size:13px;font-weight:700;">Free add-on included</div>
-            <div style="color:#888;font-size:11px;">Saving ${fmt(freeAddonAmt)}</div>
-          </div>
-        </div>` : ''}
-      </div>
-
-      ${memberSaving > 0 ? `
-      <div style="background:#c6ff00;color:#000;border-radius:8px;padding:16px;text-align:center;margin-bottom:20px;">
-        <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;opacity:0.6;">Total savings this booking</div>
-        <div style="font-size:28px;font-weight:900;">${fmt(memberSaving)}</div>
-      </div>` : ''}
-
-      <button onclick="closePerksPopup()"
-        style="width:100%;padding:15px;background:#c6ff00;color:#000;border:none;border-radius:6px;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;letter-spacing:0.5px;">
-        Continue to Payment →
-      </button>
-    </div>
-  `;
-  document.getElementById('bm-perks-popup').style.display = '';
-};
-
-window.closePerksPopup = function () {
-  document.getElementById('bm-perks-popup').style.display = 'none';
-  goToStep(4);
 };
 
 // Space card expand interaction
@@ -4855,32 +4412,12 @@ window.closePerksPopup = function () {
 const _origOpen = window.openBookingModal;
 window.openBookingModal = function (preStudio) {
   DC.code = null; DC.discount = 0; DC.discountType = 'percent'; DC.discountFixed = 0; DC.applied = false;
-  DC.isMember = false; DC.memberCode = null; DC.memberId = null; DC.memberRate = 0;
-  DC.memberRateLabel = ''; DC.memberTier = ''; DC.remainingCapCents = 0;
   const inp = document.getElementById('bm-discount-input');
   const sts = document.getElementById('bm-discount-status');
   const btn = document.getElementById('bm-discount-btn');
   if (inp) { inp.value = ''; inp.disabled = false; }
   if (sts) { sts.textContent = ''; sts.className = 'bm-discount-status'; }
   if (btn) { btn.disabled = false; btn.textContent = 'Apply'; }
-  // Reset entry form
-  const ec = document.getElementById('bm-entry-code');
-  const ee = document.getElementById('bm-entry-email');
-  const es = document.getElementById('bm-entry-status');
-  if (ec) ec.value = '';
-  if (ee) ee.value = '';
-  if (es) { es.textContent = ''; es.style.color = ''; }
-  const card = document.getElementById('bm-entry-member-card');
-  const form = document.getElementById('bm-entry-member-form');
-  if (card) card.style.display = '';
-  if (form) form.style.display = 'none';
-  // Reset details fields
-  ['bm-first','bm-last','bm-email','bm-phone'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) { el.value = ''; el.disabled = false; }
-  });
-  const tc = document.getElementById('bm-terms');
-  if (tc) tc.checked = false;
   _origOpen(preStudio);
 };
 </script>

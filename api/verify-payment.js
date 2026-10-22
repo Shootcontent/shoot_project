@@ -8,7 +8,6 @@
 
 import { kv } from './_kv.js';
 import { icsAttachment } from './_ics.js';
-import { createMember, recordSaving, MEMBERSHIP_PRICE } from './_member.js';
 
 const OWNER_EMAILS = ['hello@shootstudios.co.za', 'elad@asapsolutions.co.za'];
 
@@ -136,14 +135,7 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
-  const bookingId  = req.query.bookingId;
-  const membershipId = req.query.membershipId;
-
-  // ── MEMBERSHIP VERIFICATION ─────────────────────────────────────────────────
-  if (membershipId) {
-    return handleMembershipVerification(req, res, membershipId);
-  }
-
+  const { bookingId } = req.query;
   if (!bookingId || !/^BK-/.test(bookingId)) {
     return res.status(400).json({ error: 'Invalid booking ID.' });
   }
@@ -229,14 +221,6 @@ export default async function handler(req, res) {
     // Clean up pending state
     await kv('DEL', `booking:pending:${bookingId}`);
 
-    // Record member savings if applicable
-    if (confirmed.memberId && confirmed.memberSavedCents > 0) {
-      await recordSaving(confirmed.memberId, bookingId, confirmed.memberSavedCents).catch(e =>
-        console.error('[verify-payment] recordSaving error:', e.message)
-      );
-      console.log(`[verify-payment] member savings recorded memberId=${confirmed.memberId} saved=${confirmed.memberSavedCents}c`);
-    }
-
     // Send confirmation emails — must be awaited before returning or Vercel kills the function
     await sendEmails(confirmed);
     console.log(`[verify-payment] emails dispatched bookingId=${bookingId}`);
@@ -247,174 +231,4 @@ export default async function handler(req, res) {
     console.error('[verify-payment]', err);
     return res.status(500).json({ error: 'Verification failed. Please contact us if you were charged.' });
   }
-}
-
-// ── Membership payment verification ──────────────────────────────────────────
-
-async function handleMembershipVerification(req, res, pendingId) {
-  try {
-    // Load pending membership
-    const pendingJson = await kv('GET', `membership:pending:${pendingId}`);
-    if (!pendingJson) {
-      return res.status(404).json({ error: 'Membership session expired or not found. Please contact us if you were charged.' });
-    }
-    const pending = JSON.parse(pendingJson);
-
-    // Verify with Yoco
-    const checkoutId = pending.checkoutId;
-    if (!checkoutId) {
-      return res.status(502).json({ error: 'Payment verification failed. Please contact us.' });
-    }
-
-    const yocoRes = await fetch(`${YOCO_CHECKOUT_URL}/${checkoutId}`, {
-      headers: { 'Authorization': `Bearer ${process.env.YOCO_SECRET_KEY}` },
-    });
-
-    if (!yocoRes.ok) {
-      const body = await yocoRes.text();
-      console.error(`[verify-payment] Yoco membership lookup failed status=${yocoRes.status} body=${body}`);
-      return res.status(502).json({ error: 'Could not verify payment. Please contact us.' });
-    }
-
-    const checkout = await yocoRes.json();
-
-    if (checkout.status !== 'completed') {
-      return res.status(402).json({ error: `Payment not confirmed (status: ${checkout.status}). Please contact us if you were charged.` });
-    }
-
-    console.log(`[verify-payment] Yoco membership confirmed pendingId=${pendingId} checkoutId=${checkoutId}`);
-
-    // Create the member
-    const member = await createMember({
-      email:          pending.email,
-      firstName:      pending.firstName,
-      lastName:       pending.lastName,
-      phone:          pending.phone,
-      pricePaidCents: MEMBERSHIP_PRICE,
-      yocoCheckoutId: checkoutId,
-    });
-
-    // Clean up pending
-    await kv('DEL', `membership:pending:${pendingId}`);
-
-    // Send welcome email
-    await sendMembershipEmail(member);
-    console.log(`[verify-payment] membership created memberId=${member.memberId} code=${member.memberCode}`);
-
-    return res.status(200).json({
-      success:    true,
-      membership: true,
-      memberId:   member.memberId,
-      memberCode: member.memberCode,
-      tier:       member.tier,
-      expiresAt:  member.expiresAt,
-    });
-
-  } catch (err) {
-    console.error('[verify-payment] membership error:', err);
-    // If member already exists, still return success
-    if (err.message && err.message.includes('already exists')) {
-      return res.status(200).json({ success: true, membership: true, alreadyMember: true });
-    }
-    return res.status(500).json({ error: 'Membership verification failed. Please contact us if you were charged.' });
-  }
-}
-
-async function sendMembershipEmail(member) {
-  const apiKey = process.env.BREVO_API_KEY;
-  if (!apiKey) {
-    console.error('[verify-payment] BREVO_API_KEY not set — membership email skipped');
-    return;
-  }
-
-  const from = process.env.FROM_EMAIL || 'hello@shootstudios.co.za';
-  const expiresStr = new Date(member.expiresAt).toLocaleDateString('en-ZA', {
-    day: 'numeric', month: 'long', year: 'numeric',
-  });
-  const tierLabel = member.tier === 'founding' ? 'Founding Member' : 'Member';
-
-  const clientHtml = `<!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#0a0a0a;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
-<tr><td align="center" style="padding:48px 24px 64px;">
-<table width="100%" style="max-width:520px;" cellpadding="0" cellspacing="0" border="0">
-<tr><td>
-  <p style="margin:0 0 40px;font-size:10px;font-weight:700;letter-spacing:3.5px;text-transform:uppercase;color:rgba(255,255,255,0.3);">SHOOT. Photographic Studios</p>
-  <h1 style="margin:0 0 16px;font-size:38px;font-weight:900;font-style:italic;color:#c6ff00;line-height:1;letter-spacing:-1.5px;">Welcome to the Club.</h1>
-  <p style="margin:0 0 40px;font-size:15px;line-height:1.75;color:rgba(255,255,255,0.55);">Your SHOOT. Club membership is active. Use your member code when booking to unlock your discounts.</p>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid rgba(255,255,255,0.12);margin-bottom:40px;">
-    <tr><td style="padding:20px 28px;border-bottom:1px solid rgba(255,255,255,0.08);">
-      <p style="margin:0 0 6px;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.3);">${tierLabel}</p>
-      <p style="margin:0;font-size:20px;font-weight:900;color:#fff;">${member.firstName} ${member.lastName}</p>
-    </td></tr>
-    <tr><td style="padding:20px 28px;border-bottom:1px solid rgba(255,255,255,0.08);">
-      <p style="margin:0 0 6px;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.3);">Member Code</p>
-      <p style="margin:0;font-size:28px;font-weight:900;letter-spacing:6px;color:#c6ff00;">${member.memberCode}</p>
-    </td></tr>
-    <tr><td style="padding:20px 28px;border-bottom:1px solid rgba(255,255,255,0.08);">
-      <p style="margin:0 0 6px;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.3);">Member No.</p>
-      <p style="margin:0;font-size:15px;font-weight:700;color:#fff;">${member.memberId}</p>
-    </td></tr>
-    <tr><td style="padding:20px 28px;">
-      <p style="margin:0 0 6px;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.3);">Valid Until</p>
-      <p style="margin:0;font-size:15px;font-weight:700;color:#fff;">${expiresStr}</p>
-    </td></tr>
-  </table>
-  <div style="background:rgba(198,255,0,0.08);border:1px solid rgba(198,255,0,0.2);border-radius:6px;padding:16px 20px;margin-bottom:32px;">
-    <p style="margin:0 0 8px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#c6ff00;">Your Benefits</p>
-    <p style="margin:0;font-size:13px;line-height:1.8;color:rgba(255,255,255,0.6);">
-      25% off weekday off-peak hours (Mon–Thu 08:00–13:00)<br>
-      10% off all other weekday hours<br>
-      1 free add-on per booking<br>
-      Weekend bookings after Friday 4PM cutoff
-    </p>
-  </div>
-  <p style="margin:0;font-size:12px;line-height:1.7;color:rgba(255,255,255,0.35);">
-    Questions? Contact us at
-    <a href="mailto:hello@shootstudios.co.za" style="color:rgba(255,255,255,0.6);">hello@shootstudios.co.za</a>
-    or <a href="tel:+27609948107" style="color:rgba(255,255,255,0.6);">060 994 8107</a>.
-  </p>
-  <p style="margin:48px 0 0;font-size:10px;color:rgba(255,255,255,0.18);">SHOOT. Photographic Studios · 135 Albert Rd, Woodstock, Cape Town</p>
-</td></tr>
-</table>
-</td></tr>
-</table>
-</body></html>`;
-
-  const studioNote =
-    `NEW SHOOT. CLUB MEMBER\n${'='.repeat(40)}\n\n` +
-    `Member:    ${member.memberId} (${member.memberCode})\n` +
-    `Name:      ${member.firstName} ${member.lastName}\n` +
-    `Email:     ${member.email}\n` +
-    `Phone:     ${member.phone}\n` +
-    `Tier:      ${tierLabel}\n` +
-    `Expires:   ${expiresStr}\n` +
-    `Paid:      R${(member.pricePaidCents / 100).toFixed(2)}`;
-
-  const post = async p => {
-    try {
-      const r = await fetch(BREVO_API_URL, {
-        method: 'POST',
-        headers: { 'api-key': apiKey, 'Content-Type': 'application/json' },
-        body: JSON.stringify(p),
-      });
-      if (!r.ok) console.error('[verify-payment] Brevo membership email error', r.status, await r.text());
-    } catch (e) {
-      console.error('[verify-payment] membership email failed:', e.message);
-    }
-  };
-
-  await post({
-    sender:  { name: 'SHOOT. Studios', email: from },
-    to:      [{ email: member.email, name: `${member.firstName} ${member.lastName}` }],
-    subject: `Welcome to SHOOT. Club — ${member.memberCode}`,
-    htmlContent: clientHtml,
-  });
-  await post({
-    sender:  { name: 'SHOOT. Club', email: from },
-    to:      OWNER_EMAILS.map(email => ({ email })),
-    subject: `[NEW MEMBER] ${member.memberId} — ${member.firstName} ${member.lastName} (${tierLabel})`,
-    textContent: studioNote,
-  });
 }
