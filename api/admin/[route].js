@@ -31,6 +31,8 @@ import dashboard      from './_dashboard.js';
 import login          from './_login.js';
 import logout         from './_logout.js';
 import me             from './_me.js';
+import member         from './_member.js';
+import members        from './_members.js';
 import pendingPayments from './_pending-payments.js';
 import quote          from './_quote.js';
 import quotes         from './_quotes.js';
@@ -48,6 +50,8 @@ const ROUTES = {
   login,
   logout,
   me,
+  member,
+  members,
   'pending-payments': pendingPayments,
   quote,
   quotes,

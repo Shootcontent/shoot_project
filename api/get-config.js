@@ -2,7 +2,10 @@
  * GET /api/get-config
  * Returns non-sensitive client configuration.
  * Secret keys are NEVER returned here — only the public Yoco key.
+ * Also returns SHOOT. Club founding member stats (public info).
  */
+
+import { getFoundingStats } from './_member.js';
 
 function setCors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -21,5 +24,8 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Payment not configured' });
   }
 
-  return res.status(200).json({ yocoPublicKey: publicKey });
+  let founding = null;
+  try { founding = await getFoundingStats(); } catch {}
+
+  return res.status(200).json({ yocoPublicKey: publicKey, founding });
 }

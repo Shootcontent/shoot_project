@@ -15,6 +15,8 @@ import { kv } from './_kv.js';
 import { getCoupon } from './_coupon.js';
 import { icsAttachment } from './_ics.js';
 import { isWeekendCutoff } from './_weekend-cutoff.js';
+import { getMemberByCode, getRemainingCap } from './_member.js';
+import { calcMemberDiscount } from './_member-discount.js';
 
 const OWNER_EMAILS = ['hello@shootstudios.co.za', 'elad@asapsolutions.co.za'];
 
@@ -95,7 +97,7 @@ function getSurchargeHours(date, time, duration, extraHours) {
 async function calcServerAmount(body) {
   const { studios, duration, extraHours = 0, date, time,
           photo, addons = [], cameraBody, rentalDuration, lensChoice,
-          discountCode } = body;
+          discountCode, memberCode } = body;
 
   // --- Studio prices
   let studioTotal = 0;
@@ -114,7 +116,7 @@ async function calcServerAmount(body) {
     }
   }
 
-  // --- Extra hours: R200/hr * number of selected studios
+  // --- Extra hours: R450/hr * number of selected studios
   const extraTotal = (extraHours || 0) * EXTRA_RATE * studios.length;
 
   // --- Photography package
@@ -135,26 +137,60 @@ async function calcServerAmount(body) {
     cameraTotal += LENS_PRICES[lensChoice][rentalDuration] || 0;
   }
 
-  // --- Surcharge
-  const surchargeHours = time ? getSurchargeHours(date, time, duration, extraHours) : 0;
-  const surchargeTotal = Math.round(surchargeHours * SURCHARGE_RATE);
+  // --- Member perk: free add-on
+  const bookingEmail = (body.email || '').toLowerCase().trim();
+  const normalMemberCode = (memberCode || '').toUpperCase().trim();
+  let validMember = null;
+  let freeAddonAmt = 0;
 
-  const subtotal = studioTotal + extraTotal + photoTotal + addonTotal + cameraTotal + surchargeTotal;
-
-  // --- Discount code (looked up from Redis)
-  const normalCode = (discountCode || '').toUpperCase().trim();
-  let discountAmt = 0;
-  if (normalCode) {
-    const coupon = await getCoupon(normalCode);
-    if (coupon && coupon.active) {
-      if (coupon.type === 'percent') {
-        discountAmt = Math.round(subtotal * coupon.value / 100);
-      } else if (coupon.type === 'fixed') {
-        discountAmt = Math.min(coupon.value, subtotal);
+  if (normalMemberCode) {
+    const member = await getMemberByCode(normalMemberCode);
+    if (member && member.email === bookingEmail && member.status === 'active' &&
+        (!member.expiresAt || new Date(member.expiresAt) > new Date())) {
+      validMember = member;
+      if (addons && addons.length > 0) {
+        const addonPrices = addons.map(a => ADDON_PRICES[a] || 0).filter(p => p > 0);
+        if (addonPrices.length > 0) {
+          freeAddonAmt = Math.min(...addonPrices);
+          addonTotal -= freeAddonAmt;
+        }
       }
     }
   }
 
+  // --- Surcharge
+  const surchargeHours = time ? getSurchargeHours(date, time, duration, extraHours) : 0;
+  const surchargeTotal = Math.round(surchargeHours * SURCHARGE_RATE);
+
+  const discountable = studioTotal + extraTotal + addonTotal + cameraTotal;
+  const subtotal = discountable + photoTotal + surchargeTotal;
+  let discountAmt = 0;
+
+  if (validMember) {
+    const remainingCap = await getRemainingCap(validMember.memberId);
+    const md = calcMemberDiscount({ discountableAmount: discountable, date, time, remainingCapCents: remainingCap });
+    discountAmt = md.discountRands;
+  } else {
+    const normalCode = (discountCode || '').toUpperCase().trim();
+    if (normalCode) {
+      const coupon = await getCoupon(normalCode);
+      if (coupon && coupon.active) {
+        if (coupon.customerEmail && coupon.customerEmail.toLowerCase() !== bookingEmail) {
+          discountAmt = 0;
+        } else if (coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) {
+          discountAmt = 0;
+        } else if (coupon.maxUses > 0 && coupon.currentUses >= coupon.maxUses) {
+          discountAmt = 0;
+        } else if (coupon.type === 'percent') {
+          discountAmt = Math.round(discountable * coupon.value / 100);
+        } else if (coupon.type === 'fixed') {
+          discountAmt = Math.min(coupon.value, discountable);
+        }
+      }
+    }
+  }
+
+  // freeAddonAmt was already subtracted from addonTotal, so don't subtract again
   return subtotal - discountAmt;
 }
 

@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SHOOT. Club — Membership</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,900;1,900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: #080808;
+      color: #fff;
+      min-height: 100svh;
+    }
+    :root {
+      --lime: #c6ff00;
+      --lime-dim: rgba(198,255,0,0.12);
+      --lime-border: rgba(198,255,0,0.3);
+    }
+    a { color: inherit; }
+
+    /* ── Nav ── */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 28px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .top-logo {
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+    }
+    .top-back {
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.4);
+      text-decoration: none;
+    }
+    .top-back:hover { color: #fff; }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: 40px 24px 32px;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .hero-eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--lime);
+      margin-bottom: 16px;
+    }
+    .hero-title {
+      font-size: clamp(38px, 7vw, 60px);
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: -2px;
+      line-height: 1.05;
+      margin-bottom: 20px;
+    }
+    .lime { color: var(--lime); }
+    .hero-sub {
+      font-size: 16px;
+      line-height: 1.75;
+      color: rgba(255,255,255,0.5);
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    /* ── Founding Banner ── */
+    .founding-section {
+      max-width: 600px;
+      margin: 40px auto 0;
+      padding: 0 24px;
+    }
+    .founding-card {
+      background: linear-gradient(135deg, rgba(198,255,0,0.12) 0%, rgba(198,255,0,0.04) 100%);
+      border: 1.5px solid var(--lime-border);
+      border-radius: 14px;
+      padding: 32px;
+      text-align: center;
+    }
+    .founding-badge {
+      display: inline-block;
+      background: var(--lime);
+      color: #000;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+    .founding-headline {
+      font-size: 22px;
+      font-weight: 900;
+      font-style: italic;
+      margin-bottom: 10px;
+    }
+    .founding-desc {
+      font-size: 14px;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.7;
+      max-width: 440px;
+      margin: 0 auto 20px;
+    }
+    .founding-counter {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+    }
+    .founding-stat {
+      text-align: center;
+    }
+    .founding-stat-val {
+      font-size: 36px;
+      font-weight: 900;
+      font-style: italic;
+      color: var(--lime);
+      line-height: 1;
+    }
+    .founding-stat-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+      margin-top: 4px;
+    }
+    .founding-divider {
+      width: 1px;
+      height: 40px;
+      background: rgba(255,255,255,0.12);
+    }
+
+    /* ── Price Section ── */
+    .price-section {
+      text-align: center;
+      padding: 48px 24px 16px;
+    }
+    .price-tag {
+      font-size: 52px;
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: -2px;
+      color: #fff;
+    }
+    .price-tag span {
+      font-size: 20px;
+      font-weight: 600;
+      font-style: normal;
+      color: rgba(255,255,255,0.35);
+    }
+    .price-note {
+      font-size: 13px;
+      color: rgba(255,255,255,0.35);
+      margin-top: 6px;
+    }
+
+    /* ── What You Get ── */
+    .perks-section {
+      max-width: 640px;
+      margin: 40px auto 0;
+      padding: 0 24px;
+    }
+    .perks-title {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .perks-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .perk-card {
+      background: #111;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 28px 22px;
+    }
+    .perk-card.highlight {
+      border-color: var(--lime-border);
+      background: linear-gradient(135deg, rgba(198,255,0,0.06) 0%, #111 100%);
+    }
+    .perk-value {
+      font-size: 36px;
+      font-weight: 900;
+      font-style: italic;
+      color: var(--lime);
+      letter-spacing: -1px;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .perk-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 6px;
+    }
+    .perk-desc {
+      font-size: 13px;
+      color: rgba(255,255,255,0.4);
+      line-height: 1.5;
+    }
+    .perk-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+    .perk-card.full { grid-column: 1 / -1; }
+
+    /* ── How It Works ── */
+    .steps-section {
+      max-width: 520px;
+      margin: 56px auto 0;
+      padding: 0 24px;
+    }
+    .steps-title {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .step-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .step-num {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--lime);
+      color: #000;
+      font-size: 14px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .step-text {
+      padding-top: 6px;
+    }
+    .step-text strong {
+      display: block;
+      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 2px;
+    }
+    .step-text span {
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+      line-height: 1.5;
+    }
+
+    /* ── Join Form ── */
+    .join-section {
+      max-width: 480px;
+      margin: 56px auto 0;
+      padding: 0 24px 80px;
+    }
+    .join-card {
+      background: #111;
+      border: 1.5px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 40px 32px;
+    }
+    .join-heading {
+      font-size: 24px;
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    .join-subheading {
+      font-size: 13px;
+      color: rgba(255,255,255,0.4);
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .field { margin-bottom: 16px; }
+    .field label {
+      display: block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 6px;
+    }
+    .field input {
+      width: 100%;
+      background: #0a0a0a;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 14px 16px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .field input:focus { border-color: var(--lime); }
+    .field input::placeholder { color: rgba(255,255,255,0.2); }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .join-btn {
+      display: block;
+      width: 100%;
+      margin-top: 24px;
+      padding: 16px;
+      background: var(--lime);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .join-btn:hover:not(:disabled) { opacity: 0.88; }
+    .join-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .join-note {
+      text-align: center;
+      font-size: 11px;
+      color: rgba(255,255,255,0.25);
+      margin-top: 14px;
+      line-height: 1.6;
+    }
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+    .alert-error { background: rgba(214,69,69,0.15); border: 1px solid rgba(214,69,69,0.3); color: #f87171; }
+    .alert-success { background: var(--lime-dim); border: 1px solid var(--lime-border); color: var(--lime); }
+    .hidden { display: none !important; }
+
+    /* ── Success ── */
+    .success-card {
+      text-align: center;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 80px 24px;
+    }
+    .success-card .hero-title { margin-bottom: 24px; }
+    .member-code-display {
+      font-size: 40px;
+      font-weight: 900;
+      letter-spacing: 8px;
+      color: var(--lime);
+      margin: 24px 0;
+      font-family: 'Courier New', monospace;
+    }
+    .success-details {
+      background: #111;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 24px 0;
+      text-align: left;
+    }
+    .success-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 13px;
+    }
+    .success-row:last-child { border-bottom: none; }
+    .success-label { color: rgba(255,255,255,0.4); font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+    .success-value { font-weight: 700; }
+    .success-note {
+      font-size: 13px;
+      color: rgba(255,255,255,0.35);
+      margin-top: 24px;
+      line-height: 1.7;
+    }
+    .book-btn {
+      display: inline-block;
+      margin-top: 32px;
+      padding: 16px 36px;
+      background: var(--lime);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .book-btn:hover { opacity: 0.88; }
+    .footer {
+      text-align: center;
+      padding: 32px 24px;
+      font-size: 10px;
+      color: rgba(255,255,255,0.15);
+    }
+
+    @media (max-width: 600px) {
+      .hero { padding: 28px 20px 24px; }
+      .perks-grid { grid-template-columns: 1fr; }
+      .perk-card.full { grid-column: auto; }
+      .form-row { grid-template-columns: 1fr; gap: 0; }
+      .join-card { padding: 32px 20px; }
+      .join-section { padding: 0 20px 60px; }
+      .founding-card { padding: 24px 20px; }
+      .founding-counter { gap: 16px; }
+      .founding-stat-val { font-size: 28px; }
+      .steps-section { padding: 0 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── PURCHASE VIEW ── -->
+  <div id="purchaseView">
+
+    <div class="top-bar">
+      <div class="top-logo">SHOOT.</div>
+      <a href="/" class="top-back">← Back to site</a>
+    </div>
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-eyebrow">Introducing</div>
+      <div class="hero-title">SHOOT. <span class="lime">Club</span></div>
+      <div class="hero-sub">The membership for creatives who shoot regularly. Save on every weekday booking with discounted studio and equipment hire.</div>
+    </div>
+
+    <!-- Founding Members -->
+    <div class="founding-section">
+      <div class="founding-card" id="foundingCard">
+        <div class="founding-badge">Limited — Founding Members</div>
+        <div class="founding-headline">Be one of the first <span class="lime">25.</span></div>
+        <div class="founding-desc">Our first 25 members become <strong style="color:#fff;">Founding Members</strong> — locking in the R850/year price forever, even when prices go up. Plus a special founding member card.</div>
+        <div class="founding-counter">
+          <div class="founding-stat">
+            <div class="founding-stat-val" id="foundingTaken">0</div>
+            <div class="founding-stat-label">Joined</div>
+          </div>
+          <div class="founding-divider"></div>
+          <div class="founding-stat">
+            <div class="founding-stat-val" id="foundingRemaining">25</div>
+            <div class="founding-stat-label">Spots Left</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Price -->
+    <div class="price-section">
+      <div class="price-tag">R850 <span>/ year</span></div>
+      <div class="price-note">12-month membership, paid upfront. Cancel anytime.</div>
+    </div>
+
+    <!-- What You Get -->
+    <div class="perks-section">
+      <div class="perks-title">What you get</div>
+      <div class="perks-grid">
+        <div class="perk-card highlight">
+          <div class="perk-value">25%</div>
+          <div class="perk-label">Off-Peak Discount</div>
+          <div class="perk-desc">Mon — Thu, 08:00 to 13:00. The biggest savings for early shooters.</div>
+        </div>
+        <div class="perk-card highlight">
+          <div class="perk-value">10%</div>
+          <div class="perk-label">Weekday Discount</div>
+          <div class="perk-desc">All other weekday hours. Every weekday booking saves you money.</div>
+        </div>
+        <div class="perk-card">
+          <div class="perk-icon">+</div>
+          <div class="perk-label">Free Add-on Every Session</div>
+          <div class="perk-desc">One free lighting add-on (sunset lamp, snoot, RGB, or mic) included with every booking.</div>
+        </div>
+        <div class="perk-card">
+          <div class="perk-icon">&#9734;</div>
+          <div class="perk-label">Weekend Booking Access</div>
+          <div class="perk-desc">Members can book weekend sessions even after the Friday 4pm cutoff.</div>
+        </div>
+        <div class="perk-card full">
+          <div class="perk-label">What's Discounted</div>
+          <div class="perk-desc">Studio hire (all spaces + extra hours) and equipment rental. Photography packages and after-hours surcharges are excluded. Annual savings capped at R2,500 per member.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- How It Works -->
+    <div class="steps-section">
+      <div class="steps-title">How it works</div>
+      <div class="step-row">
+        <div class="step-num">1</div>
+        <div class="step-text">
+          <strong>Sign up below</strong>
+          <span>Fill in your details and pay R850 securely via Yoco.</span>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">2</div>
+        <div class="step-text">
+          <strong>Get your member code</strong>
+          <span>You'll receive a unique code (e.g. SC-001) instantly via email.</span>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">3</div>
+        <div class="step-text">
+          <strong>Book and save</strong>
+          <span>Sign in with your code when booking — your discounts apply automatically.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Join Form -->
+    <div class="join-section">
+      <div class="join-card">
+        <div class="join-heading">Sign Up Now</div>
+        <div class="join-subheading">Fill in your details to become a SHOOT. Club member.</div>
+        <div id="joinAlert" class="alert alert-error hidden"></div>
+        <div class="form-row">
+          <div class="field">
+            <label>First Name</label>
+            <input id="fFirstName" type="text" placeholder="Jane" required />
+          </div>
+          <div class="field">
+            <label>Last Name</label>
+            <input id="fLastName" type="text" placeholder="Doe" required />
+          </div>
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input id="fEmail" type="email" placeholder="jane@example.com" required />
+        </div>
+        <div class="field">
+          <label>Phone</label>
+          <input id="fPhone" type="tel" placeholder="082 123 4567" required />
+        </div>
+        <button class="join-btn" id="joinBtn">Sign Up — R850</button>
+        <div class="join-note">Secure payment via Yoco. Your membership activates immediately after payment.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SUCCESS VIEW ── -->
+  <div id="successView" class="hidden">
+    <div class="success-card">
+      <div class="hero-eyebrow">SHOOT. CLUB</div>
+      <div class="hero-title">Welcome to the <span class="lime">Club.</span></div>
+      <div class="hero-sub">Your membership is active. Check your email for your member code and benefits.</div>
+      <div class="member-code-display" id="memberCodeDisplay">—</div>
+      <div class="success-details" id="successDetails"></div>
+      <div class="success-note">Save this code — enter it when booking to unlock your member rates. We've also emailed it to you.</div>
+      <a href="/" class="book-btn">Book Your First Session</a>
+    </div>
+  </div>
+
+  <!-- ── CANCEL / FAIL VIEW ── -->
+  <div id="failView" class="hidden">
+    <div class="success-card">
+      <div class="hero-eyebrow">SHOOT. CLUB</div>
+      <div class="hero-title" id="failTitle">Payment Cancelled.</div>
+      <div class="hero-sub" id="failSub">Your membership was not created. No charge was made.</div>
+      <a href="/membership.html" class="book-btn" style="background:#fff;color:#000;">Try Again</a>
+    </div>
+  </div>
+
+  <!-- ── LOADING VIEW ── -->
+  <div id="loadingView" class="hidden">
+    <div class="success-card">
+      <div class="hero-eyebrow">SHOOT. CLUB</div>
+      <div class="hero-title">Confirming<span class="lime">...</span></div>
+      <div class="hero-sub">Verifying your payment. Please wait.</div>
+    </div>
+  </div>
+
+  <div class="footer">SHOOT. Photographic Studios · 135 Albert Rd, Woodstock, Cape Town</div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get('status');
+    const pendingId = params.get('id');
+
+    async function init() {
+      // Load founding stats
+      try {
+        const r = await fetch('/api/get-config');
+        if (r.ok) {
+          const { founding } = await r.json();
+          if (founding) {
+            document.getElementById('foundingTaken').textContent = founding.foundingTaken || 0;
+            document.getElementById('foundingRemaining').textContent = founding.foundingRemaining ?? 25;
+            if (founding.foundingRemaining <= 0) {
+              document.getElementById('foundingCard').style.display = 'none';
+            }
+          }
+        }
+      } catch {}
+
+      if (status === 'success' && pendingId) {
+        showView('loadingView');
+        await verifyMembership(pendingId);
+      } else if (status === 'cancel') {
+        showView('failView');
+      } else if (status === 'fail') {
+        document.getElementById('failTitle').textContent = 'Payment Failed.';
+        document.getElementById('failSub').textContent = 'Something went wrong with your payment. Please try again or contact us.';
+        showView('failView');
+      } else {
+        showView('purchaseView');
+      }
+    }
+
+    function showView(id) {
+      ['purchaseView', 'successView', 'failView', 'loadingView'].forEach(v => {
+        document.getElementById(v).classList.toggle('hidden', v !== id);
+      });
+    }
+
+    async function verifyMembership(pendingId) {
+      try {
+        const r = await fetch(`/api/verify-payment?membershipId=${encodeURIComponent(pendingId)}`);
+        const data = await r.json();
+
+        if (data.success && data.membership) {
+          document.getElementById('memberCodeDisplay').textContent = data.memberCode || '—';
+          document.getElementById('successDetails').innerHTML = `
+            <div class="success-row"><span class="success-label">Member ID</span><span class="success-value">${esc(data.memberId || '—')}</span></div>
+            <div class="success-row"><span class="success-label">Tier</span><span class="success-value" style="color:var(--lime);">${esc(data.tier === 'founding' ? 'Founding Member' : 'Member')}</span></div>
+            <div class="success-row"><span class="success-label">Valid Until</span><span class="success-value">${data.expiresAt ? fmtDate(data.expiresAt.slice(0,10)) : '—'}</span></div>
+          `;
+          showView('successView');
+        } else if (data.alreadyMember) {
+          document.getElementById('memberCodeDisplay').textContent = 'Already Active';
+          document.getElementById('successDetails').innerHTML = '<div class="success-row"><span class="success-label">Status</span><span class="success-value" style="color:var(--lime);">Your membership is already active</span></div>';
+          showView('successView');
+        } else {
+          throw new Error(data.error || 'Verification failed');
+        }
+      } catch (err) {
+        document.getElementById('failTitle').textContent = 'Verification Issue.';
+        document.getElementById('failSub').textContent = err.message + ' — please contact us if you were charged.';
+        showView('failView');
+      }
+    }
+
+    // Join form
+    document.getElementById('joinBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('joinBtn');
+      const alertEl = document.getElementById('joinAlert');
+      alertEl.classList.add('hidden');
+      btn.disabled = true;
+      btn.textContent = 'Processing...';
+
+      const body = {
+        purchaseType: 'membership',
+        firstName: document.getElementById('fFirstName').value.trim(),
+        lastName:  document.getElementById('fLastName').value.trim(),
+        email:     document.getElementById('fEmail').value.trim(),
+        phone:     document.getElementById('fPhone').value.trim(),
+      };
+
+      if (!body.firstName || !body.lastName) {
+        showError('Please enter your full name.');
+        return;
+      }
+      if (!body.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)) {
+        showError('Please enter a valid email address.');
+        return;
+      }
+      if (!body.phone) {
+        showError('Please enter your phone number.');
+        return;
+      }
+
+      try {
+        const r = await fetch('/api/create-checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const data = await r.json();
+
+        if (data.redirectUrl) {
+          window.location.href = data.redirectUrl;
+          return;
+        }
+        throw new Error(data.error || 'Failed to create checkout.');
+      } catch (err) {
+        showError(err.message);
+      }
+
+      function showError(msg) {
+        alertEl.textContent = msg;
+        alertEl.classList.remove('hidden');
+        btn.disabled = false;
+        btn.textContent = 'Sign Up — R850';
+      }
+    });
+
+    function fmtDate(s) {
+      if (!s) return '—';
+      const [y, m, d] = s.split('-');
+      return `${d}/${m}/${y}`;
+    }
+    function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+    init();
+  </script>
+</body>
+</html>

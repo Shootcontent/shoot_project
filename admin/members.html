@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>SHOOT. Admin — Members</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/assets/admin.css" />
+  <script src="/admin/assets/nav.js" defer></script>
+  <style>
+    .progress-bar { height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden; margin-top: 4px; }
+    .progress-fill { height: 100%; border-radius: 3px; background: #1f9d55; transition: width 0.3s; }
+    .progress-fill.warn { background: #d98e04; }
+    .progress-fill.full { background: #d64545; }
+    .badge-lime { background: #e8f7e0; color: #3a7d1e; }
+    .founding-banner {
+      background: #000; color: #fff; border-radius: 6px; padding: 16px 20px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      margin-bottom: 24px; flex-wrap: wrap;
+    }
+    .founding-banner .fb-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase;
+      color: rgba(255,255,255,0.5); margin-bottom: 4px;
+    }
+    .founding-banner .fb-value {
+      font-size: 24px; font-weight: 900; font-style: italic; letter-spacing: -0.5px;
+    }
+    .savings-text { font-size: 11px; color: #8a8a8a; margin-top: 2px; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-left">
+      <a class="nav-brand" href="/admin/dashboard.html">SHOOT. <span>Admin</span></a>
+      <div class="nav-links">
+        <a class="nav-link" href="/admin/dashboard.html">Dashboard</a>
+        <a class="nav-link" href="/admin/bookings.html">Bookings</a>
+        <a class="nav-link" href="/admin/calendar.html">Calendar</a>
+        <a class="nav-link" href="/admin/coupons.html">Coupons</a>
+        <a class="nav-link active" href="/admin/members.html">Members</a>
+        <a class="nav-link" href="/admin/create-booking.html">Create Booking</a>
+        <a class="nav-link" href="/admin/pending-payments.html">Payments</a>
+        <a class="nav-link" href="/admin/slot-manager.html">Slots</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div class="nav-user" id="navUser">—</div>
+      <button class="btn btn-ghost btn-sm" id="logoutBtn">Sign Out</button>
+    </div>
+  </nav>
+
+  <main>
+    <div class="page-header">
+      <div>
+        <div class="page-title">SHOOT. Club.</div>
+        <div class="page-sub" id="memberCount">Loading...</div>
+      </div>
+      <button class="btn btn-primary" id="newMemberBtn">+ Add Member</button>
+    </div>
+
+    <!-- Founding member banner -->
+    <div class="founding-banner" id="foundingBanner" style="display:none;">
+      <div>
+        <div class="fb-label">Founding Members</div>
+        <div class="fb-value" id="foundingText">—</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="fb-label">Spots Remaining</div>
+        <div class="fb-value" id="foundingRemaining">—</div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats" id="statsRow" style="margin-bottom:24px;">
+      <div class="stat-card accent-green">
+        <div class="stat-label">Active</div>
+        <div class="stat-value" id="statActive">—</div>
+      </div>
+      <div class="stat-card accent-amber">
+        <div class="stat-label">Total Saved</div>
+        <div class="stat-value sm" id="statSaved">—</div>
+      </div>
+      <div class="stat-card accent-red">
+        <div class="stat-label">Expired</div>
+        <div class="stat-value" id="statExpired">—</div>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="filters" style="margin-bottom:16px;">
+      <input class="search-input" id="searchInput" type="text" placeholder="Search by name, email, or member code..." />
+      <select class="filter-select" id="statusFilter">
+        <option value="">All Statuses</option>
+        <option value="active">Active</option>
+        <option value="expired">Expired</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Member</th>
+            <th>Code</th>
+            <th>Tier</th>
+            <th>Savings</th>
+            <th class="hide-mobile">Expires</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="membersBody">
+          <tr><td colspan="7"><div class="skeleton"></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Create / Edit Modal -->
+  <div class="modal-overlay hidden" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-title" id="modalTitle">Add Member.</div>
+      <div id="modalAlert" class="alert alert-error hidden"></div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>First Name *</label>
+          <input id="fFirstName" type="text" placeholder="Jane" />
+        </div>
+        <div class="field">
+          <label>Last Name *</label>
+          <input id="fLastName" type="text" placeholder="Doe" />
+        </div>
+        <div class="field">
+          <label>Email *</label>
+          <input id="fEmail" type="email" placeholder="jane@example.com" />
+        </div>
+        <div class="field">
+          <label>Phone</label>
+          <input id="fPhone" type="tel" placeholder="082 123 4567" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Price Paid (cents, default R850)</label>
+        <input id="fPrice" type="number" min="0" placeholder="85000" />
+      </div>
+      <div class="field">
+        <label>Note</label>
+        <input id="fNote" type="text" placeholder="Internal note..." />
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="cancelBtn">Cancel</button>
+        <button class="btn btn-primary" id="saveBtn">Add Member</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Modal -->
+  <div class="modal-overlay hidden" id="detailOverlay">
+    <div class="modal" style="max-width:600px;">
+      <div class="modal-title" id="detailTitle">Member.</div>
+      <div id="detailContent"></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="detailClose">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let allMembers = [];
+
+    async function init() {
+      try {
+        const r = await fetch('/api/admin/me', { credentials: 'same-origin' });
+        if (!r.ok) { window.location.replace('/admin/index.html'); return; }
+        const { username } = await r.json();
+        document.getElementById('navUser').textContent = username;
+      } catch { window.location.replace('/admin/index.html'); return; }
+      load();
+    }
+
+    async function load() {
+      const tbody = document.getElementById('membersBody');
+      tbody.innerHTML = '<tr><td colspan="7"><div class="skeleton"></div></td></tr>';
+      try {
+        const r = await fetch('/api/admin/members', { credentials: 'same-origin' });
+        if (!r.ok) throw new Error(await r.text());
+        const { members, founding } = await r.json();
+        allMembers = members;
+
+        // Founding banner
+        if (founding) {
+          document.getElementById('foundingBanner').style.display = '';
+          document.getElementById('foundingText').textContent = `${founding.foundingTaken} / ${25}`;
+          document.getElementById('foundingRemaining').textContent = founding.foundingRemaining;
+        }
+
+        // Stats
+        const active  = members.filter(m => m.status === 'active' && (!m.expiresAt || new Date(m.expiresAt) > new Date()));
+        const expired = members.filter(m => m.status === 'expired' || (m.expiresAt && new Date(m.expiresAt) <= new Date()));
+        const totalSaved = members.reduce((s, m) => s + (m.totalSavedCents || 0), 0);
+        document.getElementById('statActive').textContent  = active.length;
+        document.getElementById('statExpired').textContent  = expired.length;
+        document.getElementById('statSaved').textContent    = 'R' + (totalSaved / 100).toLocaleString('en-ZA', { minimumFractionDigits: 0 });
+        document.getElementById('memberCount').textContent  = `${members.length} member${members.length !== 1 ? 's' : ''}`;
+
+        render();
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="7" class="row-error">Error: ${esc(err.message)}</td></tr>`;
+      }
+    }
+
+    function render() {
+      const tbody  = document.getElementById('membersBody');
+      const search = document.getElementById('searchInput').value.toLowerCase().trim();
+      const status = document.getElementById('statusFilter').value;
+
+      let filtered = allMembers;
+      if (search) {
+        filtered = filtered.filter(m =>
+          m.firstName.toLowerCase().includes(search) ||
+          m.lastName.toLowerCase().includes(search) ||
+          m.email.toLowerCase().includes(search) ||
+          m.memberCode.toLowerCase().includes(search) ||
+          m.memberId.toLowerCase().includes(search)
+        );
+      }
+      if (status) {
+        filtered = filtered.filter(m => {
+          if (status === 'expired') return m.status === 'expired' || (m.expiresAt && new Date(m.expiresAt) <= new Date());
+          return m.status === status;
+        });
+      }
+
+      if (!filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state">No members found.</div></td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(m => {
+        const isExpired  = m.expiresAt && new Date(m.expiresAt) <= new Date();
+        const realStatus = isExpired ? 'expired' : m.status;
+        const statusBadge = realStatus === 'active' ? 'badge-green'
+                          : realStatus === 'expired' ? 'badge-yellow'
+                          : 'badge-red';
+        const tierBadge = m.tier === 'founding' ? '<span class="badge badge-lime" style="margin-left:4px;">Founding</span>' : '';
+        const capPct = m.savingsCapCents > 0 ? Math.min(100, Math.round(m.totalSavedCents / m.savingsCapCents * 100)) : 0;
+        const barClass = capPct >= 100 ? 'full' : capPct >= 75 ? 'warn' : '';
+
+        return `<tr onclick="viewMember('${esc(m.memberId)}')" style="cursor:pointer;">
+          <td>
+            <span class="cell-strong">${esc(m.firstName)} ${esc(m.lastName)}</span>
+            <span class="cell-sub">${esc(m.email)}</span>
+          </td>
+          <td><span class="mono cell-strong">${esc(m.memberCode)}</span><span class="cell-sub">${esc(m.memberId)}</span></td>
+          <td><span class="badge ${m.tier === 'founding' ? 'badge-lime' : 'badge-grey'}">${esc(m.tier)}</span></td>
+          <td>
+            <span class="cell-small">R${(m.totalSavedCents / 100).toFixed(0)} / R${(m.savingsCapCents / 100).toFixed(0)}</span>
+            <div class="progress-bar"><div class="progress-fill ${barClass}" style="width:${capPct}%"></div></div>
+          </td>
+          <td class="hide-mobile">${m.expiresAt ? fmtDate(m.expiresAt.slice(0, 10)) : '<span class="muted">—</span>'}</td>
+          <td><span class="badge ${statusBadge}">${esc(realStatus)}</span>${tierBadge}</td>
+          <td>
+            <div class="btn-row">
+              <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteMember('${esc(m.memberId)}', '${esc(m.firstName)} ${esc(m.lastName)}')">Delete</button>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    // Search & filter
+    document.getElementById('searchInput').addEventListener('input', render);
+    document.getElementById('statusFilter').addEventListener('change', render);
+
+    // View member detail
+    async function viewMember(id) {
+      const overlay = document.getElementById('detailOverlay');
+      const content = document.getElementById('detailContent');
+      content.innerHTML = '<div class="skeleton" style="margin:16px 0;"></div>';
+      overlay.classList.remove('hidden');
+
+      try {
+        const r = await fetch(`/api/admin/member?id=${encodeURIComponent(id)}`, { credentials: 'same-origin' });
+        if (!r.ok) throw new Error((await r.json()).error);
+        const { member: m, savings, remainingCapCents } = await r.json();
+
+        const isExpired = m.expiresAt && new Date(m.expiresAt) <= new Date();
+        const realStatus = isExpired ? 'expired' : m.status;
+        const capPct = m.savingsCapCents > 0 ? Math.min(100, Math.round(m.totalSavedCents / m.savingsCapCents * 100)) : 0;
+        const barClass = capPct >= 100 ? 'full' : capPct >= 75 ? 'warn' : '';
+
+        document.getElementById('detailTitle').textContent = `${m.firstName} ${m.lastName}.`;
+
+        content.innerHTML = `
+          <div class="detail-grid">
+            <div class="detail-item"><div class="detail-label">Member ID</div><div class="detail-value">${esc(m.memberId)}</div></div>
+            <div class="detail-item"><div class="detail-label">Code</div><div class="detail-value mono">${esc(m.memberCode)}</div></div>
+            <div class="detail-item"><div class="detail-label">Tier</div><div class="detail-value"><span class="badge ${m.tier === 'founding' ? 'badge-lime' : 'badge-grey'}">${esc(m.tier)}</span></div></div>
+            <div class="detail-item"><div class="detail-label">Email</div><div class="detail-value"><a href="mailto:${esc(m.email)}">${esc(m.email)}</a></div></div>
+            <div class="detail-item"><div class="detail-label">Phone</div><div class="detail-value">${esc(m.phone || '—')}</div></div>
+            <div class="detail-item"><div class="detail-label">Status</div><div class="detail-value"><span class="badge ${realStatus === 'active' ? 'badge-green' : realStatus === 'expired' ? 'badge-yellow' : 'badge-red'}">${esc(realStatus)}</span></div></div>
+            <div class="detail-item"><div class="detail-label">Joined</div><div class="detail-value">${m.purchaseDate ? fmtDate(m.purchaseDate.slice(0, 10)) : '—'}</div></div>
+            <div class="detail-item"><div class="detail-label">Expires</div><div class="detail-value">${m.expiresAt ? fmtDate(m.expiresAt.slice(0, 10)) : '—'}</div></div>
+            <div class="detail-item"><div class="detail-label">Price Paid</div><div class="detail-value">R${(m.pricePaidCents / 100).toFixed(2)}</div></div>
+          </div>
+
+          <div class="card card-pad" style="margin-bottom:16px;">
+            <div class="card-title tight">Savings Cap</div>
+            <div style="font-size:18px;font-weight:900;font-style:italic;">R${(m.totalSavedCents / 100).toFixed(0)} <span style="font-weight:500;font-style:normal;color:#8a8a8a;">/ R${(m.savingsCapCents / 100).toFixed(0)}</span></div>
+            <div class="progress-bar" style="margin-top:8px;height:8px;"><div class="progress-fill ${barClass}" style="width:${capPct}%"></div></div>
+            <div class="savings-text">R${(remainingCapCents / 100).toFixed(0)} remaining</div>
+          </div>
+
+          ${savings.length ? `
+          <div class="card">
+            <div class="card-pad">
+              <div class="card-title">Savings History</div>
+              <table style="min-width:0;">
+                <thead><tr><th>Date</th><th>Booking</th><th>Saved</th></tr></thead>
+                <tbody>
+                  ${savings.map(s => `<tr>
+                    <td class="cell-small">${s.createdAt ? fmtDate(s.createdAt.slice(0, 10)) : '—'}</td>
+                    <td class="mono cell-small">${esc(s.bookingId || '—')}</td>
+                    <td class="cell-small" style="font-weight:700;color:#1a7f45;">R${(s.savedCents / 100).toFixed(0)}</td>
+                  </tr>`).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>` : '<div class="muted" style="text-align:center;padding:12px;">No savings recorded yet.</div>'}
+
+          ${m.note ? `<div class="muted" style="margin-top:12px;">Note: ${esc(m.note)}</div>` : ''}
+        `;
+      } catch (err) {
+        content.innerHTML = `<div class="row-error">${esc(err.message)}</div>`;
+      }
+    }
+
+    // Create member
+    document.getElementById('newMemberBtn').addEventListener('click', () => {
+      document.getElementById('modalTitle').textContent = 'Add Member.';
+      document.getElementById('fFirstName').value = '';
+      document.getElementById('fLastName').value  = '';
+      document.getElementById('fEmail').value     = '';
+      document.getElementById('fPhone').value     = '';
+      document.getElementById('fPrice').value     = '';
+      document.getElementById('fNote').value      = '';
+      document.getElementById('modalAlert').classList.add('hidden');
+      document.getElementById('modalOverlay').classList.remove('hidden');
+    });
+
+    document.getElementById('cancelBtn').addEventListener('click', () => {
+      document.getElementById('modalOverlay').classList.add('hidden');
+    });
+    document.getElementById('modalOverlay').addEventListener('click', e => {
+      if (e.target === document.getElementById('modalOverlay'))
+        document.getElementById('modalOverlay').classList.add('hidden');
+    });
+    document.getElementById('detailClose').addEventListener('click', () => {
+      document.getElementById('detailOverlay').classList.add('hidden');
+    });
+    document.getElementById('detailOverlay').addEventListener('click', e => {
+      if (e.target === document.getElementById('detailOverlay'))
+        document.getElementById('detailOverlay').classList.add('hidden');
+    });
+
+    document.getElementById('saveBtn').addEventListener('click', async () => {
+      const btn     = document.getElementById('saveBtn');
+      const alertEl = document.getElementById('modalAlert');
+      btn.disabled  = true;
+      alertEl.classList.add('hidden');
+
+      const body = {
+        firstName:      document.getElementById('fFirstName').value.trim(),
+        lastName:       document.getElementById('fLastName').value.trim(),
+        email:          document.getElementById('fEmail').value.trim(),
+        phone:          document.getElementById('fPhone').value.trim(),
+        pricePaidCents: document.getElementById('fPrice').value || undefined,
+        note:           document.getElementById('fNote').value.trim(),
+      };
+
+      try {
+        const r = await fetch('/api/admin/members', {
+          method: 'POST', credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        if (!r.ok) { const d = await r.json(); throw new Error(d.error); }
+        document.getElementById('modalOverlay').classList.add('hidden');
+        load();
+      } catch (err) {
+        alertEl.textContent = err.message;
+        alertEl.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    async function deleteMember(id, name) {
+      if (!confirm(`Permanently delete member ${name} (${id})? This cannot be undone.`)) return;
+      try {
+        const r = await fetch(`/api/admin/member?id=${encodeURIComponent(id)}`, {
+          method: 'DELETE', credentials: 'same-origin',
+        });
+        if (!r.ok) throw new Error((await r.json()).error);
+        load();
+      } catch (err) { alert('Error: ' + err.message); }
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await fetch('/api/admin/logout', { method: 'POST', credentials: 'same-origin' });
+      window.location.replace('/admin/index.html');
+    });
+
+    function fmtDate(s) { if (!s) return '—'; const [y, m, d] = s.split('-'); return `${d}/${m}/${y}`; }
+    function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+    init();
+  </script>
+</body>
+</html>
